@@ -1,0 +1,226 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Form</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Link to your CSS file -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        body {
+            background-image: linear-gradient(135deg, #1a80b3 0%, #414345 100%);
+        }
+        :root {
+            --text: #0f172a;
+            --muted: #475569;
+
+            /* Genre dropdown tokens */
+            --genre-select-text: #0f172a;
+            --genre-select-bg: #ffffff;
+            --genre-select-border: #cbd5e1;
+            --genre-select-hover-bg: #f1f5f9;
+            --genre-select-focus: 2px solid #3b82f6;
+            --genre-select-radius: 10px;
+            --genre-select-shadow: 0 1px 2px rgba(2, 6, 23, 0.06);
+            --genre-select-arrow: #64748b;
+            --genre-select-padding-y: 10px;
+            --genre-select-padding-x: 12px;
+
+            /*
+            Django:
+            - Ensure your ModelForm includes the genre field (e.g., `genre` or `genre_movie`).
+            - If the model field is `genre_movie`, render `{{ form.genre_movie }}` or use the manual dropdown below inside the <form>, not inside <style>.
+
+            Replace the text input with this dropdown:
+            <p>
+                <label for="id_genre">Genre</label>
+                <select name="genre" id="id_genre">
+                    <option value="">Select a genre</option>
+                    <option value="Action">Action</option>
+                    <option value="Drama">Drama</option>
+                    <option value="Sci-Fi">Sci-Fi</option>
+                </select>
+            </p>
+            */
+            /* New column: genre_movie UI tokens */
+            --genre-movie-text: #0f172a;
+            --genre-movie-bg: #f8fafc;
+            --genre-movie-border: #cbd5e1;
+
+            /* Genre button defaults */
+            --genre-default-text: #334155;
+            --genre-default-bg: #f1f5f9;
+            --genre-default-border: #cbd5e1;
+
+            /* Action */
+            --genre-action-text: #ffffff;
+            --genre-action-bg: #dc2626;
+            --genre-action-border: #b91c1c;
+
+            /* Drama */
+            --genre-drama-text: #ffffff;
+            --genre-drama-bg: #7c3aed;
+            --genre-drama-border: #6d28d9;
+
+            /* Sci-Fi */
+            --genre-scifi-text: #ffffff;
+            --genre-scifi-bg: #0ea5e9;
+            --genre-scifi-border: #0284c7;
+
+            /* Selected genre (override these from UI if needed) */
+            --genre-selected-text: var(--genre-default-text);
+            --genre-selected-bg: var(--genre-default-bg);
+            --genre-selected-border: var(--genre-default-border);
+
+            /* Optional: list of allowed genres (for reference) */
+            --genre-options: "Action,Drama,Sci-Fi";
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --secondary: #334155;
+            --focus: 2px solid #3b82f6;
+            --shadow: 0 10px 25px rgba(2, 6, 23, 0.08);
+        }
+
+        .container {
+            max-width: 560px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .container h1 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            color: var(--text);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        form p {
+            margin: 0;
+            display: grid;
+            gap: 6px;
+        }
+
+        label {
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="url"],
+        input[type="file"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--text);
+        }
+
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: var(--focus);
+            outline-offset: 2px;
+        }
+
+        form button {
+            appearance: none;
+            border: 1px solid #2563eb;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #fff;
+            background: #2563eb;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.02s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+            user-select: none;
+        }
+        form button:hover { background: #1d4ed8; border-color: #1d4ed8; }
+        form button:active { transform: translateY(1px); }
+        form button:focus-visible { outline: var(--focus); outline-offset: 2px; }
+
+        form a.button-cancel {
+            color: var(--secondary);
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.02s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+        form a.button-cancel:hover {
+            color: #111827;
+            border-color: #94a3b8;
+            background: #f8fafc;
+        }
+        form a.button-cancel:active { transform: translateY(1px); }
+        form a.button-cancel:focus-visible { outline: var(--focus); outline-offset: 2px; }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .button-cancel {
+            display: inline-block;
+            background-color: #f44336;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .button-cancel:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Movie Submission Form</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+        <a href="http://127.0.0.1:8000/home/" class="button-cancel">Cancel</a>
+    </form>
+</div>
+
+</body>
+</html>
+

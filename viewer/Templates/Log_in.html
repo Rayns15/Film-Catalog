@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Log in</title>
+    <style>
+        :root {
+            --bg1: #1e3c72;
+            --bg2: #2a5298;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --stroke: rgba(255, 255, 255, 0.25);
+            --text: #ffffff;
+            --muted: rgba(255,255,255,0.75);
+            --accent: #6ee7ff;
+            --accent-2: #a78bfa;
+            --shadow: rgba(0,0,0,0.35);
+        }
+
+        html, body {
+            height: 100%;
+        }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        /* Subtle alignment tweaks for username/password fields */
+        .card .field {
+            gap: 5px;
+        }
+
+        .card .field label {
+            padding-left: 14px; /* align label text with input text start */
+        }
+
+        .card .field input[type="text"],
+        .card .field input[type="password"] {
+            height: 44px;       /* consistent field height */
+            font-size: 15px;    /* subtle size for better visual alignment */
+        }
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+            color: var(--text);
+            display: grid;
+            place-items: center;
+            background-color: #0b1020;
+            background-image: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+        }
+
+        .wrap {
+            width: min(92vw, 420px);
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--stroke);
+            border-radius: 16px;
+            padding: 28px 24px;
+            box-shadow: 0 10px 30px var(--shadow), inset 0 0 0 1px rgba(255,255,255,0.05);
+        }
+
+        .title {
+            margin: 0 0 18px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: .3px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-2));
+            box-shadow: 0 0 18px var(--accent-2);
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: .92rem;
+            margin: 0 0 18px;
+        }
+
+        form {
+            display: grid;
+            gap: 14px;
+        }
+
+        .field {
+            display: grid;
+            gap: 6px;
+        }
+
+        label {
+            font-size: .9rem;
+            color: var(--muted);
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--stroke);
+            background: rgba(13, 18, 38, 0.35);
+            color: var(--text);
+            outline: none;
+            transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+        }
+        input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        input:focus {
+            border-color: var(--accent-2);
+            box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.25);
+            background: rgba(13, 18, 38, 0.5);
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: .9rem;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        button[type="submit"] {
+            appearance: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-weight: 700;
+            color: #0b1020;
+            background: linear-gradient(135deg, #6ee7ff, #a78bfa);
+            box-shadow: 0 8px 20px rgba(167, 139, 250, 0.35);
+            transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+        }
+        button[type="submit"]:hover {
+            filter: brightness(1.03);
+            box-shadow: 0 10px 26px rgba(167, 139, 250, 0.45);
+        }
+        button[type="submit"]:active {
+            transform: translateY(1px);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 14px;
+            font-size: .9rem;
+        }
+
+        /* Optional message area (Django messages) */
+        .messages {
+            margin: 0 0 10px;
+            padding: 0;
+            list-style: none;
+        }
+        .messages li {
+            background: rgba(255, 72, 72, 0.12);
+            border: 1px solid rgba(255, 72, 72, 0.35);
+            color: #ffecec;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: .9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="card">
+            <h1 class="title"><span class="dot" aria-hidden="true"></span>Sign in</h1>
+            <p class="muted">Use your Django superuser or staff account. Successful login will redirect to the Admin.</p>
+
+            {# Optional: show Django messages if your view populates them #}
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {# This posts directly to Django Admin's login. #}
+            <form method="post" action="{% url 'admin:login' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'admin:index' %}">
+                <input type="hidden" name="this_is_the_login_form" value="1">
+
+                <div class="field">
+                    <label for="id_username">Username</label>
+                    <input id="id_username" name="username" type="text" autocomplete="username" placeholder="Enter your username" required>
+                </div>
+
+                <div class="field">
+                    <label for="id_password">Password</label>
+                    <input id="id_password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+                </div>
+
+                <div class="row">
+                    <label style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.9rem;">
+                        <input type="checkbox" name="remember" value="1" style="accent-color:#a78bfa;">
+                        Keep me signed in (this device)
+                    </label>
+                    <a class="link" href="{% url 'admin:login' %}">Need help?</a>
+                </div>
+
+                <button type="submit">Log in</button>
+            </form>
+
+            <div class="footer-links">
+                <a class="link" href="{% url 'admin:index' %}">Go to Admin</a>
+                {# If you included django.contrib.auth.urls, this will work: #}
+                {% if perms %}
+                {% endif %}
+                {# <a class="link" href="{% url 'password_reset' %}">Forgot password?</a> #}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
