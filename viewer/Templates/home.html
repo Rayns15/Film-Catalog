@@ -45,31 +45,9 @@
             <div class="container">
                 <script>
                     (function () {
-                        function resolveLogoutHref(cb) {
-                            if (resolveLogoutHref.cache) return cb(resolveLogoutHref.cache);
-                            var candidates = ['/logout/', '/accounts/logout/', '/account/logout/', '/users/logout/', '/user/logout/', '/admin/logout/'];
-                            var i = 0;
-                            function tryNext() {
-                                if (i >= candidates.length) {
-                                    resolveLogoutHref.cache = '/logout/';
-                                    return cb(resolveLogoutHref.cache);
-                                }
-                                var url = candidates[i++];
-                                fetch(url, { method: 'HEAD', credentials: 'same-origin' })
-                                    .then(function (r) {
-                                        if (r.ok || r.status === 301 || r.status === 302 || r.status === 405) {
-                                            resolveLogoutHref.cache = url;
-                                            cb(url);
-                                        } else {
-                                            tryNext();
-                                        }
-                                    })
-                                    .catch(function () {
-                                        // If one candidate fails, try the next; fall back after exhausting all.
-                                        tryNext();
-                                    });
-                            }
-                            tryNext();
+                        function computeLogoutBase(loginHref) {
+                            if (/\/admin\/?$/.test((loginHref || '').toString())) return '/admin/logout/';
+                            return '/logout/';
                         }
                         function addFooter() {
                             var footer = document.createElement('footer');
@@ -136,39 +114,53 @@
                                 return m ? decodeURIComponent(m[1]) : null;
                             }
 
-                            // Resolve logout endpoint and wire up a safe POST (falls back to GET)
-                            resolveLogoutHref(function (base) {
+                            // Determine logout endpoint without HEAD probing and wire up a safe POST with fallbacks
+                            var logoutEl = document.getElementById('logout-link');
+                            if (logoutEl && isAuthenticated) {
                                 var nextUrl = 'http://127.0.0.1:8000/home/';
+                                var base = computeLogoutBase(loginBtn ? loginBtn.getAttribute('href') : '');
                                 var logoutHref = base + (base.indexOf('?') === -1 ? '?' : '&') + 'next=' + encodeURIComponent(nextUrl);
-                                var logoutEl = document.getElementById('logout-link');
-                                if (!logoutEl) return;
 
                                 // Set href for normal navigation as a fallback
                                 logoutEl.setAttribute('href', logoutHref);
 
-                                // Prefer POST (required for /admin/logout/), then fallback to GET
+                                // Prefer POST (required for /admin/logout/); cascade through common endpoints on failure
                                 logoutEl.addEventListener('click', function (e) {
                                     e.preventDefault();
                                     var csrf = getCsrfToken();
-                                    fetch(base, {
-                                        method: 'POST',
-                                        credentials: 'same-origin',
-                                        headers: Object.assign(
-                                            { 'Content-Type': 'application/x-www-form-urlencoded' },
-                                            csrf ? { 'X-CSRFToken': csrf } : {}
-                                        ),
-                                        body: 'next=' + encodeURIComponent(nextUrl)
-                                    }).then(function (r) {
-                                        if (r.ok || r.status === 301 || r.status === 302) {
-                                            window.location.href = nextUrl;
-                                        } else {
+
+                                    function tryPost(urls) {
+                                        if (!urls.length) {
                                             window.location.href = logoutHref;
+                                            return;
                                         }
-                                    }).catch(function () {
-                                        window.location.href = logoutHref;
-                                    });
+                                        var url = urls[0];
+                                        fetch(url, {
+                                            method: 'POST',
+                                            credentials: 'same-origin',
+                                            headers: Object.assign(
+                                                { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                                csrf ? { 'X-CSRFToken': csrf } : {}
+                                            ),
+                                            body: 'next=' + encodeURIComponent(nextUrl)
+                                        }).then(function (r) {
+                                            if (r.ok || r.status === 301 || r.status === 302) {
+                                                window.location.href = nextUrl;
+                                            } else {
+                                                tryPost(urls.slice(1));
+                                            }
+                                        }).catch(function () {
+                                            tryPost(urls.slice(1));
+                                        });
+                                    }
+
+                                    var candidates = base === '/admin/logout/'
+                                        ? ['/admin/logout/', '/logout/', '/accounts/logout/']
+                                        : ['/logout/', '/accounts/logout/', '/admin/logout/'];
+
+                                    tryPost(candidates);
                                 });
-                            });
+                            }
 
                             addFooter();
                         }

@@ -8,6 +8,9 @@
     <title>Movie Form</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Link to your CSS file -->
     <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -117,11 +120,39 @@
         form {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-        }
-
         form p {
             margin: 0;
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 8px 12px;
+            align-items: center;
+        }
+
+        form p > label {
+            grid-column: 1;
+        }
+
+        form p > :not(label) {
+            grid-column: 2;
+        }
+
+        form p > ul.errorlist {
+            grid-column: 1 / -1;
+            margin: 0 0 6px 0;
+            padding: 8px 12px;
+            list-style: none;
+            border-radius: 8px;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            font-size: 13px;
+        }
+
+        form p .helptext {
+            grid-column: 2;
+            color: var(--muted);
+            font-size: 12px;
+        }
             display: grid;
             gap: 6px;
         }
