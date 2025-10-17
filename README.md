@@ -1,7 +1,4 @@
-Here is a description for a "Film Catalog" website, written in the same format as your example.
-
------
-
+![viewer/Static/Pics/home.jpg](https://github.com/Rayns15/Film-Catalog/blob/1957bd7d87d6ba3153b65ebada2a7fbf6d84b42d/viewer/Static/Pics/home.jpg))
 # Film Catalog - A Django Movie Database
 
 ## Introduction
