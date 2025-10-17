@@ -1,4 +1,4 @@
-![viewer/Static/Pics/home.jpg](https://github.com/Rayns15/Film-Catalog/blob/1957bd7d87d6ba3153b65ebada2a7fbf6d84b42d/viewer/Static/Pics/home.jpg))
+![viewer/Static/Pics/home.jpg](https://github.com/Rayns15/Film-Catalog/blob/1957bd7d87d6ba3153b65ebada2a7fbf6d84b42d/viewer/Static/Pics/home.jpg)
 # Film Catalog - A Django Movie Database
 
 ## Introduction
@@ -130,6 +130,10 @@ python manage.py runserver
   - `Custom 404 Pages`: Custom error pages that display when a user navigates to a non-existent page or encounters an error.
 
 ## Admin Screenshots
+
+![viewer/Static/Pics/filter.jpg](https://github.com/Rayns15/Film-Catalog/blob/11f141c09edd8b3e1cb5b4540c8e708cb172e3f4/viewer/Static/Pics/filter.jpg)
+![viewer/Static/Pics/Login.jpg](https://github.com/Rayns15/Film-Catalog/blob/11f141c09edd8b3e1cb5b4540c8e708cb172e3f4/viewer/Static/Pics/Login.jpg)
+![viewer/Static/Pics/Signup.jpg]https://github.com/Rayns15/Film-Catalog/blob/11f141c09edd8b3e1cb5b4540c8e708cb172e3f4/viewer/Static/Pics/Signup.jpg
 
 ## Deployment
 
