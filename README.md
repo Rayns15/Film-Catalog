@@ -23,7 +23,7 @@
 <!-- end list -->
 
 ```
-git clone https://github.com/your-username/film-catalog.git
+git clone https://github.com/Rayns15/Film-Catalog.git
 ```
 
 2.  Navigate to the project directory:
@@ -141,7 +141,7 @@ To deploy this project to a web server, you can follow these general steps:
 <!-- end list -->
 
 ```
-git clone https://github.com/your-username/film-catalog.git
+git clone https://github.com/Rayns15/Film-Catalog.git
 ```
 
 3.  Install the project dependencies on your server using `pip`:
