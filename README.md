@@ -133,7 +133,7 @@ python manage.py runserver
 
 ![viewer/Static/Pics/filter.jpg](https://github.com/Rayns15/Film-Catalog/blob/11f141c09edd8b3e1cb5b4540c8e708cb172e3f4/viewer/Static/Pics/filter.jpg)
 ![viewer/Static/Pics/Login.jpg](https://github.com/Rayns15/Film-Catalog/blob/11f141c09edd8b3e1cb5b4540c8e708cb172e3f4/viewer/Static/Pics/Login.jpg)
-![viewer/Static/Pics/Signup.jpg]https://github.com/Rayns15/Film-Catalog/blob/11f141c09edd8b3e1cb5b4540c8e708cb172e3f4/viewer/Static/Pics/Signup.jpg
+![viewer/Static/Pics/Signup.jpg](https://github.com/Rayns15/Film-Catalog/blob/11f141c09edd8b3e1cb5b4540c8e708cb172e3f4/viewer/Static/Pics/Signup.jpg)
 
 ## Deployment
 
