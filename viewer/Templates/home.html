@@ -176,17 +176,21 @@
                     <span class="brand-badge" aria-hidden="true">FC</span>
                     <span>Film Catalog</span>
                 </a>
-            <p class="text-white/90 text-lg max-w-2xl hidden md:block text-center mx-4 flex-1">
-                Hello, my name is Emanuel Panait. This is my final project, submitted for the completion of the Python Development program at Software Development Academy.
-            </p>
-            <nav class="actions" aria-label="User" style="gap:16px;">
+            <nav class="actions flex justify-end w-full gap-4 mt-4" aria-label="User account actions">
                 <a class="btn btn-login" href="http://127.0.0.1:8000/home/" style="padding:12px 24px;">My account</a>
                 <a class="btn btn-signup" id="logout-link" href="#" style="padding:12px 24px;">Log out</a>
+                <a class="btn btn-login" href="http://127.0.0.1:8000/aboutme/" style="padding:12px 24px;">About Me</a>
+                <a class="btn btn-login" href="/contact/" style="padding:12px 24px;">Contact</a>
             </nav>
             </div>
         </header>
-        <h1 class="text-4xl font-extrabold text-white mb-8 text-center col-span-full">Film Catalog</h1>
-        <div class="flex space-x-2 my-2 col-span-full justify-center">
+        <h1 class="text-4xl font-extrabold text-white mb-8 text-center col-span-full">Film Catalog - A Django Movie Database</h1>
+                <div class="flex justify-center col-span-full mb-4">
+                    <p class="text-white/90 text-lg max-w-2xl text-center mx-4">
+                        Hello, my name is Emanuel Panait. This is my final project, submitted for the completion of the Python Development program at Software Development Academy.
+                    </p>
+                </div>
+        <div id="filter-bar" class="flex space-x-2 my-2 col-span-full justify-center">
             <button class="bg-gray-500 text-white px-2 py-1 rounded text-xl hover:bg-gray-600">All</button>
             <button class="bg-blue-500 text-white px-2 py-1 rounded text-xl hover:bg-blue-600">Drama</button>
             <button class="bg-red-500 text-white px-2 py-1 rounded text-xl hover:bg-red-600">Action</button>
@@ -388,7 +392,7 @@
     </div>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const filterBar = document.querySelector('.col-span-full.justify-center');
+        const filterBar = document.getElementById('filter-bar');
         const valid = ['All', 'Drama', 'Action', 'Sci-Fi'];
         const filterButtons = filterBar ? Array.from(filterBar.querySelectorAll('button')).filter(b => valid.includes(b.textContent.trim())) : [];
 

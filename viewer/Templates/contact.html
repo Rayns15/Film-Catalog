@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <style>
+        /* --- Basic Reset & Font --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-image: linear-gradient(135deg, #6dd5ed, #2193b0);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .contact-container {
+            background: rgba(255,255,255,0.95);
+            max-width: 420px;
+            width: 100%;
+            padding: 36px 32px;
+            border-radius: 14px;
+            box-shadow: 0 10px 32px rgba(0,0,0,0.18);
+        }
+        h2 {
+            text-align: center;
+            color: #2193b0;
+            margin-bottom: 28px;
+            font-size: 2rem;
+            letter-spacing: 1px;
+        }
+        label {
+            display: block;
+            margin-bottom: 7px;
+            color: #176087;
+            font-weight: 600;
+        }
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #b3c6d6;
+            border-radius: 7px;
+            font-size: 1rem;
+            background: #f7fafd;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus {
+            border-color: #2193b0;
+            outline: none;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        input[type="submit"] {
+            background: #2193b0;
+            color: #fff;
+            border: none;
+            padding: 14px 0;
+            width: 100%;
+            border-radius: 7px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        input[type="submit"]:hover {
+            background: #176087;
+        }
+        @media (max-width: 500px) {
+            .contact-container {
+                padding: 18px 8px;
+            }
+            h2 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="contact-container">
+        <h2>Contact Us</h2>
+        <form action="mailto:panaitemanuel@gmail.com" method="POST" enctype="text/plain">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="message">Message</label>
+            <textarea id="message" name="message" required></textarea>
+
+            <input type="submit" value="Send Message">
+        </form>
+                    <div style="text-align:center; margin-top: 24px;">
+                        <a href="http://127.0.0.1:8000/home/" style="display:inline-block; padding:12px 32px; background-color:#2193b0; color:#fff; border-radius:8px; text-decoration:none; font-weight:600; font-size:1rem; box-shadow:0 2px 8px rgba(33,147,176,0.12); transition:background 0.2s; text-align:center;">
+                            Return Home
+                        </a>
+                    </div>
+    </div>
+</body>
+</html>
