@@ -6,7 +6,7 @@
 ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
-![viewer/Static/Pics/home.jpg](https://github.com/Rayns15/Film-Catalog/blob/1957bd7d87d6ba3153b65ebada2a7fbf6d84b42d/viewer/Static/Pics/home.jpg)
+![viewer/Static/Pics/home.jpg](https://github.com/Rayns15/Film-Catalog/blob/3c0c51df528ff685500dc7c2f4d053f87848c984/viewer/Static/Pics/home.jpg)
 
 # Film Catalog - A Django Movie Database
 
