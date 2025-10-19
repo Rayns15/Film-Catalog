@@ -18,189 +18,121 @@
 </head>
 
 <body>
-    <h1>Welcome to Home Page</h1>
-<table>
-    {% for movie in movies_html %}
-        <tr>
-            {# Display movie details in a standard table cell #}
-            <td>
-                **{{ movie.Title }}** - {{ movie.director }} ({{ movie.Year }})
-            </td>
-            {# Use a second cell for the streams #}
-            <td>
-                <ul>
-                    {% for stream in streams_html %}
-                        {% if stream.movie_id == movie.id %}
-                            <li>{{ stream.stream_url }} - ${{ stream.price }}</li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            </td>
-        </tr>
-    {% endfor %}
-</table>
-        <div class="container mx-auto p-4 md:p-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        <header class="app-header col-span-full" role="banner">
-            <div class="container">
-                <script>
-                    (function () {
-                        function computeLogoutBase(loginHref) {
-                            if (/\/admin\/?$/.test((loginHref || '').toString())) return '/admin/logout/';
-                            return '/logout/';
-                        }
-                        function addFooter() {
-                            var footer = document.createElement('footer');
-                            footer.className = 'mt-12 bg-gray-900/80 text-white text-sm';
-                            footer.innerHTML =
-                                '<div class="max-w-6xl mx-auto px-4 py-6 text-center space-y-1">' +
-                                '<style>' +
-                                '  footer a[href="https://github.com/Rayns15?tab=repositories"],' +
-                                '  footer a[href="https://www.linkedin.com/in/emanuel-marian-panait-57b516208"] {' +
-                                '    display:inline-block;' +
-                                '    width:48px;' +
-                                '    height:48px;' +
-                                '    background-repeat:no-repeat;' +
-                                '    background-position:center;' +
-                                '    background-size:contain;' +
-                                '    text-indent:-9999px;' +
-                                '    overflow:hidden;' +
-                                '    vertical-align:middle;' +
-                                '    text-decoration:none;' +
-                                '  }' +
-                                '  footer a[href="https://github.com/Rayns15?tab=repositories"] {' +
-                                '    background-image:url("{% static "logos/Github.jpg" %}");' +
-                                '  }' +
-                                '  footer a[href="https://www.linkedin.com/in/emanuel-marian-panait-57b516208"] {' +
-                                '    background-image:url("{% static "logos/Linkedin.jpg" %}");' +
-                                '  }' +
-                                '</style>' +
-                                '<p>© 2025 Emanuel Panait. All rights reserved.</p>' +
-                                '<p>© 2025 Emanuel Panait | ' +
-                                '<a href="https://github.com/Rayns15?tab=repositories" class="underline" target="_blank" rel="noopener">https://github.com/Rayns15?tab=repositories</a> | ' +
-                                '<a href="https://www.linkedin.com/in/emanuel-marian-panait-57b516208" class="underline" target="_blank" rel="noopener">www.linkedin.com/in/emanuel-marian-panait-57b516208</a>' +
-                                '</p>' +
-                                '</div>';
-                            document.body.appendChild(footer);
-                        }
-                        function onReady() {
-                            var isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
-                            var loginBtn = document.querySelector('.btn.btn-login');
-                            var signupBtn = document.querySelector('.btn.btn-signup');
-
-                            // Toggle nav items based on Django auth status
-                            if (loginBtn && signupBtn) {
-                                if (isAuthenticated) {
-                                    // Logged in: My Account + Log out
-                                    loginBtn.textContent = 'My account';
-                                    loginBtn.setAttribute('href', 'http://127.0.0.1:8000/admin/');
-                                    signupBtn.textContent = 'Log out';
-                                    signupBtn.id = 'logout-link';
-                                } else {
-                                    // Logged out: Log in + Sign up
-                                    loginBtn.textContent = 'Log in';
-                                    loginBtn.setAttribute('href', '/login/');
-                                    signupBtn.textContent = 'Sign up';
-                                    signupBtn.removeAttribute('id');
-                                    signupBtn.setAttribute('href', '/signup/');
-                                }
-                                loginBtn.style.display = 'inline-block';
-                                signupBtn.style.display = 'inline-block';
-                            }
-
-                            // Helper to read Django's CSRF token
-                            function getCsrfToken() {
-                                var m = document.cookie.match(/(?:^|;)\s*csrftoken=([^;]+)/);
-                                return m ? decodeURIComponent(m[1]) : null;
-                            }
-
-                            // Determine logout endpoint without HEAD probing and wire up a safe POST with fallbacks
-                            var logoutEl = document.getElementById('logout-link');
-                            if (logoutEl && isAuthenticated) {
-                                var nextUrl = 'http://127.0.0.1:8000/home/';
-                                var base = computeLogoutBase(loginBtn ? loginBtn.getAttribute('href') : '');
-                                var logoutHref = base + (base.indexOf('?') === -1 ? '?' : '&') + 'next=' + encodeURIComponent(nextUrl);
-
-                                // Set href for normal navigation as a fallback
-                                logoutEl.setAttribute('href', logoutHref);
-
-                                // Prefer POST (required for /admin/logout/); cascade through common endpoints on failure
-                                logoutEl.addEventListener('click', function (e) {
-                                    e.preventDefault();
-                                    var csrf = getCsrfToken();
-
-                                    function tryPost(urls) {
-                                        if (!urls.length) {
-                                            window.location.href = logoutHref;
-                                            return;
-                                        }
-                                        var url = urls[0];
-                                        fetch(url, {
-                                            method: 'POST',
-                                            credentials: 'same-origin',
-                                            headers: Object.assign(
-                                                { 'Content-Type': 'application/x-www-form-urlencoded' },
-                                                csrf ? { 'X-CSRFToken': csrf } : {}
-                                            ),
-                                            body: 'next=' + encodeURIComponent(nextUrl)
-                                        }).then(function (r) {
-                                            if (r.ok || r.status === 301 || r.status === 302) {
-                                                window.location.href = nextUrl;
-                                            } else {
-                                                tryPost(urls.slice(1));
-                                            }
-                                        }).catch(function () {
-                                            tryPost(urls.slice(1));
-                                        });
-                                    }
-
-                                    var candidates = base === '/admin/logout/'
-                                        ? ['/admin/logout/', '/logout/', '/accounts/logout/']
-                                        : ['/logout/', '/accounts/logout/', '/admin/logout/'];
-
-                                    tryPost(candidates);
-                                });
-                            }
-
-                            addFooter();
-                        }
-
-                        if (document.readyState === 'loading') {
-                            document.addEventListener('DOMContentLoaded', onReady);
-                        } else {
-                            onReady();
-                        }
-                    })();
-                </script>
-                <a class="brand" href="http://127.0.0.1:8000/home/" aria-label="Film Catalog home"></a>
-                    <span class="brand-badge" aria-hidden="true">FC</span>
-                    <span>Film Catalog</span>
-                <p class="tagline hidden sm:inline-block ml-2 text-white/90">Python Development program at Software Development Academy</p><nav class="actions flex justify-end w-full gap-4 mt-4" aria-label="User account actions">
-                <a class="btn btn-login" href="http://127.0.0.1:8000/home/" style="padding:12px 24px;">My account</a>
-                <a class="btn btn-signup" id="logout-link" href="#" style="padding:12px 24px;">Log out</a>
-                <a class="btn btn-login" href="http://127.0.0.1:8000/aboutme/" style="padding:12px 24px;">About Me</a>
-                <a class="btn btn-login" href="/contact/" style="padding:12px 24px;">Contact</a>
-            </nav>
+    <!-- <h1>Welcome to Home Page</h1> -->
+<div class="container mx-auto p-4 md:p-8">
+<header class="app-header col-span-full" role="banner">
+            <div class="container flex flex-col md:flex-row items-center justify-between">
+                <div class="flex items-center mb-2 md:mb-0">
+                    <a class="brand" href="http://127.0.0.1:8000/home/" aria-label="Film Catalog home"></a>
+                    <span class="brand-badge ml-2" aria-hidden="true">FC</span>
+                    <span class="ml-2">Film Catalog</span>
+                    <p class="tagline hidden sm:inline-block ml-2 text-white/90">Python Development</p>
+                </div>
+                <div class="flex-1"></div>
+                <nav class="actions flex gap-4 mt-2 md:mt-0 justify-end" aria-label="User account actions">
+                    {% if user.is_authenticated %}
+                        <a class="btn btn-login" href="{% url 'admin:index' %}" style="padding:12px 24px;">My account</a>
+                        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'home' %}">
+                            <button type="submit" class="btn btn-signup" style="padding:12px 24px;">Log out</button>
+                        </form>
+                    {% else %}
+                        <a class="btn btn-login" href="{% url 'login' %}" style="padding:12px 24px;">Log in</a>
+                        <a class="btn btn-signup" href="{% url 'signup' %}" style="padding:12px 24px;">Sign up</a>
+                    {% endif %}
+                    <a class="btn btn-login" href="http://127.0.0.1:8000/aboutme/" style="padding:12px 24px;">About Me</a>
+                    <a class="btn btn-login" href="/contact/" style="padding:12px 24px;">Contact</a>
+                    {% if request.path == '/search/' or request.path|slice:":8" == '/search/' %}
+                        <a class="btn btn-login bg-indigo-500 hover:bg-indigo-700 text-white" href="{% url 'home' %}" style="padding:12px 24px;">Exit Search</a>
+                    {% endif %}
+                </nav>
             </div>
+            <!-- Moved search bar below header -->
+
         </header>
-        <h1 class="text-4xl font-extrabold text-white mb-8 text-center col-span-full">Film Catalog - A Django Movie Database</h1>
+        <div class="flex justify-end mt-4 mb-4"></div>
+        <script>
+            // Smooth page transition on link clicks and on exiting (page load and back/forward)
+            function fadeInBody() {
+                document.body.style.opacity = '0';
+                document.body.style.transition = 'opacity 0.4s';
+                setTimeout(() => {
+                    document.body.style.opacity = '1';
+                }, 10);
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                fadeInBody();
+
+                // Fade out on link click
+                const links = document.querySelectorAll('a[href]:not([target="_blank"]):not([href^="#"])');
+                links.forEach(link => {
+                    link.addEventListener('click', function (e) {
+                        if (
+                            e.defaultPrevented ||
+                            e.button !== 0 ||
+                            link.hasAttribute('download') ||
+                            link.getAttribute('href').startsWith('mailto:') ||
+                            link.getAttribute('href').startsWith('tel:')
+                        ) return;
+                        e.preventDefault();
+                        document.body.style.opacity = '0';
+                        setTimeout(() => {
+                            window.location = link.href;
+                        }, 400);
+                    });
+                });
+            });
+
+            // Fade in on browser back/forward navigation
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) {
+                    fadeInBody();
+                }
+            });
+        </script>
+            <form action="{% url 'movie_search' %}" method="get" class="flex items-center justify-end mb-4">
+                <input type="text" name="q" placeholder="Search movies..." class="px-3 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition">Search</button>
+            </form>
+            <style>
+                .actions .btn {
+                    padding-left: 32px !important;
+                    padding-right: 32px !important;
+                    min-width: 130px;
+                    font-size: 1.05rem;
+                }
+            </style>
+        </div>
+        <h1 class="text-4xl font-extrabold text-white mb-8 text-center col-span-full"><span class='bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-transparent'>Film Catalog - A Django Movie Database</span></h1>
+        {% if movies_html %}
                 <div class="flex justify-center col-span-full mb-4">
                     <p class="text-white/90 text-xl max-w-2xl text-center mx-4">
-                        Hello, my name is Emanuel Panait. This is my final project, submitted for the completion of the Python Development program at Software Development Academy.
+                        Hello, my name is Emanuel Panait. This is my final project, submitted for the completion of the Python Development program at <br> Software Development Academy. <br>
                     </p>
                 </div>
+        {% endif %}
+        {% if movies_html %}
         <div id="filter-bar" class="flex space-x-2 my-2 col-span-full justify-center">
-            <button class="bg-gray-500 text-white px-2 py-1 rounded text-xl hover:bg-gray-600">All</button>
-            <button class="bg-blue-500 text-white px-2 py-1 rounded text-xl hover:bg-blue-600">Drama</button>
-            <button class="bg-red-500 text-white px-2 py-1 rounded text-xl hover:bg-red-600">Action</button>
-            <button class="bg-green-500 text-white px-2 py-1 rounded text-xl hover:bg-green-600">Sci-Fi</button>
+            <button class="filter-btn bg-gray-500 text-white px-2 py-1 rounded text-xl hover:bg-gray-600" data-genre="all">All</button>
+            <button class="filter-btn bg-blue-500 text-white px-2 py-1 rounded text-xl hover:bg-blue-600" data-genre="drama">Drama</button>
+            <button class="filter-btn bg-red-500 text-white px-2 py-1 rounded text-xl hover:bg-red-600" data-genre="action">Action</button>
+            <button class="filter-btn bg-green-500 text-white px-2 py-1 rounded text-xl hover:bg-green-600" data-genre="sci-fi">Sci-Fi</button>
             {% if user.is_authenticated %}
-                <a href="/AddMovie/" class="bg-purple-500 text-white px-2 py-1 rounded text-xl hover:bg-purple-600">Add Movie</a>
-                <a href="/update/1/" class="bg-yellow-500 text-white px-2 py-1 rounded text-xl hover:bg-yellow-600">Update Movie</a>
-                <a href="/delete/1/" class="bg-red-500 text-white px-2 py-1 rounded text-xl hover:bg-red-600">Delete Movie</a>
+            <a href="/AddMovie/" class="bg-purple-500 text-white px-2 py-1 rounded text-xl hover:bg-purple-600">Add Movie</a>
+            <a href="/update/1/" class="bg-yellow-500 text-white px-2 py-1 rounded text-xl hover:bg-yellow-600">Update Movie</a>
+            <a href="/delete/1/" class="bg-red-500 text-white px-2 py-1 rounded text-xl hover:bg-red-600">Delete Movie</a>
             {% endif %}
         </div>
+        {% endif %}
+        <!-- No extra content needed here for genre display. 
+        The genre badges are already rendered in the card loop above, 
+        but your Django logic is too complex and defaults to "Other" if genres_list, genre, or gender is not a list/iterable. 
+        Instead, just display the genre(s) as a comma-separated string if not iterable. 
+        Replace the genre badge block in your card with this simpler version: -->
 
+        <!-- The genre badge block must be inside the movie card loop, not here. -->
         <script>
             (function () {
             function resolveHref(candidates, cb) {
@@ -324,7 +256,9 @@
                 }
             </style>
             {% endif %}
-
+        {% endfor %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-8">
+        {% for movie in movies_html %}
             <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col transform hover:scale-105 transition-transform duration-300 ease-in-out">
                 <div class="p-6">
                     <a href="{% url 'movie-update' movie.pk %}">
@@ -332,7 +266,11 @@
                     </a>
                     <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ movie.Title }}</h2>
                     <div class="flex space-x-2 my-2">
-                        <span class="sr-only genre-marker" data-genre="{% firstof movie.genre_movies movie.genre_movie movie.genre movie.gender 'Other' %}"></span>
+                        <span 
+                            class="genre-marker"
+                            data-genre="{% if movie.genres_list %}{{ movie.genres_list|join:', ' }}{% elif movie.genre_movie %}{{ movie.genre_movie }}{% elif movie.genre %}{{ movie.genre }}{% elif movie.gender %}{{ movie.gender }}{% else %}Other{% endif %}">
+                        </span>
+                        <!-- Genre buttons will be injected here by JavaScript -->
                     </div>
                     <p class="text-gray-600 text-sm">
                         Directed by <span class="font-semibold">{{ movie.director }}</span>
@@ -341,72 +279,69 @@
                         Released in <span class="font-semibold">{{ movie.Year }}</span>
                     </p>
                 </div>
-
                 <hr class="border-gray-200">
 
                 <div class="p-6">
                     <h3 class="text-md font-semibold text-gray-700 mb-2">Cinema Price:</h3>
                     <p class="text-gray-800 text-lg font-bold mb-4"> ${{ movie.cinema_price }} </p>
                     <div class="flex justify-center mb-4">
-                        <a href="{% url 'movie_detail' movie.pk %}" alt="View Details" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 text-sm rounded-full transition-colors duration-300">
+                        <a href="{% url 'movie_id' movie.pk %}" alt="View Details" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 text-sm rounded-full transition-colors duration-300">
                             View Details
                         </a>
                     </div>
                     <div class="flex justify-center">
-                        <a href="{% url 'movie_detail' movie.pk %}">
+                        <a href="{% url 'movie_details_view' movie.pk %}" class="hover:opacity-90 transition">
                             <img src="{% static 'logos/'|add:movie.Title|add:'.jpg' %}" alt="{{ movie.Title }} cover" class="h-48 w-auto rounded-lg shadow-md object-cover" />
                         </a>
                     </div>
                 </div>
-
-                <div class="p-6 flex-grow">
-                    <ul class="space-y-2">
+                <!-- Streaming Availability List for each movie card -->
+                <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 rounded-b-xl">
+                    <ul class="space-y-0">
                         {% for stream in streams_html %}
                             {% if stream.movie_id == movie.id %}
-                                <li>
-                                    <a href="{{ stream.stream_url }}" class="text-blue-600 hover:underline" target="_blank" style="background-color: #c54b1b; color: white; padding: 4px 8px; border-radius: 4px;"> {{ stream.stream_url }} - ${{ stream.price }}</a>
+                                <li class="mb-1"></li>
+                                    <a href="{{ stream.stream_url }}" target="_blank" rel="noopener noreferrer"
+                                       class="inline-block bg-orange-600 text-white px-2 py-1 rounded hover:bg-orange-700 transition text-xs font-medium shadow">
+                                        {{ stream.stream_url }} <span class="font-semibold">- ${{ stream.price }}</span>
+                                    </a>
                                 </li>
                             {% endif %}
                         {% endfor %}
-                        <li class="flex items-center space-x-3 mt-2">
-                            <span class="text-gray-500 text-sm">Available on:</span>
+                        <li class="flex items-center gap-2 mt-1">
+                            <span class="text-gray-500 text-xs font-medium">Available on:</span>
                             <a href="https://www.netflix.com" target="_blank" rel="noopener noreferrer">
-                                <img src="{% static 'logos/netflix.jpg' %}" alt="Netflix" class="h-6 w-6" title="Netflix">
+                                <img src="{% static 'logos/netflix.jpg' %}" alt="Netflix" class="h-5 w-5 rounded shadow" title="Netflix">
                             </a>
                             <a href="https://www.primevideo.com" target="_blank" rel="noopener noreferrer">
-                                <img src="{% static 'logos/prime.jpg' %}" alt="Amazon Prime" class="h-6 w-6" title="Amazon Prime">
+                                <img src="{% static 'logos/prime.jpg' %}" alt="Amazon Prime" class="h-5 w-5 rounded shadow" title="Amazon Prime">
                             </a>
                             <a href="https://www.hbo.com" target="_blank" rel="noopener noreferrer">
-                                <img src="{% static 'logos/hbo.jpg' %}" alt="HBO" class="h-6 w-6" title="HBO">
+                                <img src="{% static 'logos/hbo.jpg' %}" alt="HBO" class="h-5 w-5 rounded shadow" title="HBO">
                             </a>
                         </li>
-                        <li class="text-gray-500 text-sm mt-2">
+                        <li class="text-gray-500 text-xs mt-1 font-medium"></li>
                             <span>Choose a streaming platform to watch this movie online. Prices may vary by provider.</span>
                         </li>
                     </ul>
+                <!-- </div>
+                    <div class="p-6 flex-grow">
+                        <div class="flex space-x-2 my-2">
+                            {% if movie.genres_list %}
+                            Genre buttons will be injected by JavaScript using the genre-marker above -->
+                            <!-- {% endif %}
+                        </div> -->
                 </div>
             </div>
         {% endfor %}
-        </div>
-    </div>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const filterBar = document.getElementById('filter-bar');
-        const valid = ['All', 'Drama', 'Action', 'Sci-Fi'];
-        const filterButtons = filterBar ? Array.from(filterBar.querySelectorAll('button')).filter(b => valid.includes(b.textContent.trim())) : [];
-
+        <script>
         function normalize(g) {
-            return (g || '').toString().trim().toLowerCase()
-                .replace(/science[-\s]*fiction/g, 'sci-fi')
-                .replace(/[\s_]+/g, '-');
+            return (g || '').toLowerCase().replace(/[^a-z0-9]/g, '');
         }
-
         function parseGenres(raw) {
-            const str = (raw || '').toString().trim();
-            if (!str) return [];
-            return str.split(/[,;|/]+/).map(s => s.trim()).filter(Boolean);
+            if (!raw) return [];
+            return raw.split(',').map(g => g.trim());
         }
-
         function buildGenreButtons() {
             document.querySelectorAll('.genre-marker').forEach(marker => {
                 const wrap = marker.parentElement;
@@ -456,16 +391,61 @@
                     card.classList.toggle('hidden', !show);
                 }
             });
+            // Highlight active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (normalize(btn.dataset.genre) === target) {
+                    btn.classList.add('ring', 'ring-2', 'ring-indigo-400');
+                } else {
+                    btn.classList.remove('ring', 'ring-2', 'ring-indigo-400');
+                }
+            });
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            buildGenreButtons();
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    applyFilter(btn.dataset.genre);
+                });
+            });
+            applyFilter('all');
+        // Scroll to top when filter is applied
         filterButtons.forEach(btn => {
-            btn.addEventListener('click', () => applyFilter(btn.textContent.trim()));
+            btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            applyFilter(btn.dataset.genre);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
         });
-
-        buildGenreButtons();
-        applyFilter('All');
-    });
-    </script>
-
-</body>
-</html>
+        applyFilter('all');
+        });
+        </script>
+    <!-- Footer always at the bottom, not overlaying content -->
+    <style>
+        body, html {
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 120px; /* Height of footer */
+        }
+        footer.footer-bottom {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+        }
+    </style>
+    <footer class="footer-bottom bg-gray-900 text-white py-6 w-full">
+        <div class="container mx-auto text-center flex flex-col md:flex-row items-center justify-between">
+            <div>
+                <p class="text-sm">&copy; {{ now|date:"Y" }} Emanuel Panait. All rights reserved. | Film Catalog Project</p>
+                <p class="text-xs mt-2">Software Development Academy</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex gap-4 justify-center">
+                <a href="/aboutme/" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">About Me</a>
+                <a href="/contact/" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">Contact</a>
+            </div>
+        </div>
+    </footer>

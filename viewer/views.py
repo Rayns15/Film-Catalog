@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy, reverse
@@ -7,21 +7,15 @@ from django.db.models import Model, IntegerField, CharField
 from django.views import View
 from django.shortcuts import render
 from django import forms
-from django.contrib import messages
-from django.contrib.auth.models import User
-from django.db import IntegrityError
-from django.views.decorators.http import require_http_methods
 # Create your views here.
 
 def base_view(request):
     return render(request, 'base.html')
 
-def search(request, item):
-    list_of_movies = ["Inception", "The Dark Knight", "Interstellar", "Pulp Fiction"]
-    if item in list_of_movies:
-        return HttpResponse(f"Movie '{item}' found!")
-    else:
-        return HttpResponse(f"Movie '{item}' not found.")
+def search(request):
+    query = request.GET.get('q', '')
+    movies = Movie.objects.filter(Title__icontains=query)
+    return render(request, 'home.html', {'movies_html': movies})
     
 # nume.com/hello_regex?"nume='Andrei":
 #     return HttpResponse(request):
@@ -132,10 +126,10 @@ class MovieDetailView(DetailView):
             return [f'movie_{self.object.id}.html', self.template_name]
         return [self.template_name]
 
-def movie_details_view(request, id):
+def movie_details_view(request, pk):
     try:
-        movie = Movie.objects.get(id=id)
-        return render(request, f'movie_{id}.html', {'movie': movie})
+        movie = Movie.objects.get(pk=pk)
+        return render(request, f'movie_{pk}.html', {'movie': movie})
     except Movie.DoesNotExist:
         return HttpResponse("Movie not found", status=404)
   # Ensure the template exists
@@ -161,19 +155,17 @@ def the_godfather(request, slug=None):
         if slug is None:
             return HttpResponse("Slug not provided", status=400)
         movie = Movie.objects.get(slug=slug)
-        return render(request, 'movie_details.html', {'movie': movie})
+        return render(request, 'The Godfather.html', {'movie': movie})
     except Movie.DoesNotExist:
         return HttpResponse("Movie not found", status=404)
-
+    
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=100)
     password = forms.CharField(widget=forms.PasswordInput)
-
 def serve_static(request, path):
     from django.conf import settings
     from django.views.static import serve
     return serve(request, path, document_root=settings.STATIC_ROOT)
-
 def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -186,29 +178,66 @@ def login_view(request):
         form = LoginForm()
     return render(request, 'Log_in.html', {'form': form})
 
+def signup_view(request):
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            # Here you would typically create the user
+            return HttpResponse(f"User {username} signed up successfully")
+    else:
+        form = SignupForm()
+    return render(request, 'Sign_up.html', {'form': form})
+
+def logout_view(request):
+    # Here you would typically log out the user
+    return HttpResponse("Logged out successfully")
+
+class SignupForm(forms.Form):
+    username = forms.CharField(max_length=100)
+    password = forms.CharField(widget=forms.PasswordInput)
 def signup(request):
-    if request.method == "POST":
-        username = request.POST.get("username", "").strip()
-        first_name = request.POST.get("first_name", "").strip()
-        last_name = request.POST.get("last_name", "").strip()
-        password = request.POST.get("password", "")
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            # Here you would typically create the user
+            return HttpResponse(f"User {username} signed up successfully")
+    else:
+        form = SignupForm()
+    return render(request, 'Sign_up.html', {'form': form})
 
-        if not username or not password:
-            messages.error(request, "Username and password are required.")
-            return render(request, "sign_up.html")
-
-        try:
-            User.objects.create_user(
-                username=username,
-                password=password,
-                first_name=first_name,
-                last_name=last_name,
-            )
-        except IntegrityError:
-            messages.error(request, "This username is already taken.")
-            return render(request, "sign_up.html")
-
-        messages.success(request, "Account created successfully. You can now sign in.")
-        return redirect("login")
-
-    return render(request, "sign_up.html")
+def movie_search(request):
+    query = request.GET.get('q', '')
+    movies = Movie.objects.filter(Title__icontains=query)
+    streams = Stream.objects.all()
+    return render(request, 'home.html', {
+        'movies_html': movies,
+        'streams_html': streams,
+        'user': request.user,
+        'year': datetime.datetime.now().year,
+    })
+  
+def movie_id_view(request, pk):
+    try:
+        movie = Movie.objects.get(pk=pk)
+        return render(request, 'movie_detail.html', {'movie_html': movie})
+    except Movie.DoesNotExist:
+        return HttpResponse("Movie not found", status=404)
+    
+def movie_details_view(request, pk):
+    try:
+        movie = Movie.objects.get(pk=pk)
+        return render(request, f'movie_{pk}.html', {'movie': movie})
+    except Movie.DoesNotExist:
+        return HttpResponse("Movie not found", status=404)
+    
+def movie_detail(request, pk):
+    try:
+        movie = Movie.objects.get(pk=pk)
+        return render(request, 'movie_detail.html', {'movie': movie})
+    except Movie.DoesNotExist:
+        return HttpResponse("Movie not found", status=404)
+    

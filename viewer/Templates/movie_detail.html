@@ -1,0 +1,16 @@
+<!-- Create the movie_detail.html file with the necessary content -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Detail</title>
+</head>
+<body>
+    <h1>{{ movie.Title }}</h1>
+    <p>Directed by: {{ movie.director }}</p>
+    <p>Released in: {{ movie.Year }}</p>
+    <p>Price: ${{ movie.cinema_price }}</p>
+    <a href="{% url 'home' %}">Back to Home</a>
+</body>
+</html>

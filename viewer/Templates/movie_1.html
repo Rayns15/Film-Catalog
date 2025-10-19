@@ -18,6 +18,13 @@
             background-color: #111827; /* Dark blue-gray background */
             background-image: linear-gradient(145deg, #111827 0%, #1f2937 50%, #000000 100%);
             color: #f3f4f6; /* Light gray text */
+            /* Added for smooth exit transition */
+            transition: opacity 0.5s ease-out;
+        }
+
+        /* A class to trigger the fade-out on the body */
+        body.fade-out {
+            opacity: 0;
         }
 
         /* Glassmorphism effect for the main card */
@@ -25,10 +32,11 @@
             background: rgba(31, 41, 55, 0.5); /* Semi-transparent background */
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.1s ease-out; /* Smooth transition for JS tilt effect */
+            /* Updated transition to handle tilt, entrance, and exit animations smoothly */
+            transition: opacity 0.4s ease-out, transform 0.2s ease-out;
         }
         
-        /* Entrance animation */
+        /* Entrance animation (Unchanged) */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -44,7 +52,7 @@
             animation: fadeIn 0.8s ease-out forwards;
         }
         
-        /* Custom button styling */
+        /* Custom button styling (Unchanged) */
         .home-btn {
             background-color: #3b82f6; /* Blue-600 */
             transition: background-color 0.3s ease, transform 0.2s ease;
@@ -98,25 +106,55 @@
     </div>
 
     <script>
-        // JavaScript for a subtle 3D tilt effect on the card (Unchanged)
-        const card = document.getElementById('movie-card');
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.getElementById('movie-card');
+            const homeButton = document.querySelector('.home-btn');
+            const body = document.body;
 
-        card.addEventListener('mousemove', (e) => {
-            const { left, top, width, height } = card.getBoundingClientRect();
-            const x = e.clientX - left;
-            const y = e.clientY - top;
+            // --- 3D Tilt Effect (Unchanged) ---
+            if (card) {
+                card.addEventListener('mousemove', (e) => {
+                    const { left, top, width, height } = card.getBoundingClientRect();
+                    const x = e.clientX - left;
+                    const y = e.clientY - top;
+                    const rotateY = -1 * ((x - width / 2) / (width / 2)) * 5;
+                    const rotateX = ((y - height / 2) / (height / 2)) * 5;
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
 
-            // Calculate rotation values based on mouse position
-            const rotateY = -1 * ((x - width / 2) / (width / 2)) * 5; // Max 5 degrees rotation
-            const rotateX = ((y - height / 2) / (height / 2)) * 5; // Max 5 degrees rotation
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+                });
+            }
+            
+            // --- NEW: Smooth Exit Transition ---
+            if (homeButton) {
+                homeButton.addEventListener('click', (e) => {
+                    e.preventDefault(); // Prevent immediate navigation
+                    const targetUrl = homeButton.href;
+                    
+                    // 1. Fade out the card
+                    if (card) {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)'; // Move it down slightly
+                    }
 
-            // Apply the transform
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        });
+                    // 2. After a short delay, fade out the whole body
+                    setTimeout(() => {
+                        body.classList.add('fade-out');
+                        
+                        // 3. Navigate after the body fade-out is complete
+                        setTimeout(() => {
+                            window.location.href = targetUrl;
+                        }, 500); // This duration should match the body's transition time
+                    }, 200); // Delay before fading the body
+                });
+            }
 
-        // Reset the transform when the mouse leaves the card
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+            // --- Handler for Browser Back/Forward functionality ---
+            window.addEventListener('beforeunload', () => {
+                body.classList.add('fade-out');
+            });
         });
     </script>
 

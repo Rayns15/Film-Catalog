@@ -11,6 +11,7 @@ class Movie(Model):
     cinema_price = IntegerField(blank=True, null=True, db_column='cinema_price')
     genre_movie = CharField(max_length=50, blank=True, null=True, db_column='genre_movie')
     
+    
 
 
 

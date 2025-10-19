@@ -12,6 +12,12 @@
             background-image: linear-gradient(135deg, #2e8b57 0%, #4682b4 100%);
             color: #fff;
             min-height: 100vh;
+            /* Added for smooth exit transition */
+            transition: opacity 0.5s ease-out;
+        }
+        /* A class to trigger the fade-out on the body */
+        body.fade-out {
+            opacity: 0;
         }
         .container {
             max-width: 700px;
@@ -20,6 +26,8 @@
             border-radius: 14px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.25);
             padding: 40px 32px;
+            /* Added for smooth exit transition */
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
         }
         h1 {
             font-size: 2.5rem;
@@ -45,9 +53,25 @@
             color: #90ee90;
             font-weight: 500;
         }
+        
+        .home-btn {
+            padding: 12px 24px;
+            background-color: #4682b4;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .home-btn:hover {
+            background-color: #5a9bd4;
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 800px) {
             .container {
-                padding: 24px 8px;
+                padding: 24px 18px;
                 margin: 24px;
             }
             h1 {
@@ -77,10 +101,46 @@
         </div>
         <br>
         <div style="text-align: center;">
-            <a href="http://127.0.0.1:8000/home/" style="padding:12px 24px; background-color:#4682b4; color:#fff; border-radius:8px; text-decoration:none; display: inline-block; hover:bg-color:#5a9bd4;">
+            <a href="http://127.0.0.1:8000/home/" class="home-btn">
                 Return Home
             </a>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const homeButton = document.querySelector('.home-btn');
+            const body = document.body;
+            const container = document.querySelector('.container');
+
+            if (homeButton) {
+                homeButton.addEventListener('click', (e) => {
+                    e.preventDefault(); // Prevent immediate navigation
+                    const targetUrl = homeButton.href;
+                    
+                    // 1. Fade out the container
+                    if (container) {
+                        container.style.opacity = '0';
+                        container.style.transform = 'translateY(20px)'; // Move it down slightly
+                    }
+
+                    // 2. After a short delay, fade out the whole body
+                    setTimeout(() => {
+                        body.classList.add('fade-out');
+                        
+                        // 3. Navigate after the body fade-out is complete
+                        setTimeout(() => {
+                            window.location.href = targetUrl;
+                        }, 500); // This duration should match the body's transition time
+                    }, 200); // Delay before fading the body
+                });
+            }
+
+            // --- Handler for Browser Back/Forward functionality ---
+            window.addEventListener('beforeunload', () => {
+                body.classList.add('fade-out');
+            });
+        });
+    </script>
 </body>
 </html>

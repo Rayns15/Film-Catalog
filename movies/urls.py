@@ -3,15 +3,13 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 from viewer import views as viewer_views
-# This file is intentionally left blank.
-from viewer.views import *  # Ensure views are imported if views.py exists
+from viewer.views import movie_details_view, movie_id_view, movie_detail
 from viewer.views import (
     MovieCreateView, MovieListView, MovieUpdateView, MovieDeleteView,
     base_view, inception_view, movie1_details, search, TheGodfatherView, 
-    movie_details_view, MovieDetailView)  # Ensure all necessary views are imported
-
+    movie_details_view, MovieDetailView, view_details, movie_details, movie_search)  # Ensure all necessary views are imported
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name='admin'),
     path('home/', viewer_views.afiseaza_home_page, name='home_page'),
     path('create/', MovieCreateView.as_view(), name='movie-create'),
     path('list/', MovieListView.as_view(), name='movie-list'),
@@ -20,13 +18,15 @@ urlpatterns = [
     path('base/', base_view, name='base'),  # Base view for the root URL
     path('inception/', inception_view, name='inception'),
     path('AddMovie/', MovieCreateView.as_view(), name='add_movie'),
-    path('movie/<int:pk>/', MovieDetailView.as_view(), name='movie_detail'),  # Detail view for a specific movie
+    path('movie/<int:pk>/', movie_details_view, name='movie_details_view'),
+    path('movie/<int:pk>/', movie_details_view, name='movie_id'),
+    path('movie/<int:pk>/', movie_detail, name='movie_detail'),  # Detail view for a specific movie
     path('', viewer_views.afiseaza_home_page, name='home'),  # Root URL mapped to home_view
-    path('movie_details/<int:id>/', movie_details_view, name='movie_details'),
+    path('movie_details/<int:pk>/', movie_details_view, name='movie_details'),
     path('login/', auth_views.LoginView.as_view(template_name='Log_in.html'), name='login'),
     path('signup/', viewer_views.signup, name='signup'),
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
-    path('search/', search, name='search'),
+    path('search/', search, name='movie_search'),
     path('the_godfather/', TheGodfatherView.as_view(), name='the_godfather'),
     path('movie1/', MovieDetailView.as_view(), name='movie1'),
     path('movie1/<int:pk>/', movie1_details, name='movie1_details'),
@@ -35,6 +35,8 @@ urlpatterns = [
     path('accounts/signup/', viewer_views.signup, name='account_signup'),
     path('accounts/logout/', auth_views.LogoutView.as_view(next_page='home'), name='account_logout'),
     path('aboutme/', TemplateView.as_view(template_name='aboutme.html'), name='aboutme'),
+    path('search/', search, name='movie_search'),  # Make sure your view matches this signature
+    #path('search/', views.search, name='movie_search'),  # Make sure your view matches this signature
     path('contact/', TemplateView.as_view(template_name='contact.html'), name='contact'),
 ]
 

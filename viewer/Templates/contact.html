@@ -18,6 +18,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            /* Added for smooth transitions */
+            transition: opacity 0.5s ease-out;
+        }
+        /* A class to trigger the fade-out on the body */
+        body.fade-out {
+            opacity: 0;
         }
         .contact-container {
             background: rgba(255,255,255,0.95);
@@ -26,7 +32,25 @@
             padding: 36px 32px;
             border-radius: 14px;
             box-shadow: 0 10px 32px rgba(0,0,0,0.18);
+            /* Added for smooth transitions */
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
         }
+        
+        /* Entrance animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
         h2 {
             text-align: center;
             color: #2193b0;
@@ -77,18 +101,37 @@
         input[type="submit"]:hover {
             background: #176087;
         }
+        .home-btn {
+            display:inline-block; 
+            padding:12px 32px; 
+            background-color:#2193b0; 
+            color:#fff; 
+            border-radius:8px; 
+            text-decoration:none; 
+            font-weight:600; 
+            font-size:1rem; 
+            box-shadow:0 2px 8px rgba(33,147,176,0.12); 
+            transition: background 0.2s, transform 0.2s; 
+            text-align:center;
+        }
+        .home-btn:hover {
+            background-color: #176087;
+            transform: translateY(-2px);
+        }
         @media (max-width: 500px) {
             .contact-container {
-                padding: 18px 8px;
+                padding: 24px 18px;
+                margin: 12px;
             }
             h2 {
-                font-size: 1.3rem;
+                font-size: 1.5rem;
             }
         }
     </style>
+
 </head>
 <body>
-    <div class="contact-container">
+    <div class="contact-container fade-in">
         <h2>Contact Us</h2>
         <form action="mailto:panaitemanuel@gmail.com" method="POST" enctype="text/plain">
             <label for="name">Name</label>
@@ -102,11 +145,47 @@
 
             <input type="submit" value="Send Message">
         </form>
-                    <div style="text-align:center; margin-top: 24px;">
-                        <a href="http://127.0.0.1:8000/home/" style="display:inline-block; padding:12px 32px; background-color:#2193b0; color:#fff; border-radius:8px; text-decoration:none; font-weight:600; font-size:1rem; box-shadow:0 2px 8px rgba(33,147,176,0.12); transition:background 0.2s; text-align:center;">
-                            Return Home
-                        </a>
-                    </div>
+        <div style="text-align:center; margin-top: 24px;">
+            <a href="http://127.0.0.1:8000/home/" class="home-btn">
+                Return Home
+            </a>
+        </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const homeButton = document.querySelector('.home-btn');
+            const body = document.body;
+            const container = document.querySelector('.contact-container');
+
+            if (homeButton) {
+                homeButton.addEventListener('click', (e) => {
+                    e.preventDefault(); // Prevent immediate navigation
+                    const targetUrl = homeButton.href;
+                    
+                    // 1. Fade out the container
+                    if (container) {
+                        container.style.opacity = '0';
+                        container.style.transform = 'translateY(20px)';
+                    }
+
+                    // 2. After a short delay, fade out the whole body
+                    setTimeout(() => {
+                        body.classList.add('fade-out');
+                        
+                        // 3. Navigate after the body fade-out is complete
+                        setTimeout(() => {
+                            window.location.href = targetUrl;
+                        }, 500); // This duration should match the body's transition time
+                    }, 200); // Delay before fading the body
+                });
+            }
+
+            // --- Handler for Browser Back/Forward functionality ---
+            window.addEventListener('beforeunload', () => {
+                body.classList.add('fade-out');
+            });
+        });
+    </script>
 </body>
 </html>
