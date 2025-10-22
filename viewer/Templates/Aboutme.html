@@ -1,10 +1,16 @@
+{% load static %} 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Me - Oracle DevOps Engineer</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
+        /* Your existing "About Me" styles */
         body {
             margin: 0;
             padding: 0;
@@ -12,10 +18,8 @@
             background-image: linear-gradient(135deg, #2e8b57 0%, #4682b4 100%);
             color: #fff;
             min-height: 100vh;
-            /* Added for smooth exit transition */
             transition: opacity 0.5s ease-out;
         }
-        /* A class to trigger the fade-out on the body */
         body.fade-out {
             opacity: 0;
         }
@@ -26,7 +30,6 @@
             border-radius: 14px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.25);
             padding: 40px 32px;
-            /* Added for smooth exit transition */
             transition: opacity 0.4s ease-out, transform 0.4s ease-out;
         }
         h1 {
@@ -38,49 +41,140 @@
         }
         h2 {
             font-size: 1.25rem;
-            font-weight: 400;
-            margin-bottom: 28px;
-            color: #fafafa;
+            /* ... other h2 styles ... */
         }
         p {
             font-size: 1.1rem;
-            line-height: 1.7;
-            margin-bottom: 18px;
+            /* ... other p styles ... */
         }
         .connect {
-            margin-top: 28px;
-            font-size: 1.15rem;
-            color: #90ee90;
-            font-weight: 500;
+            /* ... connect styles ... */
         }
-        
         .home-btn {
-            padding: 12px 24px;
-            background-color: #4682b4;
-            color: #fff;
-            border-radius: 8px;
-            text-decoration: none;
-            display: inline-block;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            border: 1px solid rgba(255,255,255,0.3);
+            /* ... home-btn styles ... */
         }
-        .home-btn:hover {
-            background-color: #5a9bd4;
-            transform: translateY(-2px);
+        @media (max-width: 800px) {
+            /* ... media query styles ... */
         }
 
-        @media (max-width: 800px) {
-            .container {
-                padding: 24px 18px;
-                margin: 24px;
-            }
-            h1 {
-                font-size: 2rem;
-            }
+        /* --- ADDED: Styles for the header --- */
+        .app-header {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(34, 211, 238, 0.35)) !important;
+            position: relative;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 8px 0;
+            color: #ffffff; /* Added for text color */
         }
+        /* This styles the container *inside* the header, not your main content container */
+        .app-header .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+        .brand {
+            display: inline-block;
+            width: 40px; /* Assuming size */
+            height: 40px; /* Assuming size */
+            /* The 'brand' class from your snippet needs a background image */
+            /* background: url('{% static "img/logo.svg" %}') no-repeat center/cover; */
+            border-radius: 50%;
+        }
+        .brand-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #7c3aed, #22d3ee);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 14px;
+        }
+        .tagline {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn {
+            appearance: none;
+            border: 0;
+            border-radius: 9999px;
+            padding: 8px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            line-height: 1;
+            /* Added min-width and font-size from your inline styles */
+            min-width: 130px;
+            font-size: 1.05rem;
+        }
+        .btn-login {
+            background: transparent;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+        .btn-login:hover {
+            border-color: #ffffff;
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .btn-signup {
+            background: #8b5cf6;
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(139, 92, 246, 0.4);
+        }
+        .btn-signup:hover {
+            background: #7c3aed;
+        }
+        /* --- End of ADDED header styles --- */
+
     </style>
 </head>
 <body>
+
+    <header class="app-header col-span-full" role="banner">
+        <div class="container flex flex-col md:flex-row items-center justify-between">
+            <div class="flex items-center mb-2 md:mb-0">
+                <a class="brand" href="http://127.0.0.1:8000/home/" aria-label="Film Catalog home"></a>
+                <span class="brand-badge ml-2" aria-hidden="true">FC</span>
+                <span class="ml-2">Film Catalog</span>
+                <p class="tagline hidden sm:inline-block ml-2 text-white/90">Python Development</p>
+            </div>
+            <div class="flex-1"></div>
+            <nav class="actions flex gap-4 mt-2 md:mt-0 justify-end" aria-label="User account actions">
+                {% if user.is_authenticated %}
+                    <a class="btn btn-login" href="{% url 'admin:index' %}" style="padding:12px 24px;">My account</a>
+                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{% url 'home' %}">
+                        <button type="submit" class="btn btn-signup" style="padding:12px 24px;">Log out</button>
+                    </form>
+                {% else %}
+                    <a class="btn btn-login" href="{% url 'login' %}" style="padding:12px 24px;">Log in</a>
+                    <a class="btn btn-signup" href="{% url 'signup' %}" style="padding:12px 24px;">Sign up</a>
+                {% endif %}
+                <a class="btn btn-login" href="http://127.0.0.1:8000/aboutme/" style="padding:12px 24px;">About Me</a>
+                <a class="btn btn-login" href="/contact/" style="padding:12px 24px;">Contact</a>
+                {% if request.path == '/search/' or request.path|slice:":8" == '/search/' %}
+                    <a class="btn btn-login bg-indigo-500 hover:bg-indigo-700 text-white" href="{% url 'home' %}" style="padding:12px 24px;">Exit Search</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
     <div class="container">
         <h1>About Me</h1>
         <h2>Experienced Oracle DevOps Engineer | Driving Efficient Software Delivery & Expanding Full-Stack Capabilities</h2>
@@ -95,7 +189,7 @@
         </p>
         <p>
             By embracing DevOps principles and developing robust full-stack skills, I aim to bridge the gap between development and operations, contribute to efficient software delivery, and build innovative web applications. My optimism and proactive approach have always fostered a positive work environment and motivated others. I am excited to leverage my expanded skill set to explore new job opportunities, earn valuable certifications, and contribute to impactful projects.
-        </p>
+        </loc>
         <div class="connect">
             Feel free to connect with me to discuss potential collaborations or opportunities!
         </div>
@@ -118,21 +212,18 @@
                     e.preventDefault(); // Prevent immediate navigation
                     const targetUrl = homeButton.href;
                     
-                    // 1. Fade out the container
                     if (container) {
                         container.style.opacity = '0';
-                        container.style.transform = 'translateY(20px)'; // Move it down slightly
+                        container.style.transform = 'translateY(20px)';
                     }
 
-                    // 2. After a short delay, fade out the whole body
                     setTimeout(() => {
                         body.classList.add('fade-out');
                         
-                        // 3. Navigate after the body fade-out is complete
                         setTimeout(() => {
                             window.location.href = targetUrl;
-                        }, 500); // This duration should match the body's transition time
-                    }, 200); // Delay before fading the body
+                        }, 500); 
+                    }, 200); 
                 });
             }
 
@@ -140,7 +231,35 @@
             window.addEventListener('beforeunload', () => {
                 body.classList.add('fade-out');
             });
+
+            // --- ADDED: Make header links fade out too ---
+            const headerLinks = document.querySelectorAll('.app-header a, .app-header button');
+            headerLinks.forEach(link => {
+                // Check if it's a form button
+                if (link.tagName === 'BUTTON' && link.type === 'submit') {
+                    link.closest('form').addEventListener('submit', (e) => {
+                         e.preventDefault();
+                         body.classList.add('fade-out');
+                         setTimeout(() => {
+                            e.target.submit();
+                         }, 500); // Wait for fade
+                    });
+                } 
+                // Check if it's a regular link
+                else if (link.tagName === 'A' && link.href) {
+                     link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetUrl = link.href;
+                        body.classList.add('fade-out');
+                        setTimeout(() => {
+                            window.location.href = targetUrl;
+                        }, 500); // Wait for fade
+                     });
+                }
+            });
+
         });
     </script>
 </body>
 </html>
+{% load static %}

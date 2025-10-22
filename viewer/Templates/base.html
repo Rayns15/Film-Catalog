@@ -1,16 +1,141 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>  
-
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Film Catalog{% endblock %}</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the Inter font and dark background */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #6a5acd, #1f1f1f);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        /* ... any other site-wide styles ... */
+        
+        /* Footer sticky styles */
+        body, html {
+            min-height: 100vh;
+            position: relative;
+            /* Adjust padding-bottom to match your footer's height */
+            padding-bottom: 120px; 
+        }
+        footer.footer-bottom {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+        }
+    </style>
 </head>
-<header>
-    <a href="http://127.0.0.1:8000/AddMovie/"><button>Add Movie</button></a>
-<header>
 
 <body>
+    <div class="container mx-auto p-4 md:p-8">
 
+        <header class="app-header col-span-full" role="banner">
+            <div class="container flex flex-col md:flex-row items-center justify-between">
+                <div class="flex items-center mb-2 md:mb-0">
+                    <a class="brand" href="http://127.0.0.1:8000/home/" aria-label="Film Catalog home"></a>
+                    <span class="brand-badge ml-2" aria-hidden="true">FC</span>
+                    <span class="ml-2">Film Catalog</span>
+                    <p class="tagline hidden sm:inline-block ml-2 text-white/90">Python Development</p>
+                </div>
+                <div class="flex-1"></div>
+                <nav class="actions flex gap-4 mt-2 md:mt-0 justify-end" aria-label="User account actions">
+                    {% if user.is_authenticated %}
+                        <a class="btn btn-login" href="{% url 'admin:index' %}" style="padding:12px 24px;">My account</a>
+                        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'home' %}">
+                            <button type="submit" class="btn btn-signup" style="padding:12px 24px;">Log out</button>
+                        </form>
+                    {% else %}
+                        <a class="btn btn-login" href="{% url 'login' %}" style="padding:12px 24px;">Log in</a>
+                        <a class="btn btn-signup" href="{% url 'signup' %}" style="padding:12px 24px;">Sign up</a>
+                    {% endif %}
+                    <a class="btn btn-login" href="http://127.0.0.1:8000/aboutme/" style="padding:12px 24px;">About Me</a>
+                    <a class="btn btn-login" href="/contact/" style="padding:12px 24px;">Contact</a>
+                    {% if request.path == '/search/' or request.path|slice:":8" == '/search/' %}
+                        <a class="btn btn-login bg-indigo-500 hover:bg-indigo-700 text-white" href="{% url 'home' %}" style="padding:12px 24px;">Exit Search</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </header>
+        <div class="flex justify-end mt-4 mb-4"></div>
+        
+        <style>
+            .actions .btn {
+                padding-left: 32px !important;
+                padding-right: 32px !important;
+                min-width: 130px;
+                font-size: 1.05rem;
+            }
+        </style>
+    </div>
+
+    {% block content %}
+    {% endblock %}
+    <footer class="footer-bottom bg-gray-900 text-white py-6 w-full">
+        <div class="container mx-auto text-center flex flex-col md:flex-row items-center justify-between">
+            <div>
+                <p class="text-sm">&copy; {{ now|date:"Y" }} Emanuel Panait. All rights reserved. | Film Catalog Project</p>
+                <p class="text-xs mt-2">Software Development Academy</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex gap-4 justify-center">
+                <a href="/aboutme/" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">About Me</a>
+                <a href="/contact/" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth page transition
+        function fadeInBody() {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.4s';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 10);
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            fadeInBody();
+            const links = document.querySelectorAll('a[href]:not([target="_blank"]):not([href^="#"])');
+            links.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    if (e.defaultPrevented || e.button !== 0 /*...etc...*/) return;
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    setTimeout(() => {
+                        window.location = link.href;
+                    }, 400);
+                });
+            });
+        });
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                fadeInBody();
+            }
+        });
+
+        // Auth link patching script
+        (function () {
+            function resolveHref(candidates, cb) { /* ...your function... */ }
+            function patchAuthLinks() { /* ...your function... */ }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', patchAuthLinks);
+            } else {
+                patchAuthLinks();
+            }
+        })();
+    </script>
+    
+    {% block scripts %}
+    {% endblock %}
 
 </body>
-
-
 </html>

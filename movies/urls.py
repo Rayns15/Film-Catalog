@@ -26,7 +26,6 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='Log_in.html'), name='login'),
     path('signup/', viewer_views.signup, name='signup'),
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
-    path('search/', search, name='movie_search'),
     path('the_godfather/', TheGodfatherView.as_view(), name='the_godfather'),
     path('movie1/', MovieDetailView.as_view(), name='movie1'),
     path('movie1/<int:pk>/', movie1_details, name='movie1_details'),

@@ -37,7 +37,7 @@
 
         .card .field input[type="text"],
         .card .field input[type="password"] {
-            height: 44px;       /* consistent field height */
+            height: 44px;      /* consistent field height */
             font-size: 15px;    /* subtle size for better visual alignment */
         }
         body {
@@ -52,6 +52,12 @@
 
         .wrap {
             width: min(92vw, 420px);
+            
+            /* --- 1. PAGE LOAD TRANSITION ADDED --- */
+            /* Start transparent and slightly down */
+            opacity: 0; 
+            /* Apply the animation */
+            animation: fadeInSlideUp 0.6s ease-out 0.1s forwards; 
         }
 
         .card {
@@ -134,9 +140,13 @@
             color: var(--accent);
             text-decoration: none;
             font-size: .9rem;
+            
+            /* --- 2. LINK HOVER TRANSITION ADDED --- */
+            transition: color 0.2s ease-in-out;
         }
         .link:hover {
             text-decoration: underline;
+            color: var(--text); /* Fades to white on hover */
         }
 
         button[type="submit"] {
@@ -180,6 +190,18 @@
             padding: 10px 12px;
             border-radius: 10px;
             font-size: .9rem;
+        }
+        
+        /* --- 1. KEYFRAMES FOR PAGE LOAD ANIMATION --- */
+        @keyframes fadeInSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -226,7 +248,8 @@
             </form>
 
             <div class="footer-links">
-                <a class="link" href="{% url 'admin:index' %}">Go to Admin</a>
+                <a class="link smooth-link" href="{% url 'home' %}">Return Home</a>
+                
                 {# If you included django.contrib.auth.urls, this will work: #}
                 {% if perms %}
                 {% endif %}
@@ -234,5 +257,40 @@
             </div>
         </div>
     </div>
+
+    <style>
+        /* fade-out used when navigating away via smooth-link */
+        .fade-out {
+            animation: fadeOutSlideDown 0.35s ease-in forwards;
+        }
+        @keyframes fadeOutSlideDown {
+            from { opacity: 1; transform: translateY(0); }
+            to   { opacity: 0; transform: translateY(12px); }
+        }
+    </style>
+
+    <script>
+        (function () {
+            // Intercept clicks on links with the .smooth-link class,
+            // play the fade-out, then navigate after animation ends.
+            function handleSmoothLinkClick(e) {
+                var a = this;
+                var href = a.getAttribute('href');
+                if (!href || href.indexOf('#') === 0) return; // allow fragments
+                e.preventDefault();
+                var wrapper = document.querySelector('.wrap') || document.body;
+                wrapper.classList.add('fade-out');
+                // match the CSS animation duration (350ms) + small buffer
+                setTimeout(function () { window.location.href = href; }, 400);
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var links = document.querySelectorAll('a.smooth-link');
+                links.forEach(function (link) {
+                    link.addEventListener('click', handleSmoothLinkClick, false);
+                });
+            });
+        })();
+    </script>
 </body>
 </html>

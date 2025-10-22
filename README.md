@@ -6,14 +6,15 @@
 ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
-![viewer/Static/Pics/home.jpg](https://github.com/Rayns15/Film-Catalog/blob/3c0c51df528ff685500dc7c2f4d053f87848c984/viewer/Static/Pics/home.jpg)
-![viewer/Static/Pics/home2.jpg](https://github.com/Rayns15/Film-Catalog/blob/5c5e565714d7740f7e97f7756d8cc82744277560/viewer/Static/Pics/home2.jpg)
 
 # Film Catalog - A Django Movie Database
 
 ## Introduction
 
 **"Film Catalog"** is a movie database and review website built using **Django** and **Tailwind CSS**. It includes several pages such as Home, About, Contact, Movie Listings, Genres, and custom 404 pages. The project features a clean and modern design that is fully responsive and optimized for performance. It includes a powerful admin interface for managing films, genres, and reviews, and is easy to customize and deploy to a production environment.
+
+![viewer/Static/Pics/home.jpg](https://github.com/Rayns15/Film-Catalog/blob/3c0c51df528ff685500dc7c2f4d053f87848c984/viewer/Static/Pics/home.jpg)
+![viewer/Static/Pics/home2.jpg](https://github.com/Rayns15/Film-Catalog/blob/5c5e565714d7740f7e97f7756d8cc82744277560/viewer/Static/Pics/home2.jpg)
 
 ## Table of Content
 
