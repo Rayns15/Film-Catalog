@@ -7,7 +7,8 @@ from viewer.views import movie_details_view, movie_id_view, movie_detail
 from viewer.views import (
     MovieCreateView, MovieListView, MovieUpdateView, MovieDeleteView,
     base_view, inception_view, movie1_details, search, TheGodfatherView,
-    movie_details_view, MovieDetailView, view_details, movie_details, movie_search, profile_view, profile_edit_view, profile_delete_view, profile_edit)  # Ensure all necessary views are imported
+    movie_details_view, MovieDetailView, view_details, movie_details, movie_search, profile_view, 
+    profile_edit_view, profile_delete_view, profile_edit, movie_add)  # Ensure all necessary views are imported
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('home/', viewer_views.afiseaza_home_page, name='home_page'),
@@ -43,6 +44,7 @@ urlpatterns = [
     path('profile/delete/', viewer_views.profile_delete_view, name='profile_delete'),  # Delete profile view
     path("profile/delete/confirm/", viewer_views.profile_delete_confirm_view, name="profile_delete_confirm"),
     path('profile/edit/', profile_edit, name='profile_edit'),  # Edit profile view
+    path('movie/add/', movie_add, name='movie_add'),  # Add movie view
 ]
 
 

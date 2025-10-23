@@ -1,447 +1,275 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Film Catalog</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <style>
-        /* Custom styles for the Inter font and dark background */
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(to bottom, #6a5acd, #1f1f1f);
-            opacity: 0;
-            transition: opacity 0.4s;
-            min-height: 100vh;
-            position: relative;
-            padding-bottom: 120px; /* Height of footer */
-        }
-        
-        body.fade-out {
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
 
-        /* --- Header Styles --- */
-        .app-header {
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(34, 211, 238, 0.35)) !important;
-            position: relative;
-            z-index: 50;
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 8px 0;
-        }
-        
-        /* This is the header's inner container */
-        .app-header .container {
-            /* FIX: Changed from 1200px to 1280px to match Tailwind's max-w-screen-xl 
-              This will make your header content align with your movie grid.
-            */
-            max-width: 1280px; 
-            margin: 0 auto;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #ffffff;
-            text-decoration: none;
-            font-weight: 800;
-            letter-spacing: 0.3px;
-        }
-        
-        .brand-badge {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #7c3aed, #22d3ee);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 14px;
-        }
-        
-        .actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .btn {
-            appearance: none;
-            border: 0;
-            border-radius: 9999px;
-            padding: 8px 14px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            line-height: 1;
-        }
-        
-        .btn-login {
-            background: transparent;
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-        }
-        .btn-login:hover {
-            border-color: #ffffff;
-            background: rgba(255, 255, 255, 0.06);
-        }
-        
-        .btn-signup {
-            background: #8b5cf6;
-            color: #ffffff;
-            box-shadow: 0 6px 18px rgba(139, 92, 246, 0.4);
-        }
-        .btn-signup:hover {
-            background: #7c3aed;
-        }
-        
-        /* This style was in a separate block, now combined */
-        .actions .btn {
-            padding-left: 32px !important;
-            padding-right: 32px !important;
-            min-width: 130px;
-            font-size: 1.05rem;
-        }
+{% block title %}Film Catalog{% endblock %}
 
-        /* --- Footer Styles --- */
-        footer.footer-bottom {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 0;
-        }
-    </style>
-    
-</head>
+{% block content %}
+<div class="w-full max-w-screen-xl mx-auto px-2 sm:px-4 md:px-8">
 
-<body>
+    <div class="flex justify-end mt-4 mb-4"></div>
+    <form action="{% url 'movie_search' %}" method="get" class="justify-end flex mb-4">
+        <input type="text" name="q" placeholder="Search movies..." class="px-3 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800" />
+        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition">Search</button>
+    </form>
     
-    <header class="app-header" role="banner">
-        <div class="container flex flex-col md:flex-row items-center justify-between">
-            <div class="flex items-center mb-2 md:mb-0">
-                <a class="brand" href="http://127.0.0.1:8000/home/" aria-label="Film Catalog home"></a>
-                <span class="brand-badge ml-2" aria-hidden="true">FC</span>
-                <span class="ml-2">Film Catalog</span>
-                <p class="tagline hidden sm:inline-block ml-2 text-white/90">Python Development</p>
-            </div>
-            <div class="flex-1"></div>
-            <nav class="actions flex gap-4 mt-2 md:mt-0 justify-end" aria-label="User account actions">
+    <h1 class="text-4xl font-extrabold text-white mb-8 text-center">
+        <span class='bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-transparent'>Film Catalog </span>- A Django Movie Database
+    </h1>
+    
+    {% if movies_html %}
+    <div class="flex justify-center mb-4">
+        <p class="text-white/90 text-xl max-w-2xl text-center mx-4">
+            Hello, my name is Emanuel Panait. This is my final project, submitted for the completion of the Python Development program at <br> Software Development Academy <br>
+        </p>
+    </div>
+    {% endif %}
+    
+    {% if movies_html %}
+    <div id="filter-bar" class="flex flex-wrap space-x-2 my-2 justify-center gap-y-2">
+        <button class="filter-btn bg-gray-500 text-white px-2 py-1 rounded text-lg hover:bg-gray-600" data-genre="all">All</button>
+        <button class="filter-btn bg-blue-500 text-white px-2 py-1 rounded text-lg hover:bg-blue-600" data-genre="drama">Drama</button>
+        <button class="filter-btn bg-red-500 text-white px-2 py-1 rounded text-lg hover:bg-red-600" data-genre="action">Action</button>
+        <button class="filter-btn bg-green-500 text-white px-2 py-1 rounded text-lg hover:bg-green-600" data-genre="sci-fi">Sci-Fi</button>
+        <button class="filter-btn bg-yellow-500 text-white px-2 py-1 rounded text-lg hover:bg-yellow-600" data-genre="comedy">Comedy</button>
+        <button class="filter-btn bg-purple-500 text-white px-2 py-1 rounded text-lg hover:bg-purple-600" data-genre="thriller">Thriller</button>
+        <button class="filter-btn bg-pink-500 text-white px-2 py-1 rounded text-lg hover:bg-pink-600" data-genre="horror">Horror</button>
+        {% if user.is_authenticated %}
+        <a href="/AddMovie/" class="bg-teal-500 text-white px-2 py-1 rounded text-lg hover:bg-teal-600">Add Movie</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8 px-2 sm:px-4 md:px-8 w-full max-w-screen-xl mx-auto">
+    {% for movie in movies_html %}
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-full transform hover:scale-105 transition-transform duration-300 ease-in-out movie-card">
+            <div class="p-6 flex flex-col flex-grow">
                 {% if user.is_authenticated %}
-                    <a class="btn btn-login" href="{% url 'profile' %}" style="padding:12px 24px;">My account</a>
-                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{% url 'home' %}">
-                        <button type="submit" class="btn btn-signup" style="padding:12px 24px;">Log out</button>
-                    </form>
-                {% else %}
-                    <a class="btn btn-login" href="{% url 'login' %}" style="padding:12px 24px;">Log in</a>
-                    <a class="btn btn-signup" href="{% url 'signup' %}" style="padding:12px 24px;">Sign up</a>
-                {% endif %}
-                <a class="btn btn-login" href="http://127.0.0.1:8000/aboutme/" style="padding:12px 24px;">About Me</a>
-                <a class="btn btn-login" href="/contact/" style="padding:12px 24px;">Contact</a>
-                {% if request.path == '/search/' or request.path|slice:":8" == '/search/' %}
-                    <a class="btn btn-login bg-indigo-500 hover:bg-indigo-700 text-white" href="{% url 'home' %}" style="padding:12px 24px;">Exit Search</a>
-                {% endif %}
-            </nav>
-        </div>
-    </header>
-    
-    <div class="w-full max-w-screen-xl mx-auto px-2 sm:px-4 md:px-8">
-    
-        <div class="flex justify-end mt-4 mb-4"></div>
-        <form action="{% url 'movie_search' %}" method="get" class="justify-end flex mb-4">
-            <input type="text" name="q" placeholder="Search movies..." class="px-3 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition">Search</button>
-        </form>
-        
-        <h1 class="text-4xl font-extrabold text-white mb-8 text-center"><span class='bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-transparent'>Film Catalog </span>- A Django Movie Database</h1>
-        
-        {% if movies_html %}
-        <div class="flex justify-center mb-4">
-            <p class="text-white/90 text-xl max-w-2xl text-center mx-4">
-                Hello, my name is Emanuel Panait. This is my final project, submitted for the completion of the Python Development program at <br> Software Development Academy <br>
-            </p>
-        </div>
-        {% endif %}
-        
-        {% if movies_html %}
-        <div id="filter-bar" class="flex space-x-2 my-2 justify-center">
-            <button class="filter-btn bg-gray-500 text-white px-2 py-1 rounded text-xl hover:bg-gray-600" data-genre="all">All</button>
-            <button class="filter-btn bg-blue-500 text-white px-2 py-1 rounded text-xl hover:bg-blue-600" data-genre="drama">Drama</button>
-            <button class="filter-btn bg-red-500 text-white px-2 py-1 rounded text-xl hover:bg-red-600" data-genre="action">Action</button>
-            <button class="filter-btn bg-green-500 text-white px-2 py-1 rounded text-xl hover:bg-green-600" data-genre="sci-fi">Sci-Fi</button>
-            {% if user.is_authenticated %}
-            <a href="/AddMovie/" class="bg-purple-500 text-white px-2 py-1 rounded text-xl hover:bg-purple-600">Add Movie</a>
-            <a href="/update/1/" class="bg-yellow-500 text-white px-2 py-1 rounded text-xl hover:bg-yellow-600">Update Movie</a>
-            <a href="/delete/1/" class="bg-red-500 text-white px-2 py-1 rounded text-xl hover:bg-red-600">Delete Movie</a>
-            {% endif %}
-        </div>
-        {% endif %}
-
-    </div>
-
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8 px-2 sm:px-4 md:px-8 w-full max-w-screen-xl mx-auto">
-        {% for movie in movies_html %}
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-full transform hover:scale-105 transition-transform duration-300 ease-in-out">
-                <div class="p-6">
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'movie-update' movie.pk %}">
-                            <img src="{% static 'logos/pencil.jpg' %}" alt="Update Movie" class="h-7 w-auto rounded shadow hover:opacity-90 transition" />
-                        </a>
-                    {% endif %}
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ movie.Title }}</h2>
-                    <div class="flex space-x-2 my-2">
-                        <span 
-                            class="genre-marker"
-                            data-genre="{% if movie.genres_list %}{{ movie.genres_list|join:', ' }}{% elif movie.genre_movie %}{{ movie.genre_movie }}{% elif movie.genre %}{{ movie.genre }}{% elif movie.gender %}{{ movie.gender }}{% else %}Other{% endif %}">
-                        </span>
-                        </div>
-                    <p class="text-gray-600 text-sm">
-                        Directed by <span class="font-semibold">{{ movie.director }}</span>
-                    </p>
-                    <p class="text-gray-500 text-sm">
-                        Released in <span class="font-semibold">{{ movie.Year }}</span>
-                    </p>
-                </div>
-                <hr class="border-gray-200">
-
-                <div class="p-6">
-                    <h3 class="text-md font-semibold text-gray-700 mb-2">Cinema Price:</h3>
-                    <p class="text-gray-800 text-lg font-bold mb-4"> ${{ movie.cinema_price }} </p>
-                    <div class="flex justify-center mb-4">
-                        <a href="{% url 'movie_id' movie.pk %}" alt="View Details" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 text-sm rounded-full transition-colors duration-300">
-                            View Details
-                        </a>
+                    <div class="flex justify-end gap-2 mb-2">
+                         <a href="{% url 'movie-update' movie.pk %}" title="Update Movie">
+                            <img src="{% static 'logos/pencil.jpg' %}" alt="Update Movie" class="h-6 w-auto rounded shadow hover:opacity-90 transition" />
+                         </a>
+                         <a href="{% url 'movie-delete' movie.pk %}" title="Delete Movie">
+                            <img src="{% static 'logos/delete.jpg' %}" alt="Delete Movie" class="h-6 w-auto rounded shadow hover:opacity-90 transition" />
+                         </a>
                     </div>
-                    <div class="flex justify-center">
-                        <a href="{% url 'movie_details_view' movie.pk %}" class="hover:opacity-90 transition">
-                            <img src="{% static 'logos/'|add:movie.Title|add:'.jpg' %}" alt="{{ movie.Title }} cover" class="h-48 w-auto rounded-lg shadow-md object-cover" />
-                        </a>
+                {% endif %}
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ movie.Title }}</h2>
+                <div class="flex space-x-2 my-2 genre-buttons-wrap">
+                    <span
+                        class="genre-marker"
+                        data-genre="{% if movie.genres_list %}{{ movie.genres_list|join:', ' }}{% elif movie.genre_movie %}{{ movie.genre_movie }}{% elif movie.genre %}{{ movie.genre }}{% elif movie.gender %}{{ movie.gender }}{% else %}Other{% endif %}">
+                    </span>
+                </div>
+                <p class="text-gray-600 text-sm">
+                    Directed by <span class="font-semibold">{{ movie.director }}</span>
+                </p>
+                <p class="text-gray-500 text-sm">
+                    Released in <span class="font-semibold">{{ movie.Year }}</span>
+                </p>
+                <h3 class="text-md font-semibold text-gray-700 mb-2 mt-4">Cinema Price:</h3>
+                <p class="text-gray-800 text-lg font-bold mb-4"> ${{ movie.cinema_price }} </p>
+                <div class="flex justify-center mb-4">
+                    <a href="{% url 'movie_id' movie.pk %}" alt="View Details" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 text-sm rounded-full transition-colors duration-300">
+                        View Details
+                    </a>
+                </div>
+                <div class="flex justify-center mb-4"> 
+                    <a href="{% url 'movie_details_view' movie.pk %}" class="block hover:opacity-90 transition max-w-full"> 
+                        <img src="{% static 'logos/'|add:movie.Title|add:'.jpg' %}"
+                             alt="{{ movie.Title }} cover"
+                             class="h-48 w-auto object-contain rounded-lg shadow-md block mx-auto"
+                             onerror="this.onerror=null; this.src='{% static 'logos/placeholder.jpg' %}';" />
+                    </a>
+                </div>
+                <div class="mt-auto">
+                    <hr class="border-gray-200">
+                    <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 rounded-b-xl">
+                        <ul class="space-y-1">
+                             <li class="flex items-center gap-2 mt-1">
+                                <span class="text-gray-500 text-xs font-medium">Available on:</span>
+                                <a href="https://www.netflix.com" target="_blank" rel="noopener noreferrer">
+                                    <img src="{% static 'logos/netflix.jpg' %}" alt="Netflix" class="h-5 w-5 rounded shadow" title="Netflix">
+                                </a>
+                                <a href="https://www.primevideo.com" target="_blank" rel="noopener noreferrer">
+                                    <img src="{% static 'logos/prime.jpg' %}" alt="Amazon Prime" class="h-5 w-5 rounded shadow" title="Amazon Prime">
+                                </a>
+                                <a href="https://www.hbo.com" target="_blank" rel="noopener noreferrer">
+                                    <img src="{% static 'logos/hbo.jpg' %}" alt="HBO" class="h-5 w-5 rounded shadow" title="HBO">
+                                </a>
+                            </li>
+                            <li class="text-gray-500 text-xs mt-1 font-medium">
+                                <span>Choose a streaming platform. Prices may vary.</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-                <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 rounded-b-xl">
-                    <ul class="space-y-0">
-                        {% for stream in streams_html %}
-                            {% if stream.movie_id == movie.id %}
-                                <li class="mb-1"></li>
-                                    <a href="{{ stream.stream_url }}" target="_blank" rel="noopener noreferrer"
-                                        class="inline-block bg-orange-600 text-white px-2 py-1 rounded hover:bg-orange-700 transition text-xs font-medium shadow">
-                                         {{ stream.stream_url }} <span class="font-semibold">- ${{ stream.price }}</span>
-                                    </a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                        <li class="flex items-center gap-2 mt-1">
-                            <span class="text-gray-500 text-xs font-medium">Available on:</span>
-                            <a href="https://www.netflix.com" target="_blank" rel="noopener noreferrer">
-                                <img src="{% static 'logos/netflix.jpg' %}" alt="Netflix" class="h-5 w-5 rounded shadow" title="Netflix">
-                            </a>
-                            <a href="https://www.primevideo.com" target="_blank" rel="noopener noreferrer">
-                                <img src="{% static 'logos/prime.jpg' %}" alt="Amazon Prime" class="h-5 w-5 rounded shadow" title="Amazon Prime">
-                            </a>
-                            <a href="https://www.hbo.com" target="_blank" rel="noopener noreferrer">
-                                <img src="{% static 'logos/hbo.jpg' %}" alt="HBO" class="h-5 w-5 rounded shadow" title="HBO">
-                            </a>
-                        </li>
-                        <li class="text-gray-500 text-xs mt-1 font-medium"></li>
-                            <span>Choose a streaming platform to watch this movie online. Prices may vary by provider.</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-
-    <script>
-        // Smooth page transition on link clicks
-        function fadeInBody() {
-            document.body.style.opacity = '0';
-            document.body.style.transition = 'opacity 0.4s';
-            setTimeout(() => {
-                document.body.style.opacity = '1';
-            }, 10);
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            fadeInBody();
-
-            // Fade out on link click
-            const links = document.querySelectorAll('a[href]:not([target="_blank"]):not([href^="#"])');
-            links.forEach(link => {
-                link.addEventListener('click', function (e) {
-                    if (
-                        e.defaultPrevented ||
-                        e.button !== 0 ||
-                        link.hasAttribute('download') ||
-                        link.getAttribute('href').startsWith('mailto:') ||
-                        link.getAttribute('href').startsWith('tel:')
-                    ) return;
-                    e.preventDefault();
-                    document.body.style.opacity = '0';
-                    setTimeout(() => {
-                        window.location = link.href;
-                    }, 400);
-                });
-            });
-            
-            // --- Genre Filter Script ---
-            buildGenreButtons();
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            filterButtons.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    applyFilter(btn.dataset.genre);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                });
-            });
-            applyFilter('all');
-        });
-
-        // Fade in on browser back/forward navigation
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                fadeInBody();
-            }
-        });
-
-        // --- Auth Link Patcher Script ---
-        (function () {
-            function resolveHref(candidates, cb) {
-                var i = 0;
-                function next() {
-                    if (i >= candidates.length) return cb(null);
-                    var url = candidates[i++];
-                    fetch(url, { method: 'HEAD', credentials: 'same-origin' })
-                        .then(function (r) {
-                            if (r.ok || r.status === 301 || r.status === 302 || r.status === 405) cb(url);
-                            else next();
-                        })
-                        .catch(next);
-                }
-                next();
-            }
-
-            function patchAuthLinks() {
-                var isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
-                if (isAuthenticated) return;
-
-                var loginBtn = document.querySelector('.btn.btn-login');
-                var signupBtn = document.querySelector('.btn.btn-signup');
-
-                if (loginBtn) {
-                    resolveHref(
-                        ['/accounts/login/', '/login/', '/user/login/', '/users/login/', '/account/login/', '/admin/login/'],
-                        function (url) {
-                            if (url) loginBtn.setAttribute('href', url);
-                        }
-                    );
-                }
-
-                if (signupBtn && signupBtn.textContent.trim().toLowerCase() === 'sign up') {
-                    resolveHref(
-                        ['/accounts/signup/', '/signup/', '/account/signup/', '/users/signup/', '/register/'],
-                        function (url) {
-                            if (url) signupBtn.setAttribute('href', url);
-                        }
-                    );
-                }
-            }
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', patchAuthLinks);
-            } else {
-                patchAuthLinks();
-            }
-        })();
-        
-        // --- Genre Button Builder & Filter Logic ---
-        function normalize(g) {
-            return (g || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-        }
-        function parseGenres(raw) {
-            if (!raw) return [];
-            return raw.split(',').map(g => g.trim());
-        }
-        function buildGenreButtons() {
-            document.querySelectorAll('.genre-marker').forEach(marker => {
-                const wrap = marker.parentElement;
-                if (!wrap) return;
-                if (wrap.querySelector('button.text-xs')) return;
-
-                const raw = marker.dataset.genre || 'Other';
-                const genres = parseGenres(raw);
-                const list = genres.length ? genres : ['Other'];
-                const added = new Set();
-
-                list.forEach(g => {
-                    const key = normalize(g);
-                    if (added.has(key)) return;
-                    added.add(key);
-
-                    const btn = document.createElement('button');
-                    btn.className = 'bg-gray-500 text-white px-2 py-1 rounded text-xs hover:bg-gray-600';
-                    btn.textContent = g;
-
-                    if (key === 'drama') {
-                        btn.className = 'bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600';
-                        btn.textContent = 'Drama';
-                    } else if (key === 'action') {
-                        btn.className = 'bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600';
-                        btn.textContent = 'Action';
-                    } else if (key === 'sci-fi' || key === 'scifi' || key === 'science-fiction') {
-                        btn.className = 'bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600';
-                        btn.textContent = 'Sci-Fi';
-                    } else if (key === 'other' || !key) {
-                        btn.className = 'bg-gray-500 text-white px-2 py-1 rounded text-xs hover:bg-gray-600';
-                        btn.textContent = 'Other';
-                    }
-
-                    wrap.appendChild(btn);
-                });
-            });
-        }
-
-        function applyFilter(genre) {
-            const target = normalize(genre);
-            document.querySelectorAll('.genre-marker').forEach(marker => {
-                const card = marker.closest('.bg-white');
-                const mList = parseGenres(marker.dataset.genre || 'Other');
-                const show = target === 'all' || mList.some(x => normalize(x) === target);
-                if (card) {
-                    card.classList.toggle('hidden', !show);
-                }
-            });
-            // Highlight active filter button
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                if (normalize(btn.dataset.genre) === target) {
-                    btn.classList.add('ring', 'ring-2', 'ring-indigo-400');
-                } else {
-                    btn.classList.remove('ring', 'ring-2', 'ring-indigo-400');
-                }
-            });
-        }
-    </script>
-
-    <footer class="footer-bottom bg-gray-900 text-white py-6 w-full">
-        <div class="container mx-auto text-center flex flex-col md:flex-row items-center justify-between">
-            <div>
-                <p class="text-sm">&copy; {{ now|date:"Y" }} Emanuel Panait. All rights reserved. | Film Catalog Project</p>
-                <p class="text-xs mt-2">Software Development Academy</p>
-            </div>
-            <div class="mt-4 md:mt-0 flex gap-4 justify-center">
-                <a href="https://github.com/Rayns15" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">GitHub</a>
-                <a href="https://www.linkedin.com/in/emanuel-marian-panait-57b516208" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">LinkedIn</a>
             </div>
         </div>
-    </footer>
-    
-</body>
-</html>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // --- Genre Filter Script ---
+    buildGenreButtons(); // Build buttons inside cards first
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            applyFilter(btn.dataset.genre);
+            // Optional: Scroll to top after filtering
+            // window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+    // Apply 'all' filter initially if needed
+    // applyFilter('all'); // Uncomment if you want 'All' active by default
+
+    // Note: Auth Link Patcher might need adjustment if still needed,
+    // ensure it runs *after* DOM content is loaded if included.
+});
+
+// --- Auth Link Patcher Script (Keep if needed, ensure it runs after DOM ready) ---
+(function () {
+    function resolveHref(candidates, cb) {
+        var i = 0;
+        function next() {
+            if (i >= candidates.length) return cb(null);
+            var url = candidates[i++];
+            fetch(url, { method: 'HEAD', credentials: 'same-origin' })
+                .then(function (r) {
+                    if (r.ok || r.status === 301 || r.status === 302 || r.status === 405) cb(url);
+                    else next();
+                })
+                .catch(next);
+        }
+        next();
+    }
+
+    function patchAuthLinks() {
+        var isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
+        if (isAuthenticated) return; // Don't patch if logged in
+
+        var loginBtn = document.querySelector('a.btn.btn-login[href*="login"]'); // Make selector more specific
+        var signupBtn = document.querySelector('a.btn.btn-signup[href*="signup"]'); // Make selector more specific
+
+        if (loginBtn) {
+            resolveHref(
+                ['/accounts/login/', '/login/', '/user/login/', '/users/login/', '/account/login/', '/admin/login/'],
+                function (url) {
+                    if (url) loginBtn.setAttribute('href', url);
+                }
+            );
+        }
+
+        if (signupBtn) { // Removed check for 'Sign up' text content
+            resolveHref(
+                ['/accounts/signup/', '/signup/', '/account/signup/', '/users/signup/', '/register/'],
+                function (url) {
+                    if (url) signupBtn.setAttribute('href', url);
+                }
+            );
+        }
+    }
+
+    // Ensure this runs after the DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', patchAuthLinks);
+    } else {
+        patchAuthLinks();
+    }
+})();
+
+// --- Genre Button Builder & Filter Logic ---
+function normalize(g) {
+    return (g || '').toLowerCase().replace(/[^a-z0-9\-]/g, '').trim(); // Allow hyphens
+}
+
+function parseGenres(raw) {
+    if (!raw) return [];
+    return raw.split(',').map(g => g.trim());
+}
+
+function getGenreColorClass(genreKey) {
+    switch (genreKey) {
+        case 'drama': return 'bg-blue-500 hover:bg-blue-600';
+        case 'action': return 'bg-red-500 hover:bg-red-600';
+        case 'sci-fi': case 'scifi': case 'sciencefiction': return 'bg-green-500 hover:bg-green-600';
+        case 'comedy': return 'bg-yellow-500 hover:bg-yellow-600';
+        case 'thriller': return 'bg-purple-500 hover:bg-purple-600';
+        case 'horror': return 'bg-pink-500 hover:bg-pink-600';
+        default: return 'bg-gray-500 hover:bg-gray-600';
+    }
+}
+
+function buildGenreButtons() {
+    document.querySelectorAll('.genre-marker').forEach(marker => {
+        const wrap = marker.parentElement; // Should be .genre-buttons-wrap
+        if (!wrap) return;
+
+        // Clear existing buttons if rebuilding
+        wrap.querySelectorAll('button.genre-tag-btn').forEach(btn => btn.remove());
+
+        const raw = marker.dataset.genre || 'Other';
+        const genres = parseGenres(raw);
+        const list = genres.length ? genres : ['Other'];
+        const added = new Set();
+
+        list.forEach(g => {
+            const key = normalize(g);
+            if (!key || added.has(key)) return; // Skip empty or duplicate keys
+            added.add(key);
+
+            const btn = document.createElement('button');
+            const colorClass = getGenreColorClass(key);
+            btn.className = `${colorClass} text-white px-2 py-1 rounded text-xs genre-tag-btn`;
+            btn.textContent = g; // Use original genre name for display
+            btn.dataset.genre = key; // Store normalized key for filtering
+
+            // Add click listener to filter when genre tag inside card is clicked
+             btn.addEventListener('click', function(e) {
+                 e.preventDefault();
+                 applyFilter(btn.dataset.genre);
+                 // Optional: Scroll to top after filtering
+                 // window.scrollTo({ top: 0, behavior: 'smooth' });
+             });
+
+            wrap.appendChild(btn);
+        });
+         marker.remove(); // Remove the original marker span
+    });
+}
+
+
+function applyFilter(genre) {
+    const target = normalize(genre);
+    document.querySelectorAll('.movie-card').forEach(card => { // Target the whole card
+        const marker = card.querySelector('.genre-buttons-wrap'); // Find the button container
+        if (!marker) {
+             card.classList.toggle('hidden', target !== 'all'); // Hide if no genres and not 'all'
+             return;
+        }
+
+        const genreButtons = marker.querySelectorAll('button.genre-tag-btn');
+        const cardGenres = Array.from(genreButtons).map(btn => btn.dataset.genre);
+
+        const show = target === 'all' || cardGenres.some(gKey => gKey === target);
+        card.classList.toggle('hidden', !show);
+    });
+
+    // Highlight active filter button in the main filter bar
+    document.querySelectorAll('#filter-bar .filter-btn').forEach(btn => { // Target only main bar buttons
+        if (normalize(btn.dataset.genre) === target) {
+            btn.classList.add('ring', 'ring-2', 'ring-offset-2', 'ring-indigo-400', 'ring-offset-gray-800');
+        } else {
+            btn.classList.remove('ring', 'ring-2', 'ring-offset-2', 'ring-indigo-400', 'ring-offset-gray-800');
+        }
+    });
+}
+</script>
+{% endblock %}

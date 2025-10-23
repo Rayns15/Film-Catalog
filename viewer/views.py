@@ -303,3 +303,13 @@ def profile_delete_confirm_view(request):
         user.delete()
         return redirect('home')
     return render(request, 'profile_delete_confirm.html')
+
+def movie_add(request):
+    if request.method == 'POST':
+        form = MovieForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('movie-list')
+    else:
+        form = MovieForm()
+    return render(request, 'movie_form.html', {'form': form})
