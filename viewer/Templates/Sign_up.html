@@ -1,232 +1,308 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Sign up</title>
-    <style>
-        :root {
-            --bg1: #1e3c72;
-            --bg2: #2a5298;
-            --card-bg: rgba(255, 255, 255, 0.08);
-            --stroke: rgba(255, 255, 255, 0.25);
-            --text: #ffffff;
-            --muted: rgba(255,255,255,0.75);
-            --accent: #6ee7ff;
-            --accent-2: #a78bfa;
-            --shadow: rgba(0,0,0,0.35);
-        }
+{% extends 'base.html' %}
+{% load static %}
 
-        html, body {
-            height: 100%;
-        }
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-        }
+{% block title %}Sign up{% endblock %} {# Changed title #}
 
-        /* Subtle alignment tweaks for fields */
-        .card .field {
-            gap: 5px;
-        }
-        .card .field label {
-            padding-left: 14px;
-        }
-        .card .field input[type="text"],
-        .card .field input[type="password"] {
-            height: 44px;
-            font-size: 15px;
-        }
+{% block content %}
+<style>
+    /* --- Styles copied and adapted from login.html --- */
+    /* --- Page-Specific Variables --- */
+    :root {
+        --bg1: #1e3c72;
+        --bg2: #2a5298;
+        --card-bg: rgba(255, 255, 255, 0.08);
+        --stroke: rgba(255, 255, 255, 0.25);
+        --text: #ffffff;
+        --muted: rgba(255,255,255,0.75);
+        --accent: #6ee7ff;
+        --accent-2: #a78bfa;
+        --shadow: rgba(0,0,0,0.35);
+        /* Added error/success vars */
+        --error-bg: rgba(255, 72, 72, 0.12);
+        --error-border: rgba(255, 72, 72, 0.35);
+        --error-text: #ffecec;
+        --success-bg: rgba(74, 222, 128, 0.15);
+        --success-border: rgba(74, 222, 128, 0.4);
+        --success-text: #dcfce7;
+    }
 
-        body {
-            margin: 0;
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
-            color: var(--text);
-            display: grid;
-            place-items: center;
-            background-color: #0b1020;
-            background-image: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
-        }
+    /* --- Override base.html body background --- */
+    body {
+        background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%) !important;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+        color: var(--text);
+    }
 
-        .wrap {
-            width: min(92vw, 420px);
-        }
+    /* --- Card Specific Styles --- */
+    .wrap {
+        width: min(92vw, 420px);
+        opacity: 0;
+        animation: fadeInSlideUp 0.6s ease-out 0.1s forwards;
+    }
 
-        .card {
-            background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--stroke);
-            border-radius: 16px;
-            padding: 28px 24px;
-            box-shadow: 0 10px 30px var(--shadow), inset 0 0 0 1px rgba(255,255,255,0.05);
-        }
+    .card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--stroke);
+        border-radius: 16px;
+        padding: 28px 24px;
+        box-shadow: 0 10px 30px var(--shadow), inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
 
-        .title {
-            margin: 0 0 18px;
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: .3px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    .title {
+        margin: 0 0 18px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: .3px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-        .title .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-2));
-            box-shadow: 0 0 18px var(--accent-2);
-        }
+    .title .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-2));
+        box-shadow: 0 0 18px var(--accent-2);
+    }
 
-        .muted {
-            color: var(--muted);
-            font-size: .92rem;
-            margin: 0 0 18px;
-        }
+    .muted {
+        color: var(--muted);
+        font-size: .92rem;
+        margin: 0 0 18px;
+    }
 
-        form {
-            display: grid;
-            gap: 14px;
-        }
+    form {
+        display: grid;
+        gap: 14px; /* Gap between fields */
+    }
 
-        .field {
-            display: grid;
-            gap: 6px;
-        }
+    .field {
+        display: grid;
+        gap: 5px; /* Gap between label and input */
+    }
 
-        label {
-            font-size: .9rem;
-            color: var(--muted);
-        }
+    .field label {
+        font-size: .9rem;
+        color: var(--muted);
+        padding-left: 14px;
+    }
 
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 1px solid var(--stroke);
-            background: rgba(13, 18, 38, 0.35);
-            color: var(--text);
-            outline: none;
-            transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
-        }
-        input::placeholder {
-            color: rgba(255,255,255,0.5);
-        }
-        input:focus {
-            border-color: var(--accent-2);
-            box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.25);
-            background: rgba(13, 18, 38, 0.5);
-        }
+    /* Unified input styles for text, password, email */
+    .field input[type="text"],
+    .field input[type="password"],
+    .field input[type="email"] {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--stroke);
+        background: rgba(13, 18, 38, 0.35);
+        color: var(--text);
+        outline: none;
+        transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+        height: 44px;
+        font-size: 15px;
+    }
+    .field input::placeholder {
+        color: rgba(255,255,255,0.5);
+    }
+    .field input:focus {
+        border-color: var(--accent-2);
+        box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.25);
+        background: rgba(13, 18, 38, 0.5);
+    }
+     /* Style for Django form field errors */
+    .field .errorlist {
+         list-style: none;
+         padding: 5px 0 0 14px;
+         margin: 0;
+         font-size: 0.8rem;
+         color: var(--error-text);
+    }
+     .field .errorlist li {
+         margin: 0; padding: 0; background: none; border: none; color: inherit;
+     }
 
-        .row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            margin-top: 4px;
-        }
+    .link {
+        color: var(--accent);
+        text-decoration: none;
+        font-size: .9rem;
+        transition: color 0.2s ease-in-out;
+    }
+    .link:hover {
+        text-decoration: underline;
+        color: var(--text);
+    }
 
-        .link {
-            color: var(--accent);
-            text-decoration: none;
-            font-size: .9rem;
-        }
-        .link:hover {
-            text-decoration: underline;
-        }
+    /* Scoped button style */
+    .card button[type="submit"] {
+        appearance: none; border: none; cursor: pointer; border-radius: 12px;
+        padding: 12px 16px; font-weight: 700; color: #0b1020;
+        background: linear-gradient(135deg, #6ee7ff, #a78bfa);
+        box-shadow: 0 8px 20px rgba(167, 139, 250, 0.35);
+        transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+         margin-top: 4px; /* Added margin */
+    }
+    .card button[type="submit"]:hover {
+        filter: brightness(1.03);
+        box-shadow: 0 10px 26px rgba(167, 139, 250, 0.45);
+    }
+    .card button[type="submit"]:active {
+        transform: translateY(1px);
+    }
 
-        button[type="submit"] {
-            appearance: none;
-            border: none;
-            cursor: pointer;
-            border-radius: 12px;
-            padding: 12px 16px;
-            font-weight: 700;
-            color: #0b1020;
-            background: linear-gradient(135deg, #6ee7ff, #a78bfa);
-            box-shadow: 0 8px 20px rgba(167, 139, 250, 0.35);
-            transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
-        }
-        button[type="submit"]:hover {
-            filter: brightness(1.03);
-            box-shadow: 0 10px 26px rgba(167, 139, 250, 0.45);
-        }
-        button[type="submit"]:active {
-            transform: translateY(1px);
-        }
+    .footer-links {
+        display: flex; justify-content: center; gap: 16px;
+        margin-top: 14px; font-size: .9rem;
+    }
 
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-top: 14px;
-            font-size: .9rem;
-        }
+    /* General Message / Non-field error styling */
+    .messages, .non-field-errors {
+        margin: 0 0 15px; padding: 0; list-style: none;
+    }
+    .messages li, .non-field-errors li {
+        background: var(--error-bg); border: 1px solid var(--error-border);
+        color: var(--error-text); padding: 10px 12px; border-radius: 10px;
+        font-size: .9rem; margin-bottom: 5px;
+    }
+     .messages li:last-child, .non-field-errors li:last-child { margin-bottom: 0; }
+    .messages li.success {
+         background: var(--success-bg); border-color: var(--success-border); color: var(--success-text);
+    }
 
-        .messages {
-            margin: 0 0 10px;
-            padding: 0;
-            list-style: none;
-        }
-        .messages li {
-            background: rgba(255, 72, 72, 0.12);
-            border: 1px solid rgba(255, 72, 72, 0.35);
-            color: #ffecec;
-            padding: 10px 12px;
-            border-radius: 10px;
-            font-size: .9rem;
-        }
-    </style>
-</head>
-<body>
+    /* Keyframes for page load animation */
+    @keyframes fadeInSlideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<main role="main" class="grid place-items-center p-4" style="min-height: calc(100vh - 192px);">
     <div class="wrap">
         <div class="card">
             <h1 class="title"><span class="dot" aria-hidden="true"></span>Sign up</h1>
-            <p class="muted">Create an account to access the app. After registration, you can log in with your credentials.</p>
+            <p class="muted">Create an account to access the app.</p>
 
+            {# Display messages #}
             {% if messages %}
             <ul class="messages">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
+                {% for message in messages %} <li class="{{ message.tags }}">{{ message }}</li> {% endfor %}
             </ul>
             {% endif %}
 
-            <!-- Adjust the URL name to your signup view -->
+            {# Display non-field errors #}
+            {% if form.non_field_errors %}
+            <ul class="non-field-errors">
+                {% for error in form.non_field_errors %} <li>{{ error }}</li> {% endfor %}
+            </ul>
+            {% endif %}
+
             <form method="post" action="{% url 'signup' %}">
                 {% csrf_token %}
 
                 <div class="field">
-                    <label for="id_username">Username</label>
-                    <input id="id_username" name="username" type="text" autocomplete="username" placeholder="Pick a unique username" required>
+                    <label for="{{ form.username.id_for_label }}">Username</label>
+                    {{ form.username }}
+                    {{ form.username.errors }}
                 </div>
 
                 <div class="field">
-                    <label for="id_first_name">First name</label>
-                    <input id="id_first_name" name="first_name" type="text" autocomplete="given-name" placeholder="Your first name" required>
+                     <label for="{{ form.email.id_for_label }}">Email</label>
+                     {{ form.email }}
+                     {{ form.email.errors }}
                 </div>
 
                 <div class="field">
-                    <label for="id_last_name">Last name</label>
-                    <input id="id_last_name" name="last_name" type="text" autocomplete="family-name" placeholder="Your last name" required>
+                    <label for="{{ form.first_name.id_for_label }}">First name</label>
+                    {{ form.first_name }}
+                    {{ form.first_name.errors }}
                 </div>
 
                 <div class="field">
-                    <label for="id_password">Password</label>
-                    <input id="id_password" name="password" type="password" autocomplete="new-password" placeholder="Create a strong password" required>
+                    <label for="{{ form.last_name.id_for_label }}">Last name</label>
+                    {{ form.last_name }}
+                    {{ form.last_name.errors }}
                 </div>
+
+                <div class="field">
+                    <label for="{{ form.password1.id_for_label }}">Password</label>
+                    {{ form.password1 }}
+                    {{ form.password1.errors }}
+                </div>
+
+                 <div class="field">
+                     <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+                     {{ form.password2 }}
+                     {{ form.password2.errors }}
+                 </div>
 
                 <button type="submit">Create account</button>
             </form>
 
             <div class="footer-links">
                 <a class="link" href="{% url 'login' %}">Already have an account? Sign in</a>
-                <a class="link" href="{% url 'admin:index' %}">Go to Admin</a>
+                <a class="link" href="{% url 'home' %}">Return Home</a>
             </div>
         </div>
     </div>
-</body>
-</html>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // base.html handles <a> tag transitions, but we need one for form submit.
+    const signupForm = document.querySelector('.card form'); // Target signup form
+
+    if (signupForm) {
+        signupForm.addEventListener('submit', function(e) {
+            // Check browser's built-in validation first
+            if (!signupForm.checkValidity()) {
+                return; // Let browser validation handle it
+            }
+            e.preventDefault(); // Stop the form from submitting instantly
+            if (document.body) { document.body.classList.add('fade-out'); }
+            setTimeout(() => { signupForm.submit(); }, 400); // Wait for fade
+        });
+    }
+
+    // --- Apply placeholders and attributes via JS ---
+    const usernameInput = document.getElementById('id_username');
+    if (usernameInput) {
+        usernameInput.placeholder = 'Pick a unique username';
+        usernameInput.autocomplete = 'username';
+        usernameInput.required = true;
+    }
+    const emailInput = document.getElementById('id_email');
+    if (emailInput) {
+         emailInput.placeholder = 'Enter your email address';
+         emailInput.autocomplete = 'email';
+         emailInput.type = 'email';
+         emailInput.required = true;
+    }
+    const firstNameInput = document.getElementById('id_first_name');
+    if (firstNameInput) {
+        firstNameInput.placeholder = 'Your first name (Optional)';
+        firstNameInput.autocomplete = 'given-name';
+    }
+    const lastNameInput = document.getElementById('id_last_name');
+    if (lastNameInput) {
+        lastNameInput.placeholder = 'Your last name (Optional)';
+        lastNameInput.autocomplete = 'family-name';
+    }
+    const passwordInput1 = document.getElementById('id_password1');
+    if (passwordInput1) {
+        passwordInput1.placeholder = 'Create a strong password';
+        passwordInput1.autocomplete = 'new-password';
+        passwordInput1.required = true;
+    }
+    const passwordInput2 = document.getElementById('id_password2');
+    if (passwordInput2) {
+        passwordInput2.placeholder = 'Confirm your password';
+        passwordInput2.autocomplete = 'new-password';
+        passwordInput2.required = true;
+    }
+});
+</script>
+{% endblock %}

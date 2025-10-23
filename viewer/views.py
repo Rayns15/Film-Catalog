@@ -7,10 +7,12 @@ from django.db.models import Model, IntegerField, CharField
 from django.views import View
 from django.shortcuts import render, redirect
 from django import forms
-from viewer.forms import RegisterForm, ProfileForm
 from django.contrib.auth import login, authenticate
 import datetime
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm # Or your custom SignupForm
+from django.contrib import messages
+from .forms import CustomSignupForm, ProfileForm, RegisterForm
 
 # Create your views here.
 
@@ -185,15 +187,24 @@ def login_view(request):
 
 def signup_view(request):
     if request.method == 'POST':
-        form = SignupForm(request.POST)
+        # 2. Use CustomSignupForm for POST data
+        form = CustomSignupForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            # Here you would typically create the user
-            return HttpResponse(f"User {username} signed up successfully")
+            user = form.save()
+            messages.success(request, f"User {user.username} signed up successfully!")
+            # Redirect to login page after successful signup
+            return redirect('login')
+        else:
+            # If form is invalid, errors will be shown on the template
+            messages.error(request, "Please correct the errors below.")
+            # No need to explicitly render here, it falls through
     else:
-        form = SignupForm()
-    return render(request, 'Sign_up.html', {'form': form})
+        # 2. Use CustomSignupForm for GET requests (blank form)
+        form = CustomSignupForm()
+
+    # Render the signup page with the form (either blank or with errors)
+    # Make sure 'Sign_up.html' matches your actual template filename
+    return render(request, 'sign_up.html', {'form': form})
 
 def logout_view(request):
     # Here you would typically log out the user
@@ -202,6 +213,7 @@ def logout_view(request):
 class SignupForm(forms.Form):
     username = forms.CharField(max_length=100)
     password = forms.CharField(widget=forms.PasswordInput)
+
 def signup(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
@@ -212,15 +224,15 @@ def signup(request):
             return HttpResponse(f"User {username} signed up successfully")
     else:
         form = SignupForm()
-    return render(request, 'Sign_up.html', {'form': form})
+    return render(request, 'sign_up.html', {'form': form})
 
 def movie_search(request):
     query = request.GET.get('q', '')
     movies = Movie.objects.filter(Title__icontains=query)
-    streams = Stream.objects.all()
+    #streams = Stream.objects.all()
     return render(request, 'home.html', {
         'movies_html': movies,
-        'streams_html': streams,
+        #'streams_html': streams,
         'user': request.user,
         'year': datetime.datetime.now().year,
     })
@@ -313,3 +325,66 @@ def movie_add(request):
     else:
         form = MovieForm()
     return render(request, 'movie_form.html', {'form': form})
+
+def CustomSignupView(request):
+    if request.method == 'POST':
+        form = CustomSignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = CustomSignupForm()
+    return render(request, 'sign_up.html', {'form': form})
+
+def register_view(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return HttpResponse("Registration successful")
+    else:
+        form = RegisterForm()
+    return render(request, 'register.html', {'form': form})
+
+@login_required
+def profile_view(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            # Process the form data
+            return HttpResponse("Profile updated successfully")
+    else:
+        form = ProfileForm()
+    return render(request, 'profile.html', {'form': form})
+
+@login_required
+def profile_edit_view(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            # Process the form data
+            return HttpResponse("Profile updated successfully")
+    else:
+        form = ProfileForm()
+    return render(request, 'profile_edit.html', {'form': form})
+
+@login_required
+def profile_delete_view(request):
+    if request.method == 'POST':
+        # Here you would typically delete the user's profile
+        return HttpResponse("Profile deleted successfully")
+    return render(request, 'profile_delete.html')
+
+@login_required
+def profile_edit(request):
+    user = request.user
+    if request.method == 'POST':
+        user.username = request.POST.get('username', user.username)
+        user.email = request.POST.get('email', user.email)
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.save()
+        return redirect('profile')
+    return render(request, 'profile_edit.html', {'user': user})
