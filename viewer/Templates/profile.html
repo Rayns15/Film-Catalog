@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Page-Specific Variables --- */
+    :root {
+        --bg1: #1e3c72;
+        --bg2: #2a5298;
+        --card-bg: rgba(255, 255, 255, 0.08);
+        --stroke: rgba(255, 255, 255, 0.25);
+        --text: #ffffff;
+        --muted: rgba(255,255,255,0.75);
+        --accent: #6ee7ff;
+        --accent-2: #a78bfa;
+        --shadow: rgba(0,0,0,0.35);
+    }
+
+    /* --- Override base.html body background --- */
+/* --- From profile.html --- */
+    body {
+        background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%) !important;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif; /* <-- THIS OVERRIDES 'Inter' */
+        color: var(--text);
+    }
+
+    /* --- Profile Card Specific Styles --- */
+    .wrap {
+        width: min(92vw, 420px);
+    }
+
+    .card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--stroke);
+        border-radius: 16px;
+        padding: 28px 24px;
+        box-shadow: 0 10px 30px var(--shadow), inset 0 0 0 1px rgba(255,255,255,0.05);
+        font-family: system-ui,
+         /* ... rest of font stack ... */;
+    }
+
+    .title {
+        margin: 0 0 24px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: .3px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .title .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-2));
+        box-shadow: 0 0 18px var(--accent-2);
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 24px;
+        display: block;
+        border: 2px solid var(--stroke);
+        box-shadow: 0 4px 10px var(--shadow);
+    }
+    
+    .profile-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.95rem;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--stroke);
+    }
+    .profile-info:last-of-type {
+        border-bottom: none;
+    }
+    
+    .profile-label {
+        font-weight: 600;
+        color: var(--muted);
+    }
+
+    .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 24px;
+        font-size: .9rem;
+        border-top: 1px solid var(--stroke);
+        padding-top: 20px;
+    }
+
+    .link {
+        color: var(--accent);
+        text-decoration: none;
+        font-size: .9rem;
+    }
+    .link:hover {
+        text-decoration: underline;
+    }
+
+</style>
+
+<main role="main" class="grid place-items-center p-4" style="min-height: calc(100vh - 192px);">
+
+    <div class="wrap">
+        <div class="card">
+            
+            <h1 class="title"><span class="dot" aria-hidden="true"></span>User Profile</h1>
+
+            {% if user.profile.avatar %}
+                <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="profile-avatar">
+            {% else %}
+                <img src="https://ui-avatars.com/api/?name={{ user.username|default:'U'|slice:':1' }}&background=a78bfa&color=fff&size=100&bold=true&rounded=true" alt="Avatar" class="profile-avatar">
+            {% endif %}
+            
+            <div class="profile-info">
+                <span class="profile-label">Username:</span>
+                <span>{{ user.username }}</span>
+            </div>
+            
+            <div class="profile-info">
+                <span class="profile-label">Email:</span>
+                <span>{{ user.email }}</span>
+            </div>
+            
+            {% if user.first_name or user.last_name %}
+            <div class="profile-info">
+                <span class="profile-label">Name:</span>
+                <span>{{ user.first_name }} {{ user.last_name }}</span>
+            </div>
+            {% endif %}
+            
+            <div class="footer-links">
+                <a class="link" href="{% url 'profile_edit' %}">Edit Profile</a>
+                <a class="link" href="{% url 'logout' %}">Logout</a>
+            </div>
+
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+
+{% block scripts %}
+{% endblock %}

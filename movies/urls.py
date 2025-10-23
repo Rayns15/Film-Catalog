@@ -6,8 +6,8 @@ from viewer import views as viewer_views
 from viewer.views import movie_details_view, movie_id_view, movie_detail
 from viewer.views import (
     MovieCreateView, MovieListView, MovieUpdateView, MovieDeleteView,
-    base_view, inception_view, movie1_details, search, TheGodfatherView, 
-    movie_details_view, MovieDetailView, view_details, movie_details, movie_search)  # Ensure all necessary views are imported
+    base_view, inception_view, movie1_details, search, TheGodfatherView,
+    movie_details_view, MovieDetailView, view_details, movie_details, movie_search, profile_view, profile_edit_view, profile_delete_view, profile_edit)  # Ensure all necessary views are imported
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('home/', viewer_views.afiseaza_home_page, name='home_page'),
@@ -37,6 +37,12 @@ urlpatterns = [
     path('search/', search, name='movie_search'),  # Make sure your view matches this signature
     #path('search/', views.search, name='movie_search'),  # Make sure your view matches this signature
     path('contact/', TemplateView.as_view(template_name='contact.html'), name='contact'),
+    path('register/', viewer_views.register_view, name='register'),
+    path('profile/', profile_view, name='profile'),
+    #path('profile/edit/', viewer_views.profile_edit_view, name='profile_edit'),  # Edit profile view
+    path('profile/delete/', viewer_views.profile_delete_view, name='profile_delete'),  # Delete profile view
+    path("profile/delete/confirm/", viewer_views.profile_delete_confirm_view, name="profile_delete_confirm"),
+    path('profile/edit/', profile_edit, name='profile_edit'),  # Edit profile view
 ]
 
 

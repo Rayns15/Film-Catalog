@@ -5,8 +5,13 @@ from django.urls import reverse_lazy, reverse
 from viewer.models import Movie
 from django.db.models import Model, IntegerField, CharField
 from django.views import View
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django import forms
+from viewer.forms import RegisterForm, ProfileForm
+from django.contrib.auth import login, authenticate
+import datetime
+from django.contrib.auth.decorators import login_required
+
 # Create your views here.
 
 def base_view(request):
@@ -241,3 +246,60 @@ def movie_detail(request, pk):
     except Movie.DoesNotExist:
         return HttpResponse("Movie not found", status=404)
     
+def register_view(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return HttpResponse("Registration successful")
+    else:
+        form = RegisterForm()
+    return render(request, 'register.html', {'form': form})
+
+def profile_view(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            # Process the form data
+            return HttpResponse("Profile updated successfully")
+    else:
+        form = ProfileForm()
+    return render(request, 'profile.html', {'form': form})
+
+def profile_edit_view(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            # Process the form data
+            return HttpResponse("Profile updated successfully")
+    else:
+        form = ProfileForm()
+    return render(request, 'profile_edit.html', {'form': form})
+
+def profile_delete_view(request):
+    if request.method == 'POST':
+        # Here you would typically delete the user's profile
+        return HttpResponse("Profile deleted successfully")
+    return render(request, 'profile_delete.html')
+
+@login_required
+
+@login_required
+def profile_edit(request):
+    user = request.user
+    if request.method == 'POST':
+        user.username = request.POST.get('username', user.username)
+        user.email = request.POST.get('email', user.email)
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.save()
+        return redirect('profile')
+    return render(request, 'profile_edit.html', {'user': user})
+
+def profile_delete_confirm_view(request):
+    if request.method == 'POST':
+        user = request.user
+        user.delete()
+        return redirect('home')
+    return render(request, 'profile_delete_confirm.html')
