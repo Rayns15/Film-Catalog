@@ -126,9 +126,13 @@
     <header class="app-header" role="banner">
         <div class="container flex flex-col md:flex-row items-center justify-between">
             <div class="flex items-center mb-2 md:mb-0">
-                <a class="brand" href="http://127.0.0.1:8000/home/" aria-label="Film Catalog home"></a>
-                <span class="brand-badge ml-2" aria-hidden="true">FC</span>
-                <span class="ml-2">Film Catalog</span>
+                {# --- MODIFIED: Content moved inside the link --- #}
+                <a class="brand flex items-center gap-2" href="{% url 'home' %}" aria-label="Film Catalog home">
+                    {# Maybe add an actual logo image here if .brand doesn't provide one via CSS #}
+                    <span class="brand-badge" aria-hidden="true">FC</span>
+                    <span class="">Film Catalog</span>
+                </a>
+                {# --- END MODIFICATION --- #}
                 <p class="tagline hidden sm:inline-block ml-2 text-white/90">Python Development</p>
             </div>
             <div class="flex-1"></div>

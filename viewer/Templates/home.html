@@ -60,31 +60,49 @@
     {% for movie in movies_html %}
         <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-full transform hover:scale-105 transition-transform duration-300 ease-in-out movie-card">
             {# --- Card Section 1: Top Info --- #}
-            <div class="p-6 min-h-[180px]"> 
-                {# Show update/delete links only if user is authenticated #}
-                {% if user.is_authenticated %}
-                    <div class="flex justify-end gap-2 mb-2">
-                        <a href="{% url 'movie-update' movie.pk %}" title="Update Movie">
-                            <img src="{% static 'logos/pencil.jpg' %}" alt="Update Movie" class="h-6 w-auto rounded shadow hover:opacity-90 transition" />
-                        </a>
-                        <a href="{% url 'movie-delete' movie.pk %}" title="Delete Movie">
-                            <img src="{% static 'logos/delete.jpg' %}" alt="Delete Movie" class="h-6 w-auto rounded shadow hover:opacity-90 transition" />
-                        </a>
+            {# --- Card Section 1: Top Info (Minimum Height & Internal Flex) --- #}
+            {# REVERTED to min-h, kept flex flex-col. Adjust 180px if needed. #}
+            <div class="p-6 min-h-[180px] flex flex-col">
+
+                {# Top part: Edit/Delete, Title, Genres (This part grows) #}
+                <div class="flex-grow">
+                    {% if user.is_authenticated %}
+                        <div class="flex justify-end gap-2 mb-2">
+                             <a href="{% url 'movie-update' movie.pk %}" title="Update Movie">
+                                <img src="{% static 'logos/pencil.jpg' %}" alt="Update Movie" class="h-6 w-auto rounded shadow hover:opacity-90 transition" />
+                             </a>
+                             <a href="{% url 'movie-delete' movie.pk %}" title="Delete Movie">
+                                <img src="{% static 'logos/delete.jpg' %}" alt="Delete Movie" class="h-6 w-auto rounded shadow hover:opacity-90 transition" />
+                             </a>
+                        </div>
+                     {% else %}
+                          {# Placeholder space to maintain alignment when not logged in #}
+                          <div class="h-6 mb-2"></div>
+                    {% endif %}
+
+                    {# Title - Still clamped #}
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2 line-clamp-2">{{ movie.Title }}</h2>
+
+                    {# Genre Buttons Wrapper - REMOVED fixed height, allows natural wrapping #}
+                    <div class="flex flex-wrap gap-1 my-2 genre-buttons-wrap">
+                        <span
+                            class="genre-marker"
+                            data-genre="{% if movie.genres_list %}{{ movie.genres_list|join:', ' }}{% elif movie.genre_movie %}{{ movie.genre_movie }}{% elif movie.genre %}{{ movie.genre }}{% elif movie.gender %}{{ movie.gender }}{% else %}Other{% endif %}">
+                        </span>
+                        {# Buttons added by JS #}
                     </div>
-                {% endif %}
-                <h2 class="text-2xl font-bold text-gray-800 mb-2 line-clamp-2">{{ movie.Title }}</h2>
-                <div class="flex flex-wrap gap-1 my-2 genre-buttons-wrap min-h-[30px]">
-                    <span
-                        class="genre-marker"
-                        data-genre="{% if movie.genres_list %}{{ movie.genres_list|join:', ' }}{% elif movie.genre_movie %}{{ movie.genre_movie }}{% elif movie.genre %}{{ movie.genre }}{% elif movie.gender %}{{ movie.gender }}{% else %}Other{% endif %}">
-                    </span>
                 </div>
-                <p class="text-gray-600 text-sm mt-2">
-                    Directed by <span class="font-semibold">{{ movie.director }}</span>
-                </p>
-                <p class="text-gray-500 text-sm">
-                    Released in <span class="font-semibold">{{ movie.Year }}</span>
-                </p>
+
+                {# Bottom part: Director/Year (Pushed down by flex-grow above) #}
+                {# ADDED mt-auto HERE to push this block down #}
+                <div class="mt-auto pt-2"> 
+                    <p class="text-gray-600 text-sm">
+                        Directed by <span class="font-semibold">{{ movie.director }}</span>
+                    </p>
+                    <p class="text-gray-500 text-sm">
+                        Released in <span class="font-semibold">{{ movie.Year }}</span>
+                    </p>
+                </div>
             </div>
 
             {# --- Card Section 2: Middle Content + Image --- #}
