@@ -22,7 +22,16 @@ def base_view(request):
 def search(request):
     query = request.GET.get('q', '')
     movies = Movie.objects.filter(Title__icontains=query)
-    return render(request, 'home.html', {'movies_html': movies})
+    
+    # Check if the search returned any movies
+    no_results = not movies.exists() if query else False # Only show if a query was made
+
+    context = {
+        'movies_html': movies,
+        'query': query, # Pass the query back to display it
+        'no_results': no_results # Add the flag to the context
+    }
+    return render(request, 'home.html', context)
     
 # nume.com/hello_regex?"nume='Andrei":
 #     return HttpResponse(request):
