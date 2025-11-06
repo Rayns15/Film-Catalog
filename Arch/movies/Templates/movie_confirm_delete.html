@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confirm Delete: {{ movie.Title }}</title>
+    <style>
+        :root {
+            --bg: #f6f7fb;
+            --text: #0f172a;
+            --muted: #475569;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --danger: #dc2626;
+            --danger-600: #b91c1c;
+            --danger-50: #fef2f2;
+            --secondary: #334155;
+            --secondary-600: #1f2937;
+            --focus: 2px solid #3b82f6;
+            --shadow: 0 10px 25px rgba(2, 6, 23, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            margin: 0;
+            color: var(--text);
+            background: radial-gradient(1200px 800px at 80% -20%, #eef2ff 0, rgba(238,242,255,0) 60%), 
+                        linear-gradient(120deg, #fef2f2 0%, #f6f7fb 100%),
+                        var(--bg);
+            font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            /* Add transition for the fade-out effect */
+            transition: opacity 0.4s ease-out;
+        }
+
+        /* A class to trigger the fade-out on the body */
+        body.fade-out {
+            opacity: 0;
+        }
+
+        .container {
+            min-height: 100dvh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 560px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            /* Add transitions for opacity and a slight scale effect */
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+
+        .card-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, #fff 0%, #fff 70%, #f9fafb 100%);
+        }
+
+        .warn {
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: var(--danger-50);
+            color: var(--danger);
+            border: 1px solid #fecaca;
+            flex: none;
+        }
+        .warn svg { width: 22px; height: 22px; }
+
+        h1 {
+            margin: 0;
+            font-size: 20px;
+            line-height: 1.2;
+        }
+
+        .card-body {
+            padding: 20px 22px;
+        }
+
+        .lead {
+            margin: 0 0 12px 0;
+            color: var(--muted);
+        }
+
+        .details {
+            margin: 12px 0 0 0;
+            padding: 12px;
+            background: #f8fafc;
+            border: 1px dashed #e2e8f0;
+            border-radius: 10px;
+        }
+        .details dl {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 6px 12px;
+            margin: 0;
+        }
+        .details dt {
+            color: #64748b;
+            font-weight: 600;
+        }
+        .details dd {
+            margin: 0;
+            color: #0f172a;
+            overflow-wrap: anywhere;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .btn {
+            appearance: none;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.02s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+            user-select: none;
+        }
+        .btn:active { transform: translateY(1px); }
+        .btn:focus-visible { outline: var(--focus); outline-offset: 2px; }
+
+        .btn-danger {
+            color: #fff;
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+        .btn-danger:hover { background: var(--danger-600); border-color: var(--danger-600); }
+
+        .btn-secondary {
+            color: var(--secondary);
+            background: #fff;
+            border-color: #cbd5e1;
+        }
+        .btn-secondary:hover {
+            color: #111827;
+            border-color: #94a3b8;
+            background: #f8fafc;
+        }
+
+        .card-foot {
+            padding: 14px 22px;
+            border-top: 1px solid var(--border);
+            color: #64748b;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 520px) {
+            .details dl { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <section class="card" role="dialog" aria-labelledby="dialog-title" aria-describedby="dialog-desc">
+            <header class="card-head">
+                <div class="warn" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    </svg>
+                </div>
+                <h1 id="dialog-title">Confirm delete</h1>
+            </header>
+
+            <div class="card-body">
+                <p id="dialog-desc" class="lead">
+                    Are you sure you want to permanently delete this movie? This action cannot be undone.
+                </p>
+
+                <div class="details" aria-live="polite">
+                    <dl>
+                        <dt>Title</dt>
+                        <dd>{{ movie.Title }}</dd>
+                    </dl>
+                </div>
+
+                <form method="post" action="" id="delete-form">
+                    {% csrf_token %}
+                    <div class="actions">
+                        <button type="submit" class="btn btn-danger" aria-label="Confirm delete">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" d="M3 6h18"/>
+                                <path stroke-linecap="round" d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                <path d="M10 11v6M14 11v6"/>
+                            </svg>
+                            Delete movie
+                        </button>
+                        
+                        <a href="http://127.0.0.1:8000/home/" class="btn btn-secondary js-smooth-exit" role="button" aria-label="Cancel and go back">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <footer class="card-foot">
+                <span>Review details carefully before confirming.</span>
+                <a href="javascript:history.back()" class="btn btn-secondary js-smooth-back" style="padding:6px 10px;">Go back</a>
+            </footer>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.querySelector('.card');
+            const body = document.body;
+            const deleteForm = document.getElementById('delete-form');
+            // Select all links that should have a smooth exit
+            const exitLinks = document.querySelectorAll('.js-smooth-exit, .js-smooth-back');
+
+            /**
+             * Reusable function to play the exit animation and then execute a callback.
+             * @param {function} actionCallback - The function to run after the animation (e.g., form submission or navigation).
+             */
+            function performSmoothExit(actionCallback) {
+                if (card) {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                }
+                
+                setTimeout(() => {
+                    body.classList.add('fade-out');
+                    setTimeout(actionCallback, 400); // Wait for body fade-out, then execute action
+                }, 200); // Wait for card fade-out to start
+            }
+
+            // --- Handler for the "Delete" form submission ---
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', (e) => {
+                    e.preventDefault(); // Stop the form from submitting immediately
+                    performSmoothExit(() => {
+                        deleteForm.submit(); // Submit form after animation
+                    });
+                });
+            }
+
+            // --- Handler for "Cancel" and "Go back" links ---
+            exitLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const isBackLink = link.classList.contains('js-smooth-back');
+                    const targetUrl = link.href;
+
+                    performSmoothExit(() => {
+                        if (isBackLink) {
+                            history.back();
+                        } else {
+                            window.location.href = targetUrl;
+                        }
+                    });
+                });
+            });
+
+            // --- Handler for Browser Back/Forward functionality ---
+            // This adds a fade-out effect as the page unloads.
+            window.addEventListener('beforeunload', () => {
+                body.classList.add('fade-out');
+            });
+        });
+    </script>
+</body>
+</html>

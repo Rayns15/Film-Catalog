@@ -1,8 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy, reverse
-from viewer.models import Movie
+from viewer.models import Movie, Showtime
 from django.db.models import Model, IntegerField, CharField
 from django.views import View
 from django.shortcuts import render, redirect
@@ -12,8 +12,10 @@ import datetime
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm # Or your custom SignupForm
 from django.contrib import messages
-from .forms import CustomSignupForm, ProfileForm, RegisterForm
-
+from .forms import CustomSignupForm, ProfileForm, RegisterForm, CinemaForm
+from django.db.models import Prefetch
+from django.utils import timezone
+from .models import Cinema, Showtime, Movie
 # Create your views here.
 
 def base_view(request):
@@ -75,7 +77,7 @@ def afiseaza_home_page(request):
 # Build a reusable ModelForm that includes the genre field if present on the Movie model
 _MOVIE_FIELD_NAMES = {f.name for f in Movie._meta.get_fields()}
 _GENRE_FIELD = 'genre_movie' if 'genre_movie' in _MOVIE_FIELD_NAMES else ('genre' if 'genre' in _MOVIE_FIELD_NAMES else None)
-_BASE_FIELDS = ['Title', 'director', 'Year', 'cinema_price']
+_BASE_FIELDS = ['title', 'director', 'year', 'rating', 'genre_movie', 'bio', 'profile_picture', 'cinema_price'] # <-- Fixed
 _FORM_FIELDS = _BASE_FIELDS + ([_GENRE_FIELD] if _GENRE_FIELD else [])
 
 class MovieForm(forms.ModelForm):
@@ -397,3 +399,72 @@ def profile_edit(request):
         user.save()
         return redirect('profile')
     return render(request, 'profile_edit.html', {'user': user})
+
+def movie_create(request):
+    if request.method == 'POST':
+        form = MovieForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('movie-list')
+    else:
+        form = MovieForm()
+    return render(request, 'movie_form.html', {'form': form})
+
+def cinema_prices_view(request, pk):
+    """
+    Shows prices for all cinemas AND upcoming showtimes for
+    the movie specified by 'movie_id'.
+    """
+    
+    # 1. Get the specific movie we want to see
+    movie = get_object_or_404(Movie, pk=pk)
+    
+    # 2. Get the current time
+    now = timezone.now()
+
+    # 3. Create a Prefetch object to get ONLY upcoming showtimes for this movie.
+    #    This is how we'll get the list of times for each cinema.
+    showtimes_for_this_movie = Prefetch(
+        'cinema_showtimes',
+        # We filter for the movie AND for showtimes that are in the future
+        queryset=Showtime.objects.filter(
+            movie_id=movie.id,
+            show_time__gte=now  # 'gte' means "greater than or equal to"
+        ).order_by('show_time'),
+        to_attr='filtered_showtimes' # The template will access this
+    )
+
+    # 4. Get ONLY the cinemas that have upcoming showtimes for this movie.
+    #    This is the main fix. We no longer fetch cinemas that aren't playing the movie.
+    relevant_cinemas = Cinema.objects.filter(
+        cinema_showtimes__movie_id=movie.id,
+        cinema_showtimes__show_time__gte=now
+    ).distinct().prefetch_related(showtimes_for_this_movie)
+    
+    # 5. Get all other cinemas that DON'T have showtimes, just for price comparison
+    other_cinemas = Cinema.objects.exclude(
+        id__in=relevant_cinemas.values_list('id', flat=True)
+    )
+
+    context = {
+        'cinemas_with_showtimes': relevant_cinemas, # Cinemas *with* showtimes
+        'other_cinemas': other_cinemas,           # Cinemas *without* showtimes
+        'movie': movie                            # The specific movie
+    }
+    return render(request, 'cinema_prices.html', context)
+    
+def cinema_prices_update_view(request, pk):
+    """
+    View to update cinema prices for a specific cinema.
+    """
+    cinema = get_object_or_404(Cinema, pk=pk)
+    
+    if request.method == 'POST':
+        form = CinemaForm(request.POST, instance=cinema)
+        if form.is_valid():
+            form.save()
+            return redirect('cinema_prices', pk=pk)  # Redirect to the cinema prices view
+    else:
+        form = CinemaForm(instance=cinema)
+    
+    return render(request, 'cinema_prices_update.html', {'form': form, 'cinema': cinema})

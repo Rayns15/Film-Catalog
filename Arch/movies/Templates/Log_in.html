@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Log in{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Page-Specific Variables --- */
+    :root {
+        --bg1: #1e3c72;
+        --bg2: #2a5298;
+        --card-bg: rgba(255, 255, 255, 0.08);
+        --stroke: rgba(255, 255, 255, 0.25);
+        --text: #ffffff;
+        --muted: rgba(255,255,255,0.75);
+        --accent: #6ee7ff;
+        --accent-2: #a78bfa;
+        --shadow: rgba(0,0,0,0.35);
+    }
+
+    /* --- Override base.html body background --- */
+    body {
+        background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%) !important;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+        color: var(--text);
+    }
+
+    /* --- Login Card Specific Styles --- */
+    .wrap {
+        width: min(92vw, 420px);
+        /* Page load animation */
+        opacity: 0;
+        animation: fadeInSlideUp 0.6s ease-out 0.1s forwards;
+    }
+
+    .card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--stroke);
+        border-radius: 16px;
+        padding: 28px 24px;
+        box-shadow: 0 10px 30px var(--shadow), inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .title {
+        margin: 0 0 18px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: .3px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .title .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-2));
+        box-shadow: 0 0 18px var(--accent-2);
+    }
+
+    .muted {
+        color: var(--muted);
+        font-size: .92rem;
+        margin: 0 0 18px;
+    }
+
+    form {
+        display: grid;
+        gap: 14px;
+    }
+
+    .field {
+        display: grid;
+        gap: 5px; /* Adjusted gap */
+    }
+
+    label {
+        font-size: .9rem;
+        color: var(--muted);
+        padding-left: 14px; /* Align label */
+    }
+
+    input[type="text"],
+    input[type="password"] {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--stroke);
+        background: rgba(13, 18, 38, 0.35);
+        color: var(--text);
+        outline: none;
+        transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+        height: 44px; /* Consistent height */
+        font-size: 15px; /* Adjusted size */
+    }
+    input::placeholder {
+        color: rgba(255,255,255,0.5);
+    }
+    input:focus {
+        border-color: var(--accent-2);
+        box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.25);
+        background: rgba(13, 18, 38, 0.5);
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-top: 4px;
+    }
+
+    .link {
+        color: var(--accent);
+        text-decoration: none;
+        font-size: .9rem;
+        transition: color 0.2s ease-in-out;
+    }
+    .link:hover {
+        text-decoration: underline;
+        color: var(--text);
+    }
+
+    /* Scoped button style */
+    .card button[type="submit"] {
+        appearance: none;
+        border: none;
+        cursor: pointer;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+        color: #0b1020;
+        background: linear-gradient(135deg, #6ee7ff, #a78bfa);
+        box-shadow: 0 8px 20px rgba(167, 139, 250, 0.35);
+        transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+    }
+    .card button[type="submit"]:hover {
+        filter: brightness(1.03);
+        box-shadow: 0 10px 26px rgba(167, 139, 250, 0.45);
+    }
+    .card button[type="submit"]:active {
+        transform: translateY(1px);
+    }
+
+    .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 14px;
+        font-size: .9rem;
+    }
+
+    /* Message area styling */
+    .messages {
+        margin: 0 0 10px;
+        padding: 0;
+        list-style: none;
+    }
+    .messages li {
+        background: rgba(255, 72, 72, 0.12);
+        border: 1px solid rgba(255, 72, 72, 0.35);
+        color: #ffecec;
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: .9rem;
+    }
+
+    /* Keyframes for page load animation */
+    @keyframes fadeInSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<main role="main" class="grid place-items-center p-4" style="min-height: calc(100vh - 192px);">
+
+    <div class="wrap">
+        <div class="card">
+            <h1 class="title"><span class="dot" aria-hidden="true"></span>Sign in</h1>
+            <p class="muted">Use your Django superuser or staff account.</p>
+
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {% if form.errors %}
+                <ul class="messages">
+                     <li>Your username and password didn't match. Please try again.</li>
+                </ul>
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next|default:'/' }}"> {# Use 'next' from context or default to home #}
+
+                <div class="field">
+                    <label for="id_username">Username</label>
+                    <input id="id_username" name="username" type="text" autocomplete="username" placeholder="Enter your username" required autofocus>
+                </div>
+
+                <div class="field">
+                    <label for="id_password">Password</label>
+                    <input id="id_password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+                </div>
+
+                {# Optional: Django's built-in remember me functionality is usually handled differently #}
+                {# Consider removing this row if not specifically implemented in your backend #}
+                <div class="row">
+                     <label style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.9rem;">
+                         <input type="checkbox" name="remember" value="1" style="accent-color:#a78bfa;">
+                         Keep me signed in
+                     </label>
+                     <a class="link" href="#">Need help?</a> {# Link to password reset if available #}
+                </div>
+
+                <button type="submit">Log in</button>
+            </form>
+
+            <div class="footer-links">
+                <a class="link" href="{% url 'home' %}">Return Home</a>
+                 <a class="link" href="{% url 'signup' %}">Sign up?</a>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // base.html handles <a> tag transitions, but we need one for form submit.
+    const loginForm = document.querySelector('.card form'); // Target the login form specifically
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            // Basic check if fields are filled (browser validation handles 'required')
+            const usernameInput = loginForm.querySelector('#id_username');
+            const passwordInput = loginForm.querySelector('#id_password');
+            if (!usernameInput || !passwordInput || !usernameInput.value || !passwordInput.value) {
+                // Allow browser's default validation to handle empty required fields
+                return;
+            }
+
+            e.preventDefault(); // Stop the form from submitting instantly
+
+            if (document.body) {
+                // Use the fade-out class from base.html
+                document.body.classList.add('fade-out');
+            }
+
+            // Wait for the fade-out (400ms) then submit the form
+            setTimeout(() => {
+                loginForm.submit();
+            }, 400);
+        });
+    }
+});
+</script>
+{% endblock %}

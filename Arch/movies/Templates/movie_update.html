@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Movie Submission Form{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Page-Specific Variables --- */
+    :root {
+        --bg1: #1a0b30;
+        --bg2: #2a1240;
+        --stroke: rgba(255, 255, 255, 0.25);
+        --text: #ffffff;
+        --muted: rgba(255,255,255,0.75);
+        --accent-save: #6ee7ff;
+        --accent-cancel: #ff6e6e;
+        --accent-2: #a78bfa;
+        --shadow: rgba(0,0,0,0.35);
+    }
+
+    /* --- Override base.html body background --- */
+    body {
+        background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%) !important;
+    }
+
+    /* --- Card & Form Styles --- */
+    .wrap {
+        width: min(92vw, 500px);
+        /* Padding is now on the <main> wrapper */
+    }
+
+    .card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--stroke);
+        border-radius: 16px;
+        padding: 28px 24px;
+        box-shadow: 0 10px 30px var(--shadow), inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .title {
+        margin: 0 0 18px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: .3px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text);
+    }
+
+    .title .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, var(--accent-save), var(--accent-2));
+        box-shadow: 0 0 18px var(--accent-2);
+    }
+
+    /* --- Form Styling --- */
+    form {
+        display: grid;
+        gap: 14px;
+    }
+    form p {
+        margin: 0;
+        display: grid;
+        gap: 5px;
+    }
+    form label {
+        font-size: .9rem;
+        color: var(--muted);
+        padding-left: 14px;
+        display: block;
+    }
+    form input, 
+    form select,
+    form textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--stroke);
+        background: rgba(13, 18, 38, 0.35);
+        color: var(--text);
+        outline: none;
+        font-size: 15px;
+        height: 44px;
+        transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+    form textarea {
+        height: auto;
+        min-height: 100px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    form select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23a78bfa'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z' clip-rule='evenodd' /%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        background-size: 1em;
+        padding-right: 30px;
+    }
+    form input:focus, 
+    form select:focus,
+    form textarea:focus {
+        border-color: var(--accent-2);
+        box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.25);
+        background: rgba(13, 18, 38, 0.5);
+    }
+    .errorlist {
+        list-style: none;
+        margin: 0;
+        padding: 8px 14px;
+        font-size: .85rem;
+        color: white;
+        background: rgba(255, 72, 72, 0.25);
+        border: 1px solid var(--accent-cancel);
+        border-radius: 8px;
+    }
+    
+    /* --- Button Group --- */
+    
+    /* MODIFIED: Scoped this style to only apply within .card */
+    .card .actions { 
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 10px;
+    }
+
+    /* Scoped to .card to avoid styling the header logout button */
+    .card button[type="submit"] {
+        appearance: none;
+        border: none;
+        cursor: pointer;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+        text-decoration: none;
+        text-align: center;
+        transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+        font-size: 1rem;
+        color: #0b1020;
+        background: linear-gradient(135deg, var(--accent-save), var(--accent-2));
+        box-shadow: 0 8px 20px rgba(167, 139, 250, 0.35);
+    }
+    .card button[type="submit"]:hover {
+        filter: brightness(1.03);
+        box-shadow: 0 10px 26px rgba(167, 139, 250, 0.45);
+    }
+    .card button[type="submit"]:active {
+        transform: translateY(1px);
+    }
+    
+    .button-cancel {
+        appearance: none;
+        border: none;
+        cursor: pointer;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+        text-decoration: none;
+        text-align: center;
+        transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+        font-size: 1rem;
+        color: var(--text);
+        background: rgba(255, 72, 72, 0.15);
+        border: 1px solid var(--accent-cancel);
+        box-shadow: 0 4px 10px rgba(255, 72, 72, 0.15);
+    }
+    .button-cancel:hover {
+        background: rgba(255, 72, 72, 0.25);
+        box-shadow: 0 6px 14px rgba(255, 72, 72, 0.25);
+    }
+    .button-cancel:active {
+        transform: translateY(1px);
+    }
+</style>
+
+<main role="main" class="grid place-items-center p-4" style="min-height: calc(100vh - 192px);">
+
+    <div class="wrap">
+        <div class="card">
+            <h1 class="title"><span class="dot" aria-hidden="true"></span>Movie Submission Form 🎬</h1>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {{ form.as_p }}
+
+                <p>
+                    <label for="genre">Genre:</label>
+                    <select name="genre" id="genre" required>
+                        <option value="" disabled selected>Select a genre</option>
+                        <option value="Action">Action</option>
+                        <option value="Drama">Drama</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Comedy">Comedy</option>
+                        <option value="Thriller">Thriller</option>
+                        <option value="Horror">Horror</option>
+                    </select>
+                </p>
+
+                <p>
+                    <label for="rating">Rating (1-5):</label>
+                    <select name="rating" id="rating">
+                        <option value="" {% if not form.instance.rating %}selected{% endif %}>Select a rating (optional)</option>
+                        <option value="1" {% if form.instance.rating == 1 %}selected{% endif %}>★☆☆☆☆ (1/5)</option>
+                        <option value="2" {% if form.instance.rating == 2 %}selected{% endif %}>★★☆☆☆ (2/5)</option>
+                        <option value="3" {% if form.instance.rating == 3 %}selected{% endif %}>★★★☆☆ (3/5)</option>
+                        <option value="4" {% if form.instance.rating == 4 %}selected{% endif %}>★★★★☆ (4/5)</option>
+                        <option value="5" {% if form.instance.rating == 5 %}selected{% endif %}>★★★★★ (5/5)</option>
+                    </select>
+                </p>
+                <div class="actions">
+                    <a href="{% url 'home' %}" class="button-cancel">Cancel</a>
+                    <button type="submit">Save Movie</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</main>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // base.html handles <a> tag transitions, but we need one for form submit.
+    const submitForm = document.querySelector('.card form');
+    
+    if (submitForm) {
+        submitForm.addEventListener('submit', function(e) {
+            // Let the browser handle built-in HTML5 validation
+            if (!submitForm.checkValidity()) {
+                return;
+            }
+
+            e.preventDefault(); // Stop the form from submitting instantly
+            
+            if (document.body) {
+                // Use the fade-out class from base.html
+                document.body.classList.add('fade-out'); 
+            }
+            
+            // Wait for the fade-out (400ms) then submit the form
+            setTimeout(() => {
+                submitForm.submit(); 
+            }, 400); 
+        });
+    }
+});
+</script>
+{% endblock %}

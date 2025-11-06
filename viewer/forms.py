@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Profile
+from .models import Movie, Profile, Cinema
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -12,6 +12,10 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+
+    class Meta:
+        model = Movie
+        fields = ['title', 'director', 'year', 'rating', 'genre_movie', 'bio', 'profile_picture'] # <-- Fixed
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -97,3 +101,9 @@ class ProfileForm(forms.Form):
     last_name = forms.CharField(max_length=30)
     email = forms.EmailField()
 
+# Add this at the end of your forms.py file, or after your other form definitions
+
+class CinemaForm(forms.ModelForm):
+    class Meta:
+        model = Cinema
+        fields = ['name', 'location', 'price']  # Adjust fields based on your Cinema model

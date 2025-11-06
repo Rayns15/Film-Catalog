@@ -1,0 +1,89 @@
+<!-- {% for film in movies_html %}
+    <div class="movie">
+        <h2>{{ film.Title }}</h2>
+        <p>Year: {{ film.Year }}</p>
+        <p>Director: {{ film.director }}</p>
+    </div>
+
+{% empty %}
+    <p>No movies available.</p>
+{% endfor %} -->
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Film List</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* A simple background for better presentation */
+        body {
+            background-color: hsl(189, 93%, 47%);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <!-- Page Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-gray-900">Film Catalog</h1>
+            <p class="text-lg text-gray-600 mt-2">Browse our collection of films</p>
+        </header>
+
+        <!-- 
+          This is a container for all the film cards. 
+          It uses a responsive grid layout.
+        -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+
+            <!-- 
+              Template logic starts here.
+              Check if the 'movies_html' list is not empty.
+            -->
+            {% if movies_html %}
+                {% for film in movies_html %}
+                
+                <!-- Film Card -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col transform hover:scale-105 hover:shadow-2xl transition-all duration-300 ease-in-out">
+                    
+                    <!-- Card Body with Film Details -->
+                    <div class="p-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2 truncate" title="{{ film.Title }}">{{ film.Title }}</h2>
+                        <div class="text-gray-600 text-sm space-y-1">
+                            <p>
+                                <span class="font-semibold">Director:</span> {{ film.director }}
+                            </p>
+                            <p>
+                                <span class="font-semibold">Year:</span> {{ film.Year }}
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+                
+                {% endfor %}
+            {% else %}
+            
+            <!-- Message for when no movies are available -->
+            <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4 text-center py-16 bg-white rounded-xl shadow-md">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
+                </svg>
+                <h3 class="mt-2 text-lg font-medium text-gray-900">No movies available</h3>
+                <p class="mt-1 text-sm text-gray-500">Check back later or try refining your search.</p>
+            </div>
+
+            {% endif %}
+            <!-- Template logic ends here -->
+
+        </div>
+    </div>
+
+</body>
+</html>

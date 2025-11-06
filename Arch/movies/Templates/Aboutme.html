@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Me - Oracle DevOps Engineer{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Override base.html body background for this page --- */
+    body {
+        background-image: linear-gradient(135deg, #2e8b57 0%, #4682b4 100%) !important;
+        font-family: 'Segoe UI', Arial, sans-serif; /* Keep specific font if desired */
+        color: #fff; /* Ensure text color is white */
+    }
+
+    /* --- Styles specific to the About Me content --- */
+    .about-me-container { /* Renamed from .container to avoid potential conflicts */
+        max-width: 700px;
+        margin: 60px auto; /* Centers horizontally and adds top/bottom margin */
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 14px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+        padding: 40px 32px;
+        /* Removed transition - base.html handles body transition */
+    }
+    .about-me-container h1 {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #ffd700; /* Gold color for main heading */
+    }
+    .about-me-container h2 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem; /* Added margin */
+        font-weight: 600; /* Added weight */
+        color: #e2e8f0; /* Lighter text for subtitle */
+    }
+    .about-me-container p {
+        font-size: 1.1rem;
+        line-height: 1.6; /* Improved readability */
+        margin-bottom: 1rem; /* Spacing between paragraphs */
+        color: #cbd5e1; /* Slightly muted paragraph text */
+    }
+    .connect {
+        font-style: italic;
+        margin-top: 2rem; /* Add space before connect text */
+        color: #94a3b8; /* Muted color */
+    }
+    .home-btn {
+        display: inline-block;
+        background: linear-gradient(135deg, #7c3aed, #22d3ee);
+        color: #fff;
+        padding: 12px 32px;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-decoration: none;
+        box-shadow: 0 4px 16px rgba(34, 211, 238, 0.15);
+        transition: background 0.2s, transform 0.2s;
+    }
+    .home-btn:hover {
+        background: linear-gradient(135deg, #22d3ee, #7c3aed);
+        transform: translateY(-2px) scale(1.03);
+    }
+    @media (max-width: 800px) {
+        .about-me-container {
+            margin: 40px auto;
+            padding: 30px 24px;
+        }
+        .about-me-container h1 {
+            font-size: 2rem;
+        }
+        .about-me-container h2 {
+            font-size: 1.1rem;
+        }
+        .about-me-container p {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="about-me-container">
+    <h1>About Me</h1>
+    <h2>Experienced Oracle DevOps Engineer | Driving Efficient Software Delivery & Expanding Full-Stack Capabilities</h2>
+    <p>
+        With over 10 years of experience as an Oracle DevOps Engineer in an international IT company, I have honed my skills in managing databases, working extensively with SQL, and providing exceptional customer support.
+    </p>
+    <p>
+        Completed two intensive live online training programs totaling over 460 hours, focused on DevOps Engineering and Python Full-Stack Development. The DevOps Engineer Course at IT School (180+ hours over one year) strengthened my expertise in automation and cloud infrastructure, with hands-on experience in AWS, Microsoft Azure, Linux, Git/GitHub, Python, Shell/Bash scripting, Docker, Kubernetes, Jenkins, Ansible, and Terraform. I successfully delivered a fully functional CI/CD pipeline and earned a 9/10 on both the theoretical exam and final project.
+    </p>
+    <p>
+        In parallel, I participated in a 280-hour Python Full-Stack Development course at Software Development Academy, deepening my skills in Python (basic to advanced), OOP, algorithms, data structures, back-end development (Flask and Django), testing (pytest), version control (Git), MySQL databases, and front-end technologies including HTML, CSS, JavaScript, and Angular. These programs complement my current role, where I ensure the availability and stability of productive environments.
+    </p>
+    <p>
+        By embracing DevOps principles and developing robust full-stack skills, I aim to bridge the gap between development and operations, contribute to efficient software delivery, and build innovative web applications. My optimism and proactive approach have always fostered a positive work environment and motivated others. I am excited to leverage my expanded skill set to explore new job opportunities, earn valuable certifications, and contribute to impactful projects.
+    </p>
+    <div class="connect">
+        Feel free to connect with me to discuss potential collaborations or opportunities!
+    </div>
+    <br>
+    <div style="text-align: center;">
+        <a href="{% url 'home' %}" class="home-btn">
+            Return Home
+        </a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Update Prices{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-2xl mx-auto px-2 sm:px-4 md:px-8 py-10">
+
+    <h1 class="text-4xl font-extrabold text-white mb-8 text-center">
+        <span class='bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-transparent'>
+            Update Cinema Prices
+        </span>
+    </h1>
+
+    <div class="bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-700 p-6 sm:p-8">
+
+        <form action="" method="post">
+            {% csrf_token %} <div class="space-y-6">
+
+                {% for field in form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-cyan-300 mb-2">
+                            {{ field.label }}
+                        </label>
+                        
+                        {{ field }} 
+                        
+                        {% if field.errors %}
+                            <p class="text-red-400 text-sm mt-1">{{ field.errors|first }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-gray-700">
+                
+                <a href="{% url 'cinema_prices' %}" class="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition text-sm font-medium">
+                    Cancel
+                </a>
+
+                <button type="submit" class="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<style>
+    form input[type="text"],
+    form input[type="number"],
+    form input[type="email"],
+    form select {
+        display: block;
+        width: 100%;
+        background-color: #1f2937; /* Tailwind 'gray-800' */
+        color: #f9fafb; /* Tailwind 'gray-50' */
+        border: 1px solid #4b5563; /* Tailwind 'gray-600' */
+        border-radius: 0.5rem; /* rounded-lg */
+        padding: 0.75rem 1rem; /* px-4 py-3 */
+        font-size: 1rem;
+        line-height: 1.5;
+        transition: border-color 0.2s;
+    }
+
+    form input:focus {
+        outline: none;
+        border-color: #6366f1; /* Tailwind 'indigo-500' */
+        /* You can add a ring/glow here if you want */
+        box-shadow: 0 0 0 2px #4f46e5; /* Tailwind 'indigo-600' */
+    }
+</style>
+
+{% endblock %}

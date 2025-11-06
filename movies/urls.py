@@ -3,25 +3,25 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 from viewer import views as viewer_views
-from viewer.views import movie_details_view, movie_id_view, movie_detail
+from viewer.views import cinema_prices_update_view, movie_details_view, movie_id_view, movie_detail
 from viewer.views import (
     MovieCreateView, MovieListView, MovieUpdateView, MovieDeleteView,
     base_view, inception_view, movie1_details, search, TheGodfatherView,
-    movie_details_view, MovieDetailView, view_details, movie_details, movie_search, profile_view, 
-    profile_edit_view, profile_delete_view, profile_edit, movie_add, CustomSignupForm)  # Ensure all necessary views are imported
+    movie_details_view, MovieDetailView, view_details, movie_details, movie_search, profile_view,
+    profile_edit_view, profile_delete_view, profile_edit, movie_add, CustomSignupForm, cinema_prices_view, cinema_prices_update_view,)  # Ensure all necessary views are imported
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('home/', viewer_views.afiseaza_home_page, name='home_page'),
-    path('create/', MovieCreateView.as_view(), name='movie-create'),
+    path('create/', MovieCreateView.as_view(), name='movie_create'),
     path('list/', MovieListView.as_view(), name='movie-list'),
     path('update/<int:pk>/', MovieUpdateView.as_view(), name='movie-update'),
     path('delete/<int:pk>/', MovieDeleteView.as_view(), name='movie-delete'),
     path('base/', base_view, name='base'),  # Base view for the root URL
     path('inception/', inception_view, name='inception'),
-    path('AddMovie/', MovieCreateView.as_view(), name='add_movie'),
+    path('AddMovie/', MovieCreateView.as_view(), name='movie-add'),
     path('movie/<int:pk>/', movie_details_view, name='movie_details_view'),
     path('movie/<int:pk>/', movie_details_view, name='movie_id'),
-    path('movie/<int:pk>/', movie_detail, name='movie_detail'),  # Detail view for a specific movie
+    path('movie/<int:pk>/', movie_detail, name='movie-detail'),  # Detail view for a specific movie
     path('', viewer_views.afiseaza_home_page, name='home'),  # Root URL mapped to home_view
     path('movie_details/<int:pk>/', movie_details_view, name='movie_details'),
     path('login/', auth_views.LoginView.as_view(template_name='Log_in.html'), name='login'),
@@ -62,6 +62,9 @@ urlpatterns = [
     path('password_change/', auth_views.PasswordChangeView.as_view(template_name='password_change.html'), name='password_change'),
     path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='password_change_done.html'), name='password_change_done'),
     path('CustomSignup/', viewer_views.CustomSignupView, name='custom_signup'),
+    path('cinema_prices/<int:movie_id>/', viewer_views.cinema_prices_view, name='cinema_prices'),
+    path('cinema-prices/<int:pk>/', viewer_views.cinema_prices_view, name='cinema_prices'),
+    path('cinema-prices/<int:pk>/update/', viewer_views.cinema_prices_update_view, name='cinema_prices_update'),
 ]
 
 

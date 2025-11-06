@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inception: A Movie Description</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts for a clean, modern look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles to supplement Tailwind */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #111827; /* Dark blue-gray background */
+            background-image: linear-gradient(145deg, #111827 0%, #1f2937 50%, #000000 100%);
+            color: #f3f4f6; /* Light gray text */
+            /* Added for smooth exit transition */
+            transition: opacity 0.5s ease-out;
+        }
+
+        /* A class to trigger the fade-out on the body */
+        body.fade-out {
+            opacity: 0;
+        }
+
+        /* Glassmorphism effect for the main card */
+        .card {
+            background: rgba(31, 41, 55, 0.5); /* Semi-transparent background */
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            /* Updated transition to handle tilt, entrance, and exit animations smoothly */
+            transition: opacity 0.4s ease-out, transform 0.2s ease-out;
+        }
+        
+        /* Entrance animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        
+        /* Custom button styling */
+        .home-btn {
+            background-color: #3b82f6; /* Blue-600 */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .home-btn:hover {
+            background-color: #2563eb; /* Blue-700 */
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main container card with all the content -->
+    <div id="movie-card" class="card rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden fade-in">
+        <div class="md:flex">
+            <!-- Left side: Movie Poster -->
+            <div class="md:w-1/3">
+                <img class="h-full w-full object-cover" src="https://placehold.co/400x600/111827/f3f4f6?text=INCEPTION" alt="Inception Movie Poster" onerror="this.onerror=null;this.src='https://placehold.co/400x600?text=Image+Not+Found';">
+            </div>
+
+            <!-- Right side: Movie Details -->
+            <div class="p-8 md:p-10 md:w-2/3">
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Inception</h1>
+                <p class="text-lg text-blue-300 mb-6 font-semibold">"Your mind is the scene of the crime."</p>
+                
+                <div class="text-gray-300 space-y-4 text-justify">
+                    <p>
+                        Dom Cobb (Leonardo DiCaprio) is not your ordinary thief. He is the absolute best in the dangerous art of extraction: stealing valuable secrets from deep within the subconscious during the dream state, when the mind is at its most vulnerable. Cobb's rare ability has made him a coveted player in the treacherous world of corporate espionage, but it has also made him an international fugitive and cost him everything he has ever loved.
+                    </p>
+                    <p>
+                        Now Cobb is being offered a chance at redemption. One last job could give him his life back, but only if he can accomplish the impossible: inception. Instead of the perfect heist, Cobb and his team of specialists have to pull off the reverse: their task is not to steal an idea but to plant one. If they succeed, it could be the perfect crime.
+                    </p>
+                </div>
+
+                <!-- Main Cast Section -->
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold text-white mb-3">Main Cast</h3>
+                    <ul class="list-disc list-inside text-gray-300">
+                        <li>Leonardo DiCaprio as Dom Cobb</li>
+                        <li>Joseph Gordon-Levitt as Arthur</li>
+                        <li>Elliot Page as Ariadne</li>
+                        <li>Tom Hardy as Eames</li>
+                        <li>Ken Watanabe as Saito</li>
+                    </ul>
+                </div>
+                
+                <!-- Return Home Button -->
+                <div class="mt-10 text-center">
+                    <a href="http://127.0.0.1:8000/home/" class="home-btn inline-block text-white font-bold py-3 px-8 rounded-lg shadow-lg">
+                        Return Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.getElementById('movie-card');
+            const homeButton = document.querySelector('.home-btn');
+            const body = document.body;
+
+            // --- 3D Tilt Effect ---
+            if (card) {
+                card.addEventListener('mousemove', (e) => {
+                    const { left, top, width, height } = card.getBoundingClientRect();
+                    const x = e.clientX - left;
+                    const y = e.clientY - top;
+                    const rotateY = -1 * ((x - width / 2) / (width / 2)) * 5;
+                    const rotateX = ((y - height / 2) / (height / 2)) * 5;
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+                });
+            }
+            
+            // --- Smooth Exit Transition ---
+            if (homeButton) {
+                homeButton.addEventListener('click', (e) => {
+                    e.preventDefault(); // Prevent immediate navigation
+                    const targetUrl = homeButton.href;
+                    
+                    // 1. Fade out the card
+                    if (card) {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)'; // Move it down slightly
+                    }
+
+                    // 2. After a short delay, fade out the whole body
+                    setTimeout(() => {
+                        body.classList.add('fade-out');
+                        
+                        // 3. Navigate after the body fade-out is complete
+                        setTimeout(() => {
+                            window.location.href = targetUrl;
+                        }, 500); // This duration should match the body's transition time
+                    }, 200); // Delay before fading the body
+                });
+            }
+
+            // --- Handler for Browser Back/Forward functionality ---
+            window.addEventListener('beforeunload', () => {
+                body.classList.add('fade-out');
+            });
+        });
+    </script>
+
+</body>
+</html>

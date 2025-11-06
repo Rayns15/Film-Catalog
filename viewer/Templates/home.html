@@ -8,9 +8,9 @@
 
     <div class="flex justify-end mt-4 mb-4"></div>
     <form action="{% url 'movie_search' %}" method="get" class="justify-end flex mb-4">
-        <input type="text" name="q" placeholder="Search movies..." class="px-3 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800" value="{{ query|default_if_none:'' }}" /> {# Updated to use 'query' from context #}
+        <input type="text" name="q" placeholder="Search movies..." class="px-3 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800" value="{{ query|default_if_none:'' }}" />
         <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition">Search</button>
-        {% if query %} {# Use 'query' from context to show Exit Search #}
+        {% if query %}
             <a href="{% url 'home' %}" class="ml-2 bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition">Exit Search</a>
         {% endif %}
     </form>
@@ -19,16 +19,13 @@
         <span class='bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-transparent'>Film Catalog </span>- A Django Movie Database
     </h1>
 
-    {# === ADDED SEARCH RESULT MESSAGES HERE === #}
-    {% if query %} {# Only show search-related messages if a query exists #}
+    {% if query %}
         <p class="text-white text-center mb-4">Showing results for: "{{ query }}"</p>
-        {% if no_results %} {# Check the no_results flag from the view #}
+        {% if no_results %}
             <p class="text-yellow-400 text-center mb-4">No movies found matching your search.</p>
         {% endif %}
     {% endif %}
-    {# ========================================== #}
 
-    {% comment %} Moved Intro Paragraph - Show only if NOT searching and movies exist {% endcomment %}
     {% if movies_html and not query %}
     <div class="flex justify-center mb-4">
         <p class="text-white/90 text-xl max-w-2xl text-center mx-4">
@@ -37,7 +34,6 @@
     </div>
     {% endif %}
 
-    {# Filter bar - Show only if NOT searching and movies exist #}
     {% if movies_html and not query %}
     <div id="filter-bar" class="flex flex-wrap space-x-2 my-2 justify-center gap-y-2">
         <button class="filter-btn bg-gray-500 text-white px-2 py-1 rounded text-lg hover:bg-gray-600" data-genre="all">All</button>
@@ -48,81 +44,85 @@
         <button class="filter-btn bg-purple-500 text-white px-2 py-1 rounded text-lg hover:bg-purple-600" data-genre="thriller">Thriller</button>
         <button class="filter-btn bg-pink-500 text-white px-2 py-1 rounded text-lg hover:bg-pink-600" data-genre="horror">Horror</button>
         {% if user.is_authenticated %}
-        <a href="/AddMovie/" class="bg-teal-500 text-white px-2 py-1 rounded text-lg hover:bg-teal-600">Add Movie</a>
+        
+        <a href="{% url 'movie-add' %}" class="bg-teal-500 text-white px-2 py-1 rounded text-lg hover:bg-teal-600">Add Movie</a>
+        
         {% endif %}
     </div>
     {% endif %}
 
 </div>
 
-{# === MOVIE GRID & EMPTY STATE LOGIC === #}
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8 px-2 sm:px-4 md:px-8 w-full max-w-screen-xl mx-auto">
     {% for movie in movies_html %}
         <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-full transform hover:scale-105 transition-transform duration-300 ease-in-out movie-card">
-            {# --- Card Section 1: Top Info --- #}
-            {# --- Card Section 1: Top Info (Minimum Height & Internal Flex) --- #}
-            {# REVERTED to min-h, kept flex flex-col. Adjust 180px if needed. #}
+            
             <div class="p-6 min-h-[180px] flex flex-col">
-
-                {# Top part: Edit/Delete, Title, Genres (This part grows) #}
                 <div class="flex-grow">
                     {% if user.is_authenticated %}
                         <div class="flex justify-end gap-2 mb-2">
                              <a href="{% url 'movie-update' movie.pk %}" title="Update Movie">
-                                <img src="{% static 'logos/pencil.jpg' %}" alt="Update Movie" class="h-6 w-auto rounded shadow hover:opacity-90 transition" />
+                                 <img src="{% static 'logos/pencil.jpg' %}" alt="Update Movie" class="h-6 w-auto rounded shadow hover:opacity-90 transition" />
                              </a>
                              <a href="{% url 'movie-delete' movie.pk %}" title="Delete Movie">
-                                <img src="{% static 'logos/delete.jpg' %}" alt="Delete Movie" class="h-6 w-auto rounded shadow hover:opacity-90 transition" />
+                                 <img src="{% static 'logos/delete.jpg' %}" alt="Delete Movie" class="h-6 w-auto rounded shadow hover:opacity-90 transition" />
                              </a>
                         </div>
                      {% else %}
-                          {# Placeholder space to maintain alignment when not logged in #}
-                          <div class="h-6 mb-2"></div>
+                         <div class="h-6 mb-2"></div>
                     {% endif %}
 
-                    {# Title - Still clamped #}
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2 line-clamp-2">{{ movie.Title }}</h2>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2 line-clamp-2">{{ movie.title }}</h2>
 
-                    {# Genre Buttons Wrapper - REMOVED fixed height, allows natural wrapping #}
                     <div class="flex flex-wrap gap-1 my-2 genre-buttons-wrap">
-                        <span
-                            class="genre-marker"
+                        <span class="genre-marker"
                             data-genre="{% if movie.genres_list %}{{ movie.genres_list|join:', ' }}{% elif movie.genre_movie %}{{ movie.genre_movie }}{% elif movie.genre %}{{ movie.genre }}{% elif movie.gender %}{{ movie.gender }}{% else %}Other{% endif %}">
                         </span>
-                        {# Buttons added by JS #}
                     </div>
                 </div>
 
-                {# Bottom part: Director/Year (Pushed down by flex-grow above) #}
-                {# ADDED mt-auto HERE to push this block down #}
                 <div class="mt-auto pt-2"> 
                     <p class="text-gray-600 text-sm">
                         Directed by <span class="font-semibold">{{ movie.director }}</span>
                     </p>
                     <p class="text-gray-500 text-sm">
-                        Released in <span class="font-semibold">{{ movie.Year }}</span>
+                        Released in <span class="font-semibold">{{ movie.year }}</span>
                     </p>
                 </div>
             </div>
-
-            {# --- Card Section 2: Middle Content + Image --- #}
             <div class="p-6 flex flex-col flex-grow border-t border-gray-200">
+                
                 <div class="flex flex-col items-center gap-2 mb-4">
-                    <a href="{% url 'movie_id' movie.pk %}" alt="View Details" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 text-sm rounded-full transition-colors duration-300">
+                    <a href="{% url 'movie-detail' movie.pk %}" alt="View Details" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 text-sm rounded-full transition-colors duration-300">
                         View Details
                     </a>
-                    <a href="{% url 'movie_details_view' movie.pk %}" class="block hover:opacity-90 transition max-w-full">
-                        <img src="{% static 'logos/'|add:movie.Title|add:'.jpg' %}"
-                             alt="{{ movie.Title }} cover"
-                             class="h-48 w-auto object-contain rounded-lg shadow-md block mx-auto"
-                             onerror="this.onerror=null; this.src='{% static 'logos/placeholder.jpg' %}';" />
+                    
+                    <a href="{% url 'cinema_prices' movie.pk %}" alt="See Prices & Showtimes" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1 px-3 text-sm rounded-full transition-colors duration-300">
+                        Prices & Showtimes
                     </a>
                 </div>
-                <h3 class="text-md font-semibold text-gray-700 mb-2 text-center">Cinema Price:</h3>
-                <p class="text-gray-800 text-lg font-bold mb-4 text-center">${{ movie.cinema_price }}</p>
-            </div>
+                
+                <a href="{% url 'movie-detail' movie.pk %}" class="block hover:opacity-90 transition max-w-full mb-4">
+                    <img src="{% static 'logos/'|add:movie.title|add:'.jpg' %}"
+                         alt="{{ movie.title }} cover"
+                         class="h-48 w-auto object-contain rounded-lg shadow-md block mx-auto"
+                         onerror="this.onerror=null; this.src='{% static 'logos/placeholder.jpg' %}';" />
+                </a>
 
-            {# --- Card Section 3: Bottom Streaming Links --- #}
+                <h3 class="text-md font-semibold text-gray-700 mb-2 text-center">Showtimes:</h3>
+                <div class="text-center max-h-24 overflow-y-auto px-2 mb-4">
+                    <ul class="text-sm space-y-1">
+                        {% for show in movie.showtimes.all %}
+                            <li>
+                                <span class="font-bold">{{ show.show_time|time:"g:i A" }}</span> 
+                                <span class="text-gray-600">at {{ show.cinema.name }}</span>
+                            </li>
+                        {% empty %}
+                            <li class="text-gray-500 italic">No showtimes scheduled.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
             <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 rounded-b-xl">
                 <ul class="space-y-1">
                         <li class="flex items-center gap-2 mt-1">
@@ -133,7 +133,7 @@
                             <a href="https://www.primevideo.com" target="_blank" rel="noopener noreferrer">
                                 <img src="{% static 'logos/prime.jpg' %}" alt="Amazon Prime" class="h-5 w-5 rounded shadow" title="Amazon Prime">
                             </a>
-                            <a href="https://www.hbo.com" target="_blank" rel="noopener noreferrer">
+                            <a href="https...://www.hbo.com" target="_blank" rel="noopener noreferrer">
                                 <img src="{% static 'logos/hbo.jpg' %}" alt="HBO" class="h-5 w-5 rounded shadow" title="HBO">
                             </a>
                         </li>
@@ -144,18 +144,13 @@
             </div>
         </div>
     {% empty %}
-        {# This 'empty' block runs ONLY if the movies_html list is empty #}
-        {# Show different message depending on whether a search was performed #}
-        {% if not query and not no_results %} {# Check if NOT searching AND no_results is FALSE (meaning initial load with no movies) #}
+        {% if not query and not no_results %}
              <p class="text-white col-span-full text-center text-xl mt-10">No movies available in the catalog yet.</p>
         {% elif query and no_results %}
-             {# The "No movies found matching..." message is already shown above the grid #}
-             {# Optionally add a placeholder graphic or keep this empty #}
-             <div class="col-span-full"></div> {# Empty div to maintain grid structure if needed #}
+             <div class="col-span-full"></div>
         {% endif %}
     {% endfor %}
 </div>
-{# ======================================= #}
 
 {% endblock %}
 
@@ -164,7 +159,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // --- Genre Filter Script ---
-    buildGenreButtons(); // Build buttons inside cards first
+    buildGenreButtons(); 
     const filterButtons = document.querySelectorAll('.filter-btn');
     filterButtons.forEach(btn => {
         btn.addEventListener('click', function(e) {
@@ -172,11 +167,8 @@ document.addEventListener('DOMContentLoaded', function () {
             applyFilter(btn.dataset.genre);
         });
     });
-    // applyFilter('all'); // Apply initial filter if needed
 });
 
-// --- Genre Button Builder & Filter Logic ---
-// (Make sure these function definitions are complete as in your previous code)
 function normalize(g) { return (g || '').toLowerCase().replace(/[^a-z0-9-]/g, '').trim(); }
 function parseGenres(raw) {
     if (!raw) return [];
@@ -207,7 +199,7 @@ function buildGenreButtons() {
         wrap.querySelectorAll('button.genre-tag-btn').forEach(btn => btn.remove());
         const raw = marker.dataset.genre || 'Other';
         const genres = parseGenres(raw);
-        const list = genres && genres.length ? genres : ['Other']; // Check if genres is truthy before accessing length
+        const list = genres && genres.length ? genres : ['Other']; 
         const added = new Set();
         list.forEach(g => {
             const key = normalize(g);
@@ -251,3 +243,4 @@ function applyFilter(genre) {
 }
 </script>
 {% endblock %}
+
