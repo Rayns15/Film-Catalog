@@ -1,14 +1,18 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 from viewer import views as viewer_views
+from django.conf import settings
+from django.conf.urls.static import static
 from viewer.views import cinema_prices_update_view, movie_details_view, movie_id_view, movie_detail
 from viewer.views import (
     MovieCreateView, MovieListView, MovieUpdateView, MovieDeleteView,
     base_view, inception_view, movie1_details, search, TheGodfatherView,
     movie_details_view, MovieDetailView, view_details, movie_details, movie_search, profile_view,
     profile_edit_view, profile_delete_view, profile_edit, movie_add, CustomSignupForm, cinema_prices_view, cinema_prices_update_view,)  # Ensure all necessary views are imported
+
+
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('home/', viewer_views.afiseaza_home_page, name='home_page'),
@@ -67,6 +71,7 @@ urlpatterns = [
     path('cinema-prices/<int:pk>/update/', viewer_views.cinema_prices_update_view, name='cinema_prices_update'),
 ]
 
-
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

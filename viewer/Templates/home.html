@@ -103,10 +103,17 @@
                 </div>
                 
                 <a href="{% url 'movie-detail' movie.pk %}" class="block hover:opacity-90 transition max-w-full mb-4">
-                    <img src="{% static 'logos/'|add:movie.title|add:'.jpg' %}"
-                         alt="{{ movie.title }} cover"
-                         class="h-48 w-auto object-contain rounded-lg shadow-md block mx-auto"
-                         onerror="this.onerror=null; this.src='{% static 'logos/placeholder.jpg' %}';" />
+    
+                    {% if movie.profile_picture %}
+                        <img src="{{ movie.profile_picture.url }}"
+                            alt="{{ movie.title }} cover"
+                            class="h-48 w-auto object-contain rounded-lg shadow-md block mx-auto" />
+                    {% else %}
+                        <img src="{% static 'logos/placeholder.jpg' %}"
+                            alt="{{ movie.title }} cover"
+                            class="h-48 w-auto object-contain rounded-lg shadow-md block mx-auto" />
+                    {% endif %}
+
                 </a>
 
                 <h3 class="text-md font-semibold text-gray-700 mb-2 text-center">Showtimes:</h3>
