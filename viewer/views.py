@@ -18,6 +18,9 @@ from django.utils import timezone
 from .models import Cinema, Showtime, Movie
 # Create your views here.
 
+def chat_api(request):
+    return HttpResponse("Chat API is working!")
+
 def base_view(request):
     return render(request, 'base.html')
 
@@ -136,13 +139,13 @@ class view_details(View):
 
 class MovieDetailView(DetailView):
     model = Movie
-    context_object_name = 'movie_html'
+    context_object_name = 'movie'
     template_name = 'movie_detail.html'  # Default template
 
-    def get_template_names(self):
-        if self.object:
-            return [f'movie_{self.object.id}.html', self.template_name]
-        return [self.template_name]
+    # def get_template_names(self):
+    #     if self.object:
+    #         return [f'movie_{self.object.id}.html', self.template_name]
+    #     return [self.template_name]
 
 def movie_details_view(request, pk):
     try:
@@ -263,12 +266,9 @@ def movie_details_view(request, pk):
         return HttpResponse("Movie not found", status=404)
     
 def movie_detail(request, pk):
-    try:
-        movie = Movie.objects.get(pk=pk)
-        return render(request, 'movie_detail.html', {'movie': movie})
-    except Movie.DoesNotExist:
-        return HttpResponse("Movie not found", status=404)
-    
+    movie = get_object_or_404(Movie, pk=pk)
+    return render(request, 'movie_detail.html', {'movie': movie})
+
 def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -468,3 +468,41 @@ def cinema_prices_update_view(request, pk):
         form = CinemaForm(instance=cinema)
     
     return render(request, 'cinema_prices_update.html', {'form': form, 'cinema': cinema})
+
+
+def cinema_prices_delete_view(request, pk):
+    """
+    View to delete a specific cinema.
+    """
+    cinema = get_object_or_404(Cinema, pk=pk)
+    
+    if request.method == 'POST':
+        cinema.delete()
+        return redirect('home')  # Redirect to home page after deletion
+    
+    return render(request, 'cinema_prices_delete.html', {'cinema': cinema})
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        # Handle profile update logic here
+        # Example: update user fields from request.POST
+        user = request.user
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.email = request.POST.get('email', user.email)
+        user.save()
+        return redirect('profile')
+    return render(request, 'profile_edit.html', {'user': user})
+
+def CinemaUpdateView(UpdateView):
+    model = Cinema
+    form_class = CinemaForm
+    template_name = 'cinema_update_form.html'
+    success_url = reverse_lazy("home")
+
+class CinemaUpdateView(UpdateView):
+    model = Cinema
+    form_class = CinemaForm
+    template_name = 'cinema_update_form.html'
+    success_url = reverse_lazy("home")
