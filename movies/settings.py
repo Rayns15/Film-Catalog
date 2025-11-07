@@ -81,34 +81,39 @@ ROOT_URLCONF = 'movies.urls'
 
 
 
+# settings.py
+
+# --- Make sure these imports are at the top of your file ---
+import os
+from pathlib import Path
+
+# --- Make sure BASE_DIR is defined (it should be near the top) ---
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# ... other settings ...
+
+
+# === YOUR CORRECTED TEMPLATES SETTING ===
 TEMPLATES = [
-
     {
-
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-
-        'DIRS': [],
-
-        'APP_DIRS': True,
-
+        
+        # This is the line you are adding.
+        # It tells Django to look in a folder named 'templates'
+        # in your project's root directory (BASE_DIR).
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        
+        'APP_DIRS': True, # This tells Django to ALSO look inside app folders
         'OPTIONS': {
-
             'context_processors': [
-
                 'django.template.context_processors.debug',
-
                 'django.template.context_processors.request',
-
                 'django.contrib.auth.context_processors.auth',
-
                 'django.contrib.messages.context_processors.messages',
-
             ],
-
         },
-
     },
-
 ]
 
 
