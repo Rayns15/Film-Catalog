@@ -16,6 +16,7 @@ from .forms import CustomSignupForm, ProfileForm, RegisterForm, CinemaForm
 from django.db.models import Prefetch
 from django.utils import timezone
 from .models import Cinema, Showtime, Movie
+
 # Create your views here.
 
 def chat_api(request):
@@ -24,19 +25,19 @@ def chat_api(request):
 def base_view(request):
     return render(request, 'base.html')
 
-def search(request):
-    query = request.GET.get('q', '')
-    movies = Movie.objects.filter(Title__icontains=query)
+# def search(request):
+#     query = request.GET.get('q', '')
+#     movies = Movie.objects.filter(Title__icontains=query)
     
-    # Check if the search returned any movies
-    no_results = not movies.exists() if query else False # Only show if a query was made
+#     # Check if the search returned any movies
+#     no_results = not movies.exists() if query else False # Only show if a query was made
 
-    context = {
-        'movies_html': movies,
-        'query': query, # Pass the query back to display it
-        'no_results': no_results # Add the flag to the context
-    }
-    return render(request, 'home.html', context)
+#     context = {
+#         'movies_html': movies,
+#         'query': query, # Pass the query back to display it
+#         'no_results': no_results # Add the flag to the context
+#     }
+#     return render(request, 'home.html', context)
     
 # nume.com/hello_regex?"nume='Andrei":
 #     return HttpResponse(request):
@@ -240,15 +241,49 @@ def signup(request):
         form = SignupForm()
     return render(request, 'sign_up.html', {'form': form})
 
-def movie_search(request):
-    query = request.GET.get('q', '')
-    movies = Movie.objects.filter(Title__icontains=query)
-    #streams = Stream.objects.all()
+def movie_search_view(request):
+    query = request.GET.get('q', '') 
+    
+    if query:
+        # --- IF there is a query, filter the movies ---
+        # This is the line that actually performs the search
+        movies = Movie.objects.filter(title__icontains=query)
+        no_results = not movies.exists()
+    else:
+        # --- IF the query is empty, show no movies ---
+        movies = Movie.objects.none() 
+        no_results = False
+
+    # Render the SAME 'home.html' template, but with the filtered 'movies'
     return render(request, 'home.html', {
         'movies_html': movies,
-        #'streams_html': streams,
         'user': request.user,
         'year': datetime.datetime.now().year,
+        'query': query,       # Pass the query back to the template
+        'no_results': no_results,
+    })
+
+def movie_search(request):
+    # Get the search term from the URL's 'q' parameter
+    query = request.GET.get('q', '') 
+    
+    if query:
+        # --- IF there is a query, filter the movies ---
+        # This is the line that actually performs the search
+        movies = Movie.objects.filter(Title__icontains=query)
+        no_results = not movies.exists()
+    else:
+        # --- IF the query is empty, show no movies ---
+        movies = Movie.objects.none() 
+        no_results = False
+
+    # Render the SAME 'home.html' template, but with the filtered 'movies'
+    return render(request, 'home.html', {
+        'movies_html': movies,
+        'user': request.user,
+        'year': datetime.datetime.now().year,
+        'query': query,       # Pass the query back to the template
+        'no_results': no_results,
     })
   
 def movie_id_view(request, pk):

@@ -153,9 +153,6 @@
                 {% if request.path == '/search/' or request.path|slice:":8" == '/search/' %}
                     <a class="btn btn-login bg-indigo-500 hover:bg-indigo-700 text-white" href="{% url 'home' %}">Exit Search</a>
                 {% endif %}
-                {% if request.GET.q %}
-                    <a href="{% url 'home' %}" class="btn btn-login bg-indigo-500 hover:bg-indigo-700 text-white">Exit Search</a>
-                {% endif %}
             </nav>
         </div>
     </header>

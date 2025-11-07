@@ -10,9 +10,6 @@
     <form action="{% url 'movie_search' %}" method="get" class="justify-end flex mb-4">
         <input type="text" name="q" placeholder="Search movies..." class="px-3 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800" value="{{ query|default_if_none:'' }}" />
         <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition">Search</button>
-        {% if query %}
-            <a href="{% url 'home' %}" class="ml-2 bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition">Exit Search</a>
-        {% endif %}
     </form>
 
     <h1 class="text-4xl font-extrabold text-white mb-8 text-center">
@@ -154,7 +151,9 @@
         {% if not query and not no_results %}
              <p class="text-white col-span-full text-center text-xl mt-10">No movies available in the catalog yet.</p>
         {% elif query and no_results %}
-             <div class="col-span-full"></div>
+            <p class="text-yellow-400 col-span-full text-center text-xl mt-10">
+                No movies found matching your search for "{{ query }}".
+            </p>
         {% endif %}
     {% endfor %}
 </div>
