@@ -29,7 +29,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '51.20.67.2',  # Your instance's Public IP
-    'ec2-51-20-67-2.eu-north-1.compute.amazonaws.com' # Your Public DNS
+    'ec2-51-20-67-2.eu-north-1.compute.amazonaws.com', # Your Public DNS
+    'localhost',
+    '127.0.0.1',
 ]
 
 
@@ -100,9 +102,9 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         
         # This is the line you are adding.
-        # It tells Django to look in a folder named 'templates'
+        # It tells Django to look in a folder named 'Templates'
         # in your project's root directory (BASE_DIR).
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'Templates')],
         
         'APP_DIRS': True, # This tells Django to ALSO look inside app folders
         'OPTIONS': {
