@@ -70,7 +70,29 @@
                     {% endif %}
 
                     <h2 class="text-2xl font-bold text-gray-800 mb-2 line-clamp-2">{{ movie.title }}</h2>
-
+                    <div class="flex items-center mb-2" title="Rating: {{ movie.rating|floatformat:1|default:'N/A' }}/5">
+                        <div class="relative flex items-center text-2xl">
+                            <div class="flex text-gray-300">
+                                <span>★</span>
+                                <span>★</span>
+                                <span>★</span>
+                                <span>★</span>
+                                <span>★</span>
+                            </div>
+                            <div class="absolute top-0 left-0 overflow-hidden" style="width: {% widthratio movie.rating 5 100 %}%">
+                                <div class="flex text-yellow-400">
+                                    <span>★</span>
+                                    <span>★</span>
+                                    <span>★</span>
+                                    <span>★</span>
+                                    <span>★</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-gray-600 font-semibold ml-2 text-sm">
+                            {{ movie.rating|floatformat:1|default:'N/A' }}
+                        </span>
+                    </div>
                     <div class="flex flex-wrap gap-1 my-2 genre-buttons-wrap">
                         <span class="genre-marker"
                             data-genre="{% if movie.genres_list %}{{ movie.genres_list|join:', ' }}{% elif movie.genre_movie %}{{ movie.genre_movie }}{% elif movie.genre %}{{ movie.genre }}{% elif movie.gender %}{{ movie.gender }}{% else %}Other{% endif %}">
