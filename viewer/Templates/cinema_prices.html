@@ -12,151 +12,65 @@
         </h1>
     </div>
 
-    <div class="max-w-5xl mx-auto bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-700">
+    <div class="max-w-5xl mx-auto space-y-8">
         
-        {% if cinemas_with_showtimes or other_cinemas %}
-            <table class="min-w-full text-white">
-                <thead class="bg-gray-800/70">
-                    <tr>
-                        <th class="px-6 py-4 text-left text-lg font-medium text-cyan-300 uppercase tracking-wider">
-                            Cinema
-                        </th>
-                        <th class="px-6 py-4 text-left text-lg font-medium text-cyan-300 uppercase tracking-wider">
-                            Ticket Type
-                        </th>
-                        <th class="px-6 py-4 text-left text-lg font-medium text-cyan-300 uppercase tracking-wider">
-                            Weekday (Mon-Thu)
-                        </th>
-                        <th class="px-6 py-4 text-left text-lg font-medium text-cyan-300 uppercase tracking-wider">
-                            Weekend (Fri-Sun)
-                        </th>
-                        <th class="px-6 py-4 text-left text-lg font-medium text-cyan-300 uppercase tracking-wider">
-                            Actions
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-700">
-                    
-                    {% for cinema in cinemas_with_showtimes %}
-                        <tr class="bg-gray-900/30">
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-bold align-top" rowspan="4">
-                                {{ cinema.name }}
-                                <p class="text-sm font-normal text-gray-400">{{ cinema.location }}</p>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg">
-                                Adult <span class="text-gray-400 text-sm">(13-64)</span>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.Adult_ticket_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.adult_weekend_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold align-top" rowspan="4">
-                                {% if user.is_staff %}
-                                    <a href="{% url 'cinema_prices_update' cinema.pk %}" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition text-sm font-medium">
-                                        Update
-                                    </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg">
-                                Child <span class="text-gray-400 text-sm">(3-12)</span>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.Child_ticket_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.child_weekend_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg">
-                                Senior <span class="text-gray-400 text-sm">(65+)</span>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.Senior_ticket_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.senior_weekend_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg">
-                                Student <span class="text-gray-400 text-sm">(with valid ID)</span>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.Student_ticket_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.student_weekend_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    
-                    {% for cinema in other_cinemas %}
-                        <tr class="bg-gray-900/30">
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-bold align-top" rowspan="4">
-                                {{ cinema.name }}
-                                <p class="text-sm font-normal text-gray-400">{{ cinema.location }}</p>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg">
-                                Adult <span class="text-gray-400 text-sm">(13-64)</span>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.Adult_ticket_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.adult_weekend_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold align-top" rowspan="4">
-                                {% if user.is_staff %}
-                                    <a href="{% url 'cinema_prices_update' cinema.pk %}" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition text-sm font-medium">
-                                        Update
-                                    </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg">
-                                Child <span class="text-gray-400 text-sm">(3-12)</span>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.Child_ticket_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.child_weekend_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg">
-                                Senior <span class="text-gray-400 text-sm">(65+)</span>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.Senior_ticket_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.senior_weekend_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg">
-                                Student <span class="text-gray-400 text-sm">(with valid ID)</span>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.Student_ticket_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-lg font-semibold">
-                                ${{ cinema.student_weekend_price|default:"0.00"|floatformat:2 }}
-                            </td>
-                        </tr>
-                    {% endfor %}
+        {% if cinemas_with_showtimes %}
+            {% for cinema in cinemas_with_showtimes %}
+            <div class="bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-700">
+                
+                <div class="p-4 bg-gray-800/70 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold text-cyan-300">{{ cinema.name }}</h3>
+                        <p class="text-sm font-normal text-gray-400">{{ cinema.location }}</p>
+                    </div>
+                    {% if user.is_staff %}
+                        <a href="{% url 'cinema_prices_update' cinema.pk %}" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition text-sm font-medium mt-2 sm:mt-0 self-start sm:self-center">
+                            Update Prices
+                        </a>
+                    {% endif %}
+                </div>
 
-                </tbody>
-            </table>
+                <ul class="divide-y divide-gray-700 p-6 text-white">
+                    <li class="grid grid-cols-3 gap-4 pb-3">
+                        <span class="font-medium text-cyan-300">Ticket Type</span>
+                        <span class="font-medium text-cyan-300 text-right">Weekday</span>
+                        <span class="font-medium text-cyan-300 text-right">Weekend</span>
+                    </li>
+                    
+                    <li class="grid grid-cols-3 gap-4 py-3">
+                        <span>Adult <span class="text-gray-400 text-sm">(13-64)</span></span>
+                        <span class="font-semibold text-right">${{ cinema.Adult_ticket_price|default:"0.00"|floatformat:2 }}</span>
+                        <span class="font-semibold text-right">${{ cinema.adult_weekend_price|default:"0.00"|floatformat:2 }}</span>
+                    </li>
+                    
+                    <li class="grid grid-cols-3 gap-4 py-3">
+                        <span>Child <span class="text-gray-400 text-sm">(3-12)</span></span>
+                        <span class="font-semibold text-right">${{ cinema.Child_ticket_price|default:"0.00"|floatformat:2 }}</span>
+                        <span class="font-semibold text-right">${{ cinema.child_weekend_price|default:"0.00"|floatformat:2 }}</span>
+                    </li>
+
+                    <li class="grid grid-cols-3 gap-4 py-3">
+                        <span>Senior <span class="text-gray-400 text-sm">(65+)</span></span>
+                        <span class="font-semibold text-right">${{ cinema.Senior_ticket_price|default:"0.00"|floatformat:2 }}</span>
+                        <span class="font-semibold text-right">${{ cinema.senior_weekend_price|default:"0.00"|floatformat:2 }}</span>
+                    </li>
+
+                    <li class="grid grid-cols-3 gap-4 py-3">
+                        <span>Student <span class="text-gray-400 text-sm">(with valid ID)</span></span>
+                        <span class="font-semibold text-right">${{ cinema.Student_ticket_price|default:"0.00"|floatformat:2 }}</span>
+                        <span class="font-semibold text-right">${{ cinema.student_weekend_price|default:"0.00"|floatformat:2 }}</span>
+                    </li>
+                </ul>
+
+            </div>
+            {% endfor %}
+            
         {% else %}
-            <p class="text-white text-center p-10">Pricing information is currently unavailable.</p>
+            <div class="bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-700">
+                <p class="text-white text-center p-10 text-lg">
+                    Pricing information is not available because no cinemas are currently scheduled to show this movie.
+                </p>
+            </div>
         {% endif %}
     </div>
 
@@ -208,6 +122,7 @@
             </ul>
         </div>
     </div>
+
     <div class="max-w-5xl mx-auto space-y-8">
         {% if cinemas_with_showtimes %}
             {% for cinema in cinemas_with_showtimes %}
@@ -236,30 +151,22 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p class="text-white text-center p-10 text-xl">
-                There are no upcoming showtimes scheduled for <strong>{{ movie.title }}</strong> at any cinema.
-            </p>
+            <div class="bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-700">
+                <p class="text-white text-center p-10 text-xl">
+                    There are no upcoming showtimes scheduled for <strong>{{ movie.title }}</strong> at any cinema.
+                </p>
+            </div>
         {% endif %}
     </div>
 
-    {% if cinemas_with_showtimes or other_cinemas %}
+
+    {% if cinemas_with_showtimes %}
     <h2 class="text-3xl font-bold text-white mt-16 mb-8 text-center">
         <span class='bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 text-transparent'>Upgrades & Surcharges</span>
     </h2>
 
     <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 text-white">
         {% for cinema in cinemas_with_showtimes %}
-            <div class="bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-700">
-                <h3 class="text-xl font-semibold mb-3 text-pink-300">{{ cinema.name }}</h3>
-                <ul class="space-y-2 text-gray-300">
-                    <li>Weekend Surcharge: <span class="font-bold text-white">${{ cinema.weekend_surcharge|default:"0.00"|floatformat:2 }}</span></li>
-                    <li>Holiday Surcharge: <span class="font-bold text-white">${{ cinema.holiday_surcharge|default:"0.00"|floatformat:2 }}</span></li>
-                    <li>Matinee Discount: <span class="font-bold text-white">-${{ cinema.matinee_discount|default:"0.00"|floatformat:2 }}</span></li>
-                    <li>Weekday Discount: <span class="font-bold text-white">-${{ cinema.weekday_discount|default:"0.00"|floatformat:2 }}</span></li>
-                </ul>
-            </div>
-        {% endfor %}
-        {% for cinema in other_cinemas %}
             <div class="bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-700">
                 <h3 class="text-xl font-semibold mb-3 text-pink-300">{{ cinema.name }}</h3>
                 <ul class="space-y-2 text-gray-300">
