@@ -102,7 +102,6 @@
         }
         
         /* Specific styles for header buttons */
-/* Specific styles for header buttons */
         .actions .btn {
             padding-left: 32px !important;
             padding-right: 32px !important;
@@ -113,26 +112,40 @@
 
         /* --- Footer Styles --- */
         footer.footer-bottom {
-            margin-top: auto;   /* ADĂUGAT: Aceasta este magia care împinge footer-ul în jos */
-            flex-shrink: 0;   /* ADĂUGAT: Oprește footer-ul din a se micșora */
-            position: relative; /* MODIFICAT: Schimbat din 'absolute' */
+            margin-top: auto;   /* This is what pushes the footer down */
+            flex-shrink: 0;   /* Stops the footer from shrinking */
+            position: relative; 
             z-index: 0;
         }
+
+        /* --- ADDED: Custom scrollbar from the other file --- */
+        .max-h-24::-webkit-scrollbar {
+            width: 8px;
+        }
+        .max-h-24::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .max-h-24::-webkit-scrollbar-thumb {
+            background: #a5b4fc; /* Indigo-300 */
+            border-radius: 10px;
+        }
+        .max-h-24::-webkit-scrollbar-thumb:hover {
+            background: #818cf8; /* Indigo-400 */
+        }
+        /* --- End of added styles --- */
     </style>
     </head>
 
-<body>
+<body class="antialiased">
     
     <header class="app-header" role="banner">
         <div class="container flex flex-col md:flex-row items-center justify-between">
             <div class="flex items-center mb-2 md:mb-0">
-                {# --- MODIFIED: Content moved inside the link --- #}
                 <a class="brand flex items-center gap-2" href="{% url 'home' %}" aria-label="Film Catalog home">
-                    {# Maybe add an actual logo image here if .brand doesn't provide one via CSS #}
                     <span class="brand-badge" aria-hidden="true">FC</span>
                     <span class="">Film Catalog</span>
                 </a>
-                {# --- END MODIFICATION --- #}
                 <p class="tagline hidden sm:inline-block ml-2 text-white/90">Python Development</p>
             </div>
             <div class="flex-1"></div>
@@ -156,9 +169,11 @@
             </nav>
         </div>
     </header>
-    {% block content %}
-    {% endblock %}
-
+    
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
     
     <footer class="footer-bottom bg-gray-900 text-white py-6 w-full">
         <div class="container mx-auto text-center flex flex-col md:flex-row items-center justify-between">
@@ -167,13 +182,13 @@
                 <p class="text-xs mt-2">Software Development Academy</p>
             </div>
             <div class="mt-4 md:mt-0 flex gap-4 justify-center">
-                <a href="https://github.com/Rayns15" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">GitHub</a>
-                <a href="https://www.linkedin.com/in/emanuel-marian-panait-57b516208" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">LinkedIn</a>
+                <a href="https://github.com/Rayns15" target="_blank" rel="noopener noreferrer" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">GitHub</a>
+                <a href="https://www.linkedin.com/in/emanuel-marian-panait-57b516208" target="_blank" rel="noopener noreferrer" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">LinkedIn</a>
             </div>
         </div>
     </footer>
+
     <script>
-        // Smooth page transition
         function fadeInBody() {
             if (document.body) {
                 document.body.style.opacity = '0';
@@ -211,23 +226,13 @@
         window.addEventListener('pageshow', function(event) {
             if (event.persisted) {
                 if (document.body) {
-                     document.body.classList.remove('fade-out');
+                        document.body.classList.remove('fade-out');
                 }
                 fadeInBody();
             }
         });
-
-        // Auth link patching script (placeholder)
-        (function () {
-            function resolveHref(candidates, cb) { /* ...your function... */ }
-            function patchAuthLinks() { /* ...your function... */ }
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', patchAuthLinks);
-            } else {
-                patchAuthLinks();
-            }
-        })();
     </script>
+    
     {% block scripts %}
     {% endblock %}
 

@@ -11,8 +11,9 @@ from django.conf.urls.static import static
 urlpatterns = [
     # === Pagina principală și Filme ===
     path('', views.afiseaza_home_page, name='home'),
-    path('search/', views.movie_search_view, name='movie_search'),
-    
+    #path('search/', views.movie_search_view, name='movie_search'),
+    path('search/', views.movie_list, name='movie_search'),
+
     # === ACEASTA ESTE CALEA CORECTĂ ===
     # Trimite către Class-Based View (MovieDetailView), nu către o funcție veche
     path('movie/<int:pk>/', views.MovieDetailView.as_view(), name='movie-detail'),

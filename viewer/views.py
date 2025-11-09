@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm # Or your custom SignupForm
 from django.contrib import messages
 from .forms import CustomSignupForm, ProfileForm, RegisterForm, CinemaForm
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.utils import timezone
 from .models import Cinema, Showtime, Movie
 
@@ -24,6 +24,40 @@ def chat_api(request):
 
 def base_view(request):
     return render(request, 'base.html')
+
+def movie_list(request):
+    """
+    This view handles both displaying all movies and searching.
+    """
+    # Get the search term from the URL (e.g., ?q=search_term)
+    query = request.GET.get('q')
+    
+    no_results = False
+    
+    if query:
+        # If there is a search query, filter the movies
+        movies = Movie.objects.filter(
+            Q(title__icontains=query) |
+            Q(director__icontains=query) |
+            Q(genre_movie__icontains=query)
+        )
+        if not movies.exists():
+            no_results = True
+    else:
+        # If there's no search, get all movies
+        movies = Movie.objects.all()
+
+    # This 'context' dictionary is what passes data to your template.
+    # The keys ('movies_html', 'query') must match what your template uses.
+    context = {
+        'movies_html': movies,
+        'query': query,
+        'no_results': no_results
+    }
+    
+    # Assumes your template file is named 'movie_list.html'
+    # and is in a 'templates' folder.
+    return render(request, 'movie_list.html', context)
 
 # def search(request):
 #     query = request.GET.get('q', '')

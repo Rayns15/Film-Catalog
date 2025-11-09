@@ -95,7 +95,7 @@
                     </div>
                     <div class="flex flex-wrap gap-1 my-2 genre-buttons-wrap">
                         <span class="genre-marker"
-                            data-genre="{% if movie.genres_list %}{{ movie.genres_list|join:', ' }}{% elif movie.genre_movie %}{{ movie.genre_movie }}{% elif movie.genre %}{{ movie.genre }}{% elif movie.gender %}{{ movie.gender }}{% else %}Other{% endif %}">
+                            data-genre="{% if movie.genres_list %}{{ movie.genres_list|join:', ' }}{% else %}{% firstof movie.genre_movie movie.genre movie.gender 'Other' %}{% endif %}">
                         </span>
                     </div>
                 </div>
