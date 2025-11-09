@@ -13,8 +13,10 @@
 
 **"Film Catalog"** is a movie database and review website built using **Django** and **Tailwind CSS**. It includes several pages such as Home, About, Contact, Movie Listings, Genres, and custom 404 pages. The project features a clean and modern design that is fully responsive and optimized for performance. It includes a powerful admin interface for managing films, genres, and reviews, and is easy to customize and deploy to a production environment.
 
-![viewer/Static/Pics/home.jpg](https://github.com/Rayns15/Film-Catalog/blob/292ee2421936ac76fecf199c05b97f4d18622595/viewer/Static/Pics/home.jpg)
-![viewer/Static/Pics/Home2.jpg](https://github.com/Rayns15/Film-Catalog/blob/292ee2421936ac76fecf199c05b97f4d18622595/viewer/Static/Pics/Home2.jpg)
+<!-- ![viewer/Static/Pics/home.jpg](https://github.com/Rayns15/Film-Catalog/blob/292ee2421936ac76fecf199c05b97f4d18622595/viewer/Static/Pics/home.jpg) -->
+![media/Home_new3.jpg](https://github.com/Rayns15/Film-Catalog/blob/3ac23f648f28bce4c0e2b0bc16a2b2587ea5e8c0/media/Home_new3.jpg)
+![media/Home_new3.jpg](https://github.com/Rayns15/Film-Catalog/blob/3ac23f648f28bce4c0e2b0bc16a2b2587ea5e8c0/media/Home_new.jpg)
+
 
 ## Table of Content
 
@@ -142,9 +144,9 @@ python manage.py runserver
 
 ## Admin Screenshots
 
+![media/Home_new1.jpg](https://github.com/Rayns15/Film-Catalog/blob/3ac23f648f28bce4c0e2b0bc16a2b2587ea5e8c0/media/Home_new1.jpg)
+![media/Home_new1.jpg](https://github.com/Rayns15/Film-Catalog/blob/3ac23f648f28bce4c0e2b0bc16a2b2587ea5e8c0/media/Home_new2.jpg)
 ![viewer/Static/Pics/filter.jpg](https://github.com/Rayns15/Film-Catalog/blob/11f141c09edd8b3e1cb5b4540c8e708cb172e3f4/viewer/Static/Pics/filter.jpg)
-![viewer/Static/Pics/Login.jpg](https://github.com/Rayns15/Film-Catalog/blob/11f141c09edd8b3e1cb5b4540c8e708cb172e3f4/viewer/Static/Pics/Login.jpg)
-![viewer/Static/Pics/Signup.jpg](https://github.com/Rayns15/Film-Catalog/blob/11f141c09edd8b3e1cb5b4540c8e708cb172e3f4/viewer/Static/Pics/Signup.jpg)
 
 ## Deployment
 
