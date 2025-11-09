@@ -40,6 +40,8 @@ def delete_chat_message(request, message_pk):
 
 @login_required
 @require_POST
+@login_required
+@require_POST
 def post_chat_message(request, movie_pk):
     try:
         movie = Movie.objects.get(pk=movie_pk)
@@ -49,21 +51,22 @@ def post_chat_message(request, movie_pk):
         if not message_text:
             return JsonResponse({'status': 'error', 'message': 'Message is empty'}, status=400)
 
-        # This is where the message is saved to the database
         chat_message = ChatMessage.objects.create(
             movie=movie,
             user=request.user,
             message=message_text
         )
 
-        # Send back the new message data so JavaScript can display it
+        # --- THIS IS THE CRITICAL FIX ---
+        # You MUST return the new message's ID so the JavaScript knows it.
         return JsonResponse({
             'status': 'ok',
             'message': chat_message.message,
             'user': chat_message.user.username,
             'timestamp': chat_message.timestamp.strftime('%b %d, %I:%M %p'),
-            'message_id': chat_message.pk  # <-- IMPORTANT: Send the new ID for the delete button
+            'message_id': chat_message.pk  # <-- THIS LINE IS REQUIRED
         })
+        # --------------------------------
 
     except Movie.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Movie not found'}, status=404)
