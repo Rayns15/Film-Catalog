@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy, reverse
 from viewer.models import Movie, Showtime
@@ -15,9 +15,132 @@ from django.contrib import messages
 from .forms import CustomSignupForm, ProfileForm, RegisterForm, CinemaForm
 from django.db.models import Prefetch, Q
 from django.utils import timezone
-from .models import Cinema, Showtime, Movie
+from .models import Cinema, Showtime, Movie, ChatMessage, Profile, User, ChatMessage
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+import json
 
 # Create your views here.
+
+# Add this new delete view in viewer/views.py
+@login_required
+@require_POST
+def delete_chat_message(request, message_pk):
+    if not request.user.is_staff:
+        return JsonResponse({'status': 'error', 'message': 'Not authorized'}, status=403)
+
+    try:
+        message = ChatMessage.objects.get(pk=message_pk)
+        message.delete()
+        return JsonResponse({'status': 'ok'})
+    except ChatMessage.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Message not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@login_required
+@require_POST
+def post_chat_message(request, movie_pk):
+    try:
+        movie = Movie.objects.get(pk=movie_pk)
+        data = json.loads(request.body)
+        message_text = data.get('message')
+
+        if not message_text:
+            return JsonResponse({'status': 'error', 'message': 'Message is empty'}, status=400)
+
+        # This is where the message is saved to the database
+        chat_message = ChatMessage.objects.create(
+            movie=movie,
+            user=request.user,
+            message=message_text
+        )
+
+        # Send back the new message data so JavaScript can display it
+        return JsonResponse({
+            'status': 'ok',
+            'message': chat_message.message,
+            'user': chat_message.user.username,
+            'timestamp': chat_message.timestamp.strftime('%b %d, %I:%M %p'),
+            'message_id': chat_message.pk  # <-- IMPORTANT: Send the new ID for the delete button
+        })
+
+    except Movie.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Movie not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@login_required
+@require_POST
+def post_chat_message(request, movie_pk):
+    try:
+        movie = Movie.objects.get(pk=movie_pk)
+        
+        # Load the message from the request body
+        data = json.loads(request.body)
+        message_text = data.get('message')
+
+        if not message_text:
+            return JsonResponse({'status': 'error', 'message': 'Message is empty'}, status=400)
+
+        # Create and save the new message
+        chat_message = ChatMessage.objects.create(
+            movie=movie,
+            user=request.user,
+            message=message_text
+        )
+
+        # Return a success response with data for the JavaScript
+        return JsonResponse({
+            'status': 'ok',
+            'message': chat_message.message,
+            'user': chat_message.user.username,
+            'timestamp': chat_message.timestamp.strftime('%b %d, %I:%M %p')
+        })
+
+    except Movie.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Movie not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+class CinemaPricesView(DetailView):
+    model = Movie
+    template_name = 'cinema_prices.html'
+    context_object_name = 'movie'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        movie = self.get_object()
+        now = timezone.now()
+
+        # --- This is the EFFICIENT query logic from your function ---
+
+        # 1. Create a Prefetch to get only this movie's upcoming showtimes
+        showtimes_for_this_movie = Prefetch(
+            'cinema_showtimes',  # The related_name from Cinema to Showtime
+            queryset=Showtime.objects.filter(
+                movie_id=movie.id,
+                show_time__gte=now
+            ).order_by('show_time'),
+            to_attr='filtered_showtimes'  # This creates 'cinema.filtered_showtimes' in the template
+        )
+
+        # 2. Get ONLY cinemas that have upcoming showtimes for this movie.
+        # This runs 2 queries total, not 101.
+        
+        cinemas_with_showtimes = Cinema.objects.filter(
+            cinema_showtimes__movie_id=movie.id,
+            cinema_showtimes__show_time__gte=now
+        ).distinct().prefetch_related(showtimes_for_this_movie)
+        
+        # --- End of efficient query logic ---
+
+        context['cinemas_with_showtimes'] = cinemas_with_showtimes
+
+        # This adds the chat messages (which you already had)
+        context['chat_messages'] = ChatMessage.objects.filter(movie=movie)
+        
+        return context
 
 def admin_view(request):
     return HttpResponse("Admin View")
@@ -32,34 +155,29 @@ def movie_list(request):
     """
     This view handles both displaying all movies and searching.
     """
-    # Get the search term from the URL (e.g., ?q=search_term)
     query = request.GET.get('q')
-    
     no_results = False
     
     if query:
-        # If there is a search query, filter the movies
+        # --- MODIFICATION 1: Added .order_by('pk') ---
         movies = Movie.objects.filter(
             Q(title__icontains=query) |
             Q(director__icontains=query) |
             Q(genre_movie__icontains=query)
-        )
+        ).order_by('pk') # <-- Sorts search results from old to new
+        
         if not movies.exists():
             no_results = True
     else:
-        # If there's no search, get all movies
-        movies = Movie.objects.all()
+        # --- MODIFICATION 2: Added .order_by('pk') ---
+        movies = Movie.objects.all().order_by('pk') # <-- Sorts all movies from old to new
 
-    # This 'context' dictionary is what passes data to your template.
-    # The keys ('movies_html', 'query') must match what your template uses.
     context = {
         'movies_html': movies,
         'query': query,
         'no_results': no_results
     }
     
-    # Assumes your template file is named 'movie_list.html'
-    # and is in a 'templates' folder.
     return render(request, 'movie_list.html', context)
 
 # def search(request):
@@ -482,48 +600,48 @@ def movie_create(request):
         form = MovieForm()
     return render(request, 'movie_form.html', {'form': form})
 
-def cinema_prices_view(request, pk):
-    """
-    Shows prices for all cinemas AND upcoming showtimes for
-    the movie specified by 'movie_id'.
-    """
+# def cinema_prices_view(request, pk):
+#     """
+#     Shows prices for all cinemas AND upcoming showtimes for
+#     the movie specified by 'movie_id'.
+#     """
     
-    # 1. Get the specific movie we want to see
-    movie = get_object_or_404(Movie, pk=pk)
+#     # 1. Get the specific movie we want to see
+#     movie = get_object_or_404(Movie, pk=pk)
     
-    # 2. Get the current time
-    now = timezone.now()
+#     # 2. Get the current time
+#     now = timezone.now()
 
-    # 3. Create a Prefetch object to get ONLY upcoming showtimes for this movie.
-    #    This is how we'll get the list of times for each cinema.
-    showtimes_for_this_movie = Prefetch(
-        'cinema_showtimes',
-        # We filter for the movie AND for showtimes that are in the future
-        queryset=Showtime.objects.filter(
-            movie_id=movie.id,
-            show_time__gte=now  # 'gte' means "greater than or equal to"
-        ).order_by('show_time'),
-        to_attr='filtered_showtimes' # The template will access this
-    )
+#     # 3. Create a Prefetch object to get ONLY upcoming showtimes for this movie.
+#     #    This is how we'll get the list of times for each cinema.
+#     showtimes_for_this_movie = Prefetch(
+#         'cinema_showtimes',
+#         # We filter for the movie AND for showtimes that are in the future
+#         queryset=Showtime.objects.filter(
+#             movie_id=movie.id,
+#             show_time__gte=now  # 'gte' means "greater than or equal to"
+#         ).order_by('show_time'),
+#         to_attr='filtered_showtimes' # The template will access this
+#     )
 
-    # 4. Get ONLY the cinemas that have upcoming showtimes for this movie.
-    #    This is the main fix. We no longer fetch cinemas that aren't playing the movie.
-    relevant_cinemas = Cinema.objects.filter(
-        cinema_showtimes__movie_id=movie.id,
-        cinema_showtimes__show_time__gte=now
-    ).distinct().prefetch_related(showtimes_for_this_movie)
+#     # 4. Get ONLY the cinemas that have upcoming showtimes for this movie.
+#     #    This is the main fix. We no longer fetch cinemas that aren't playing the movie.
+#     relevant_cinemas = Cinema.objects.filter(
+#         cinema_showtimes__movie_id=movie.id,
+#         cinema_showtimes__show_time__gte=now
+#     ).distinct().prefetch_related(showtimes_for_this_movie)
     
-    # 5. Get all other cinemas that DON'T have showtimes, just for price comparison
-    other_cinemas = Cinema.objects.exclude(
-        id__in=relevant_cinemas.values_list('id', flat=True)
-    )
+#     # 5. Get all other cinemas that DON'T have showtimes, just for price comparison
+#     other_cinemas = Cinema.objects.exclude(
+#         id__in=relevant_cinemas.values_list('id', flat=True)
+#     )
 
-    context = {
-        'cinemas_with_showtimes': relevant_cinemas, # Cinemas *with* showtimes
-        'other_cinemas': other_cinemas,           # Cinemas *without* showtimes
-        'movie': movie                            # The specific movie
-    }
-    return render(request, 'cinema_prices.html', context)
+#     context = {
+#         'cinemas_with_showtimes': relevant_cinemas, # Cinemas *with* showtimes
+#         'other_cinemas': other_cinemas,           # Cinemas *without* showtimes
+#         'movie': movie                            # The specific movie
+#     }
+#     return render(request, 'cinema_prices.html', context)
     
 def cinema_prices_update_view(request, pk):
     """

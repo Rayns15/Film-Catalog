@@ -10,6 +10,8 @@ from . import views  # <-- MODIFICARE IMPORTANTĂ: importă din folderul curent
 urlpatterns = [
     # === Pagina principală și Filme ===
     # Am șters 'admin/' și 'include()' de aici
+    path('api/chat/post/<int:movie_pk>/', views.post_chat_message, name='post-chat-message'),
+    path('api/chat/delete/<int:message_pk>/', views.delete_chat_message, name='delete-chat-message'),
     
     #path('', views.afiseaza_home_page, name='home'),
     path('', views.movie_list, name='home'), # Am corectat name='home' aici
@@ -26,7 +28,7 @@ urlpatterns = [
     path('movie/<int:pk>/delete/', views.MovieDeleteView.as_view(), name='movie-delete'),
 
     # === Prețuri Cinema și Showtimes ===
-    path('movie/<int:pk>/prices/', views.cinema_prices_view, name='cinema_prices'),
+    path('movie/<int:pk>/prices/', views.CinemaPricesView.as_view(), name='cinema_prices'),
     # --- CORECTAT: Era 'as_IA_view()' ---
     path('prices/update/<int:pk>/', views.CinemaUpdateView.as_view(), name='cinema_prices_update'),
 
