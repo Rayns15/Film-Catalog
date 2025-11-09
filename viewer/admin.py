@@ -1,5 +1,4 @@
 from django.contrib import admin
-from viewer.models import Movie
 from viewer.models import Movie, Cinema, Showtime
 
 
@@ -55,4 +54,6 @@ class ShowtimeAdmin(admin.ModelAdmin):
     list_filter = ('cinema', 'movie', 'show_time')
     search_fields = ('movie__Title', 'cinema__name')
     autocomplete_fields = ['movie', 'cinema'] # Makes dropdowns searchable
+
+
 # Register your models here.

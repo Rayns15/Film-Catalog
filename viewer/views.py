@@ -19,6 +19,9 @@ from .models import Cinema, Showtime, Movie
 
 # Create your views here.
 
+def admin_view(request):
+    return HttpResponse("Admin View")
+
 def chat_api(request):
     return HttpResponse("Chat API is working!")
 

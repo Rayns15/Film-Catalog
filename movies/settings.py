@@ -83,19 +83,6 @@ ROOT_URLCONF = 'movies.urls'
 
 
 
-# settings.py
-
-# --- Make sure these imports are at the top of your file ---
-import os
-from pathlib import Path
-
-# --- Make sure BASE_DIR is defined (it should be near the top) ---
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# ... other settings ...
-
-
 # === YOUR CORRECTED TEMPLATES SETTING ===
 TEMPLATES = [
     {
