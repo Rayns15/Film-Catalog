@@ -166,7 +166,7 @@
                 </ul>
             {% endif %}
 
-            <form method="post" action="{% url 'profile_edit' %}">
+            <form method="post" action="{% url 'profile_edit' user.pk %}">
                 {% csrf_token %}
 
                 <div class="field">

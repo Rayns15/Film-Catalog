@@ -140,7 +140,7 @@
             {% endif %}
             
             <div class="footer-links">
-                <a class="link" href="{% url 'profile_edit' %}">Edit Profile</a>
+                <a class="link" href="{% url 'profile_edit' user.pk %}">Edit Profile</a>
                 <a class="link" href="{% url 'logout' %}">Logout</a>
             </div>
 

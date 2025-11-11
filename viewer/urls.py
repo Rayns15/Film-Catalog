@@ -30,7 +30,7 @@ urlpatterns = [
     # === Prețuri Cinema și Showtimes ===
     path('movie/<int:pk>/prices/', views.CinemaPricesView.as_view(), name='cinema_prices'),
     # --- CORECTAT: Era 'as_IA_view()' ---
-    path('prices/update/<int:pk>/', views.CinemaUpdateView.as_view(), name='cinema_prices_update'),
+    path('prices/update/<int:pk>/', views.cinema_prices_update, name='cinema_prices_update'),
 
     # === Autentificare ===
     path('login/', auth_views.LoginView.as_view(template_name='Log_in.html'), name='login'),
@@ -39,7 +39,7 @@ urlpatterns = [
 
     # === Profil ===
     path('profile/', views.profile_view, name='profile'),
-    path('profile/edit/', views.edit_profile, name='profile_edit'),
+    path('profile/edit/<int:pk>/', views.edit_profile, name='profile_edit'),
     path('profile/delete/', views.profile_delete_view, name='profile_delete'),
 
     # === Resetare Parolă (totul este corect) ===

@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Update Prices - {{ cinema.name }}{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-screen-xl mx-auto px-2 sm:px-4 md:px-8 py-10">
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+        <h1 class="text-4xl font-extrabold text-white text-center">
+            Update Prices for 
+            <span class='bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-transparent'>{{ cinema.name }}</span>
+        </h1>
+    </div>
+    
+    <div class="max-w-4xl mx-auto bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-700">
+        
+        <form method="POST" class="p-6 sm:p-8 space-y-8">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            
+            <div>
+                <h3 class="text-2xl font-bold text-white mb-6 border-b border-gray-700 pb-3">
+                    Cinema Details
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    
+                    <div>
+                        <label for="id_name" class="block text-sm font-medium text-gray-300 mb-2">Cinema Name</label>
+                        <input type="text" 
+                               name="name" 
+                               value="{{ cinema.name|default:'' }}" 
+                               id="id_name" 
+                               required
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    
+                    <div>
+                        <label for="id_location" class="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                        <input type="text" 
+                               name="location" 
+                               value="{{ cinema.location|default:'' }}" 
+                               id="id_location" 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-2xl font-bold text-white mb-6 border-b border-gray-700 pb-3">
+                    Base Ticket Prices (Weekday)
+                </h3>
+                <p class="text-sm text-gray-400 -mt-6 mb-6">Enter prices in whole numbers (e.g., 15).</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    
+                    <div>
+                        <label for="id_adult_price" class="block text-sm font-medium text-gray-300 mb-2">Adult Price</label>
+                        <input type="number" step="1" min="0" 
+                               name="Adult_ticket_price" 
+                               value="{{ cinema.Adult_ticket_price|default:0 }}" 
+                               id="id_adult_price" 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    
+                    <div>
+                        <label for="id_child_price" class="block text-sm font-medium text-gray-300 mb-2">Child Price</label>
+                        <input type="number" step="1" min="0" 
+                               name="Child_ticket_price" 
+                               value="{{ cinema.Child_ticket_price|default:0 }}" 
+                               id="id_child_price" 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <div>
+                        <label for="id_senior_price" class="block text-sm font-medium text-gray-300 mb-2">Senior Price</label>
+                        <input type="number" step="1" min="0" 
+                               name="Senior_ticket_price" 
+                               value="{{ cinema.Senior_ticket_price|default:0 }}" 
+                               id="id_senior_price" 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <div>
+                        <label for="id_student_price" class="block text-sm font-medium text-gray-300 mb-2">Student Price</label>
+                        <input type="number" step="1" min="0" 
+                               name="Student_ticket_price" 
+                               value="{{ cinema.Student_ticket_price|default:0 }}" 
+                               id="id_student_price" 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="text-2xl font-bold text-white mb-6 border-b border-gray-700 pb-3">
+                    Surcharges & Discounts
+                </h3>
+                <p class="text-sm text-gray-400 -mt-6 mb-6">Enter as positive numbers. Discounts are subtracted, surcharges are added.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    
+                    <div>
+                        <label for="id_weekend_surcharge" class="block text-sm font-medium text-gray-300 mb-2">Weekend Surcharge (+)</label>
+                        <input type="number" step="1" min="0" 
+                               name="weekend_surcharge" 
+                               value="{{ cinema.weekend_surcharge|default:0 }}" 
+                               id="id_weekend_surcharge" 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <div>
+                        <label for="id_holiday_surcharge" class="block text-sm font-medium text-gray-300 mb-2">Holiday Surcharge (+)</label>
+                        <input type="number" step="1" min="0" 
+                               name="holiday_surcharge" 
+                               value="{{ cinema.holiday_surcharge|default:0 }}" 
+                               id="id_holiday_surcharge" 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <div>
+                        <label for="id_weekday_discount" class="block text-sm font-medium text-gray-300 mb-2">Weekday Discount (-)</label>
+                        <input type="number" step="1" min="0" 
+                               name="weekday_discount" 
+                               value="{{ cinema.weekday_discount|default:0 }}" 
+                               id="id_weekday_discount" 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <div>
+                        <label for="id_matinee_discount" class="block text-sm font-medium text-gray-300 mb-2">Matinee Discount (-)</label>
+                        <input type="number" step="1" min="0" 
+                               name="matinee_discount" 
+                               value="{{ cinema.matinee_discount|default:0 }}" 
+                               id="id_matinee_discount" 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-700">
+                <a href="{{ next_url|default:'/' }}" class="text-center bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition font-medium">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-indigo-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+                    Save Changes
+                </button>
+            </div>
+            
+        </form>
+    </div>
+    
+</div> 
+{% endblock %}

@@ -87,3 +87,15 @@ class Showtime(models.Model):
         if self.movie and self.cinema and self.show_time:
             return f"{self.movie.title or 'Untitled'} at {self.cinema.name or 'Unknown Cinema'} ({self.show_time.strftime('%b %d, %I:%M %p')})"
         return "Invalid Showtime"
+
+# class Comment(models.Model):
+#     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="comments")
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     content = models.TextField()
+#     created_at = models.DateTimeField(auto_now_add=True)
+
+#     class Meta:
+#         ordering = ['-created_at']
+
+#     def __str__(self):
+#         return f"Comment by {self.user.username} on {self.movie.title}"

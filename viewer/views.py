@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy, reverse
@@ -18,9 +18,65 @@ from django.utils import timezone
 from .models import Cinema, Showtime, Movie, ChatMessage, Profile, User, ChatMessage
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required # Even better!
 import json
 
 # Create your views here.
+
+@staff_member_required
+@login_required
+def cinema_prices_update(request, pk):
+    
+    cinema = get_object_or_404(Cinema, pk=pk)
+    
+    # Get the "next" URL from the URL parameter (on GET)
+    next_url = request.GET.get('next')
+
+    if request.method == 'POST':
+        # Get the "next" URL from the hidden form input (on POST)
+        next_url = request.POST.get('next')
+        
+        # Helper function
+        def get_int_or_none(field_name):
+            value = request.POST.get(field_name)
+            if value:
+                try:
+                    return int(value)
+                except (ValueError, TypeError):
+                    return None
+            return None
+
+        # Update all fields from the form
+        cinema.name = request.POST.get('name', cinema.name)
+        cinema.location = request.POST.get('location', cinema.location)
+        cinema.Adult_ticket_price = get_int_or_none('Adult_ticket_price')
+        cinema.Child_ticket_price = get_int_or_none('Child_ticket_price')
+        cinema.Senior_ticket_price = get_int_or_none('Senior_ticket_price')
+        cinema.Student_ticket_price = get_int_or_none('Student_ticket_price')
+        cinema.weekend_surcharge = get_int_or_none('weekend_surcharge')
+        cinema.holiday_surcharge = get_int_or_none('holiday_surcharge')
+        cinema.weekday_discount = get_int_or_none('weekday_discount')
+        cinema.matinee_discount = get_int_or_none('matinee_discount')
+
+        cinema.save()
+        
+        messages.success(request, f"Prices for '{cinema.name}' updated successfully!")
+        
+        # --- THIS IS THE FIX ---
+        # Redirect to the "next" URL if it exists, otherwise go home.
+        if next_url:
+            return redirect(next_url)
+        else:
+            return redirect('/') # Fallback to homepage
+
+    else:
+        # --- THIS IS THE GET REQUEST PART ---
+        # Pass the cinema AND the next_url to the template
+        context = {
+            'cinema': cinema,
+            'next_url': next_url  # Add this
+        }
+        return render(request, 'cinema_prices_update.html', context)
 
 # Add this new delete view in viewer/views.py
 @login_required
@@ -501,17 +557,17 @@ def profile_delete_view(request):
 
 @login_required
 
-@login_required
-def profile_edit(request):
-    user = request.user
-    if request.method == 'POST':
-        user.username = request.POST.get('username', user.username)
-        user.email = request.POST.get('email', user.email)
-        user.first_name = request.POST.get('first_name', user.first_name)
-        user.last_name = request.POST.get('last_name', user.last_name)
-        user.save()
-        return redirect('profile')
-    return render(request, 'profile_edit.html', {'user': user})
+# @login_required
+# def profile_edit(request):
+#     user = request.user
+#     if request.method == 'POST':
+#         user.username = request.POST.get('username', user.username)
+#         user.email = request.POST.get('email', user.email)
+#         user.first_name = request.POST.get('first_name', user.first_name)
+#         user.last_name = request.POST.get('last_name', user.last_name)
+#         user.save()
+#         return redirect('profile')
+#     return render(request, 'profile_edit.html', {'user': user})
 
 def profile_delete_confirm_view(request):
     if request.method == 'POST':
@@ -580,18 +636,6 @@ def profile_delete_view(request):
         # Here you would typically delete the user's profile
         return HttpResponse("Profile deleted successfully")
     return render(request, 'profile_delete.html')
-
-@login_required
-def profile_edit(request):
-    user = request.user
-    if request.method == 'POST':
-        user.username = request.POST.get('username', user.username)
-        user.email = request.POST.get('email', user.email)
-        user.first_name = request.POST.get('first_name', user.first_name)
-        user.last_name = request.POST.get('last_name', user.last_name)
-        user.save()
-        return redirect('profile')
-    return render(request, 'profile_edit.html', {'user': user})
 
 def movie_create(request):
     if request.method == 'POST':
@@ -676,11 +720,11 @@ def cinema_prices_delete_view(request, pk):
     return render(request, 'cinema_prices_delete.html', {'cinema': cinema})
 
 @login_required
-def edit_profile(request):
+def edit_profile(request, pk):
+    user = get_object_or_404(User, pk=pk)
     if request.method == 'POST':
         # Handle profile update logic here
         # Example: update user fields from request.POST
-        user = request.user
         user.first_name = request.POST.get('first_name', user.first_name)
         user.last_name = request.POST.get('last_name', user.last_name)
         user.email = request.POST.get('email', user.email)

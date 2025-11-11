@@ -1,26 +1,37 @@
 from django.contrib import admin
-from viewer.models import Movie, Cinema, Showtime
+from viewer.models import Movie, Cinema, Showtime, ChatMessage, Profile
 
 
 # --- Showtime Inlines ---
 # This creates a compact, table-like "inline" form.
 
+class ProfileInline(admin.StackedInline):
+    """
+    Lets you edit Profile info directly on the User admin page.
+    """
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'Profile'
+    fk_name = 'user'  # Explicitly specify the foreign key field
+
+class ChatMessageInline(admin.TabularInline):
+    """
+    Lets you view/add/delete ChatMessages directly from the Movie admin page.
+    """
+    model = ChatMessage
+    fields = ('user', 'message', 'timestamp')
+    readonly_fields = ('timestamp',)
+    extra = 1
+    autocomplete_fields = ['user'] # Makes user field a searchable dropdown
+
 class ShowtimeInlineForMovie(admin.TabularInline):
-    """
-    Lets you add/edit Showtimes from the Movie admin page.
-    """
     model = Showtime
-    # 'movie' is automatically set to the Movie you're editing
-    fields = ('cinema', 'show_time') 
-    extra = 1  # Shows one blank form for adding a new showtime
+    fields = ('cinema', 'show_time')
+    extra = 1
     autocomplete_fields = ['cinema'] # Makes cinema field a searchable dropdown
 
 class ShowtimeInlineForCinema(admin.TabularInline):
-    """
-    Lets you add/edit Showtimes from the Cinema admin page.
-    """
     model = Showtime
-    # 'cinema' is automatically set to the Cinema you're editing
     fields = ('movie', 'show_time')
     extra = 1
     autocomplete_fields = ['movie'] # Makes movie field a searchable dropdown
@@ -34,15 +45,22 @@ class ShowtimeInlineForCinema(admin.TabularInline):
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
     list_display = ('title', 'director', 'year', 'genre_movie', 'rating')
-    search_fields = ('title', 'director') # <-- Fixed
-    list_filter = ('genre_movie', 'year')  # <-- Fixed
-    inlines = [ShowtimeInlineForMovie]
+    search_fields = ('title', 'director')
+    list_filter = ('genre_movie', 'year')
+    # --- 3. Add ChatMessageInline to this list ---
+    inlines = [ShowtimeInlineForMovie, ChatMessageInline]
 
 @admin.register(Cinema)
 class CinemaAdmin(admin.ModelAdmin):
     list_display = ('name', 'location', 'Adult_ticket_price')
-    search_fields = ('name', 'location') # Make Cinema searchable
-    inlines = [ShowtimeInlineForCinema] # <-- ATTACHES THE INLINE
+    search_fields = ('name', 'location')
+    inlines = [ShowtimeInlineForCinema]
+
+@admin.register(ChatMessage)
+class ChatMessageAdmin(admin.ModelAdmin):
+    list_display = ('movie', 'user', 'message', 'timestamp')
+    list_filter = ('movie', 'user')
+    search_fields = ('message', 'user__username', 'movie__title')
 
 @admin.register(Showtime)
 class ShowtimeAdmin(admin.ModelAdmin):
@@ -54,6 +72,7 @@ class ShowtimeAdmin(admin.ModelAdmin):
     list_filter = ('cinema', 'movie', 'show_time')
     search_fields = ('movie__Title', 'cinema__name')
     autocomplete_fields = ['movie', 'cinema'] # Makes dropdowns searchable
+
 
 
 # Register your models here.
