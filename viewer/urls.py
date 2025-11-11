@@ -28,9 +28,13 @@ urlpatterns = [
     path('movie/<int:pk>/delete/', views.MovieDeleteView.as_view(), name='movie-delete'),
 
     # === Prețuri Cinema și Showtimes ===
-    path('movie/<int:pk>/prices/', views.CinemaPricesView.as_view(), name='cinema_prices'),
+    #path('movie/<int:pk>/prices/', views.CinemaPricesView.as_view(), name='cinema_prices'),
     # --- CORECTAT: Era 'as_IA_view()' ---
     path('prices/update/<int:pk>/', views.cinema_prices_update, name='cinema_prices_update'),
+    path('movie/<int:pk>/prices/', views.cinema_prices.as_view(), name='cinema_prices'),
+    path('cinemas/', views.cinema_list_view, name='cinema-list'),
+    path('showtimes/add/', views.add_showtime_view, name='add-showtime'),
+    path('cinemas/add/', views.cinema_add_view, name='cinema-add'),
 
     # === Autentificare ===
     path('login/', auth_views.LoginView.as_view(template_name='Log_in.html'), name='login'),

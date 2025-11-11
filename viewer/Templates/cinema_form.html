@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add New Cinema{% endblock %}
+
+{% block content %}
+<style>
+    /* This styles the form fields */
+    .form-control {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 8px; /* rounded-lg */
+        border: 1px solid #4B5563; /* border-gray-600 */
+        background-color: #374151; /* bg-gray-700 */
+        color: #FFFFFF; /* text-white */
+        transition: all 0.15s ease;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #6366F1; /* focus:ring-indigo-500 */
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4); /* focus:ring-2 */
+    }
+    /* This ensures <select> elements are styled correctly */
+    .form-control {
+        -webkit-appearance: none; -moz-appearance: none; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23a78bfa'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z' clip-rule='evenodd' /%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.8rem center;
+        background-size: 1em;
+        padding-right: 2.5rem; /* Make room for the arrow */
+    }
+    /* This styles number inputs, which don't get the arrow */
+    .form-control[type="number"] {
+        background-image: none;
+        padding-right: 14px;
+    }
+</style>
+
+<div class="w-full max-w-screen-xl mx-auto px-2 sm:px-4 md:px-8 py-10">
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+        <h1 class="text-4xl font-extrabold text-white text-center">
+            <span class='bg-clip-text bg-gradient-to-r from-emerald-400 to-green-400 text-transparent'>
+                Add a New Cinema
+            </span> 📍
+        </h1>
+    </div>
+
+    <div class="max-w-4xl mx-auto bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-700">
+        
+        <form method="post" class="p-6 sm:p-8 space-y-6">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                <div>
+                    <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">{{ form.name.label }}</label>
+                    {{ form.name|add_class:"form-control" }}
+                    {% if form.name.errors %}<div class="text-red-400 text-sm mt-1">{{ form.name.errors }}</div>{% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.location.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">{{ form.location.label }}</label>
+                    {{ form.location|add_class:"form-control" }}
+                    {% if form.location.errors %}<div class="text-red-400 text-sm mt-1">{{ form.location.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <hr class="border-gray-700">
+
+            <div>
+                <h3 class="text-lg font-medium text-cyan-300 mb-3">Base Ticket Prices</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    <div>
+                        <label for="{{ form.Adult_ticket_price.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">Adult Price (Weekday)</label>
+                        {{ form.Adult_ticket_price|add_class:"form-control" }}
+                    </div>
+                    <div>
+                        <label for="{{ form.Child_ticket_price.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">Child Price (Weekday)</label>
+                        {{ form.Child_ticket_price|add_class:"form-control" }}
+                    </div>
+                    <div>
+                        <label for="{{ form.Senior_ticket_price.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">Senior Price (Weekday)</label>
+                        {{ form.Senior_ticket_price|add_class:"form-control" }}
+                    </div>
+                    <div>
+                        <label for="{{ form.Student_ticket_price.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">Student Price (Weekday)</label>
+                        {{ form.Student_ticket_price|add_class:"form-control" }}
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-gray-700">
+
+            <div>
+                <h3 class="text-lg font-medium text-cyan-300 mb-3">Surcharges & Discounts</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    <div>
+                        <label for="{{ form.weekend_surcharge.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">Weekend Surcharge (+)</label>
+                        {{ form.weekend_surcharge|add_class:"form-control" }}
+                    </div>
+                    <div>
+                        <label for="{{ form.holiday_surcharge.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">Holiday Surcharge (+)</label>
+                        {{ form.holiday_surcharge|add_class:"form-control" }}
+                    </div>
+                    <div>
+                        <label for="{{ form.weekday_discount.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">Weekday Discount (-)</label>
+                        {{ form.weekday_discount|add_class:"form-control" }}
+                    </div>
+                    <div>
+                        <label for="{{ form.matinee_discount.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">Matinee Discount (-)</label>
+                        {{ form.matinee_discount|add_class:"form-control" }}
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-700">
+                <a href="{% url 'cinema-list' %}" class="text-center bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition font-medium">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-emerald-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-emerald-700 transition">
+                    Save Cinema
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+{% comment %}
+    This template requires a simple custom filter.
+    1. Create a folder in your app: `viewer/templatetags/`
+    2. Add an empty `__init__.py` file inside it.
+    3. Create a file `viewer/templatetags/form_filters.py`
+    4. Paste this code inside `form_filters.py`:
+
+    from django import template
+    register = template.Library()
+
+    @register.filter(name='add_class')
+    def add_class(value, arg):
+        return value.as_widget(attrs={'class': arg})
+
+{% endcomment %}
+{% endblock %}

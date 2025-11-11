@@ -31,8 +31,8 @@
     </div>
     {% endif %}
 
-    {% if movies_html and not query %}
     <div id="filter-bar" class="flex flex-wrap space-x-2 my-2 justify-center gap-y-2">
+        {% if movies_html and not query %}
         <button class="filter-btn bg-gray-500 text-white px-2 py-1 rounded text-lg hover:bg-gray-600" data-genre="all">All</button>
         <button class="filter-btn bg-blue-500 text-white px-2 py-1 rounded text-lg hover:bg-blue-600" data-genre="drama">Drama</button>
         <button class="filter-btn bg-red-500 text-white px-2 py-1 rounded text-lg hover:bg-red-600" data-genre="action">Action</button>
@@ -40,16 +40,42 @@
         <button class="filter-btn bg-yellow-500 text-white px-2 py-1 rounded text-lg hover:bg-yellow-600" data-genre="comedy">Comedy</button>
         <button class="filter-btn bg-purple-500 text-white px-2 py-1 rounded text-lg hover:bg-purple-600" data-genre="thriller">Thriller</button>
         <button class="filter-btn bg-pink-500 text-white px-2 py-1 rounded text-lg hover:bg-pink-600" data-genre="horror">Horror</button>
-        {% if user.is_authenticated %}
-        
-        <a href="{% url 'movie-add' %}" class="bg-teal-500 text-white px-2 py-1 rounded text-lg hover:bg-teal-600">Add Movie</a>
-        
+        {% endif %}
+        {% if user.is_staff %}
+            <a href="{% url 'movie-add' %}" class="bg-teal-500 text-white px-2 py-1 rounded text-lg hover:bg-teal-600">Add Movie</a>
+            <a href="{% url 'add-showtime' %}" class="bg-cyan-500 text-white px-2 py-1 rounded text-lg hover:bg-cyan-600">Add Showtime</a>
+            <a href="{% url 'cinema-list' %}" class="bg-indigo-500 text-white px-2 py-1 rounded text-lg hover:bg-indigo-600">View Cinemas</a>
         {% endif %}
     </div>
-    {% endif %}
 
 </div>
+<!-- Staff tools with safe URL resolution -->
+{% if user.is_staff or user.is_superuser %}
+    {% url 'movie-add' as movie_add_url %}
+    {% url 'add-showtime' as add_showtime_url %}{% if not add_showtime_url %}{% url 'viewer:add-showtime' as add_showtime_url %}{% endif %}
+    {% url 'cinema-list' as cinema_list_url %}{% if not cinema_list_url %}{% url 'viewer:cinema-list' as cinema_list_url %}{% endif %}
 
+    <div class="w-full max-w-screen-xl mx-auto px-2 sm:px-4 md:px-8">
+        <div class="flex flex-wrap justify-center gap-2 my-4">
+            {% if movie_add_url %}
+                <a href="{{ movie_add_url }}" class="bg-teal-500 text-white px-2 py-1 rounded text-lg hover:bg-teal-600">Add Movie</a>
+            {% endif %}
+            {% if add_showtime_url %}
+                <a href="{{ add_showtime_url }}" class="bg-cyan-500 text-white px-2 py-1 rounded text-lg hover:bg-cyan-600">Add Showtime</a>
+            {% endif %}
+            {% if cinema_list_url %}
+                <a href="{{ cinema_list_url }}" class="bg-indigo-500 text-white px-2 py-1 rounded text-lg hover:bg-indigo-600">View Cinemas</a>
+            {% endif %}
+        </div>
+
+        {% if not add_showtime_url or not cinema_list_url %}
+            <div class="text-center text-xs text-yellow-300 my-2">
+                {% if not add_showtime_url %}Missing URL name 'add-showtime' (try 'viewer:add-showtime'). {% endif %}
+                {% if not cinema_list_url %}Missing URL name 'cinema-list' (try 'viewer:cinema-list').{% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8 px-2 sm:px-4 md:px-8 w-full max-w-screen-xl mx-auto">
     {% for movie in movies_html %}
         <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-full transform hover:scale-105 transition-transform duration-300 ease-in-out movie-card">

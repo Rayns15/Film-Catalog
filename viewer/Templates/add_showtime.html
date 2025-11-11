@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Showtime Scheduler{% endblock %}
+
+{% block content %}
+<style>
+    /* This CSS targets the 'form-control' class from your forms.py 
+      and styles it to match the dark, Tailwind-based theme.
+    */
+    .form-control {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 8px; /* rounded-lg */
+        border: 1px solid #4B5563; /* border-gray-600 */
+        background-color: #374151; /* bg-gray-700 */
+        color: #FFFFFF; /* text-white */
+        transition: all 0.15s ease;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #6366F1; /* focus:ring-indigo-500 */
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4); /* focus:ring-2 */
+    }
+    /* Ensures the date/time picker text is visible */
+    input[type="datetime-local"].form-control {
+        color-scheme: dark;
+    }
+</style>
+
+<div class="w-full max-w-screen-xl mx-auto px-2 sm:px-4 md:px-8 py-10">
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+        <h1 class="text-4xl font-extrabold text-white text-center">
+            <span class='bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-transparent'>
+                Schedule a Showtime
+            </span> 🗓️
+        </h1>
+    </div>
+
+    <div class="max-w-2xl mx-auto bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-700">
+        
+        <form method="post" class="p-6 sm:p-8 space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label for="{{ form.movie.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">{{ form.movie.label }}</label>
+                {{ form.movie }} {% if form.movie.errors %}<div class="text-red-400 text-sm mt-1">{{ form.movie.errors }}</div>{% endif %}
+            </div>
+            
+            <div>
+                <label for="{{ form.cinema.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">{{ form.cinema.label }}</label>
+                {{ form.cinema }} {% if form.cinema.errors %}<div class="text-red-400 text-sm mt-1">{{ form.cinema.errors }}</div>{% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.show_time.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">{{ form.show_time.label }}</label>
+                {{ form.show_time }} {% if form.show_time.errors %}<div class="text-red-400 text-sm mt-1">{{ form.show_time.errors }}</div>{% endif %}
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-700">
+                <a href="{% url 'home' %}" class="text-center bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition font-medium">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-indigo-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+                    Save Showtime
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

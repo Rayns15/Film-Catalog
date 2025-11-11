@@ -2,100 +2,94 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy, reverse
-from viewer.models import Movie, Showtime
-from django.db.models import Model, IntegerField, CharField
 from django.views import View
-from django.shortcuts import render, redirect
-from django import forms
 from django.contrib.auth import login, authenticate
 import datetime
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm # Or your custom SignupForm
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from .forms import CustomSignupForm, ProfileForm, RegisterForm, CinemaForm
 from django.db.models import Prefetch, Q
 from django.utils import timezone
-from .models import Cinema, Showtime, Movie, ChatMessage, Profile, User, ChatMessage
+from .models import Cinema, Showtime, Movie, ChatMessage, Profile, User
 from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required # Even better!
+from django.contrib.admin.views.decorators import staff_member_required
 import json
+# Register a safe 'add_class' template filter so templates don't crash if widget_tweaks isn't loaded
+from django.template.defaultfilters import register as default_template_register
 
-# Create your views here.
+@default_template_register.filter(name='add_class')
+def add_class(field, css_classes):
+    try:
+        existing = field.field.widget.attrs.get('class', '')
+        combined = f"{existing} {css_classes}".strip()
+        return field.as_widget(attrs={**field.field.widget.attrs, 'class': combined})
+    except Exception:
+        return field
+
+# Import all forms from forms.py
+from .forms import (
+    CustomSignupForm, ProfileForm, RegisterForm, 
+    CinemaForm, ShowtimeForm, MovieForm,
+)
+
+# === Staff Views ===
 
 @staff_member_required
-@login_required
+def add_showtime_view(request):
+    if request.method == 'POST':
+        form = ShowtimeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Showtime successfully added!')
+            return redirect('add-showtime')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ShowtimeForm()
+    context = {'form': form}
+    return render(request, 'add_showtime.html', context)
+
+@staff_member_required
 def cinema_prices_update(request, pk):
-    
     cinema = get_object_or_404(Cinema, pk=pk)
-    
-    # Get the "next" URL from the URL parameter (on GET)
-    next_url = request.GET.get('next')
+    next_url = request.POST.get('next', request.GET.get('next', ''))
 
     if request.method == 'POST':
-        # Get the "next" URL from the hidden form input (on POST)
-        next_url = request.POST.get('next')
-        
-        # Helper function
-        def get_int_or_none(field_name):
-            value = request.POST.get(field_name)
-            if value:
-                try:
-                    return int(value)
-                except (ValueError, TypeError):
-                    return None
-            return None
-
-        # Update all fields from the form
-        cinema.name = request.POST.get('name', cinema.name)
-        cinema.location = request.POST.get('location', cinema.location)
-        cinema.Adult_ticket_price = get_int_or_none('Adult_ticket_price')
-        cinema.Child_ticket_price = get_int_or_none('Child_ticket_price')
-        cinema.Senior_ticket_price = get_int_or_none('Senior_ticket_price')
-        cinema.Student_ticket_price = get_int_or_none('Student_ticket_price')
-        cinema.weekend_surcharge = get_int_or_none('weekend_surcharge')
-        cinema.holiday_surcharge = get_int_or_none('holiday_surcharge')
-        cinema.weekday_discount = get_int_or_none('weekday_discount')
-        cinema.matinee_discount = get_int_or_none('matinee_discount')
-
-        cinema.save()
-        
-        messages.success(request, f"Prices for '{cinema.name}' updated successfully!")
-        
-        # --- THIS IS THE FIX ---
-        # Redirect to the "next" URL if it exists, otherwise go home.
-        if next_url:
-            return redirect(next_url)
+        form = CinemaForm(request.POST, instance=cinema)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Prices for '{cinema.name}' updated successfully!")
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect('cinema-list')
         else:
-            return redirect('/') # Fallback to homepage
-
+            messages.error(request, "Please correct the errors below.")
     else:
-        # --- THIS IS THE GET REQUEST PART ---
-        # Pass the cinema AND the next_url to the template
-        context = {
-            'cinema': cinema,
-            'next_url': next_url  # Add this
-        }
-        return render(request, 'cinema_prices_update.html', context)
+        form = CinemaForm(instance=cinema)
 
-# Add this new delete view in viewer/views.py
+    context = {
+        'form': form,
+        'cinema': cinema,
+        'next_url': next_url
+    }
+    return render(request, 'cinema_prices_update.html', context)
+
+# === Chat/API Views ===
+
 @login_required
 @require_POST
 def delete_chat_message(request, message_pk):
     if not request.user.is_staff:
         return JsonResponse({'status': 'error', 'message': 'Not authorized'}, status=403)
-
     try:
         message = ChatMessage.objects.get(pk=message_pk)
         message.delete()
         return JsonResponse({'status': 'ok'})
     except ChatMessage.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Message not found'}, status=404)
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-@login_required
-@require_POST
+# This is the CORRECT version of post_chat_message
 @login_required
 @require_POST
 def post_chat_message(request, movie_pk):
@@ -112,57 +106,71 @@ def post_chat_message(request, movie_pk):
             user=request.user,
             message=message_text
         )
-
-        # --- THIS IS THE CRITICAL FIX ---
-        # You MUST return the new message's ID so the JavaScript knows it.
+        
         return JsonResponse({
             'status': 'ok',
             'message': chat_message.message,
             'user': chat_message.user.username,
             'timestamp': chat_message.timestamp.strftime('%b %d, %I:%M %p'),
-            'message_id': chat_message.pk  # <-- THIS LINE IS REQUIRED
+            'message_id': chat_message.pk  # <-- This was missing in your duplicate
         })
-        # --------------------------------
-
     except Movie.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Movie not found'}, status=404)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-@login_required
-@require_POST
-def post_chat_message(request, movie_pk):
-    try:
-        movie = Movie.objects.get(pk=movie_pk)
-        
-        # Load the message from the request body
-        data = json.loads(request.body)
-        message_text = data.get('message')
+def chat_api(request):
+    return HttpResponse("Chat API is working!")
 
-        if not message_text:
-            return JsonResponse({'status': 'error', 'message': 'Message is empty'}, status=400)
+# === Main Page Views ===
 
-        # Create and save the new message
-        chat_message = ChatMessage.objects.create(
-            movie=movie,
-            user=request.user,
-            message=message_text
-        )
+def movie_list(request):
+    query = request.GET.get('q')
+    no_results = False
+    
+    if query:
+        movies = Movie.objects.filter(
+            Q(title__icontains=query) |
+            Q(director__icontains=query) |
+            Q(genre_movie__icontains=query)
+        ).order_by('pk')
+        if not movies.exists():
+            no_results = True
+    else:
+        movies = Movie.objects.all().order_by('pk')
 
-        # Return a success response with data for the JavaScript
-        return JsonResponse({
-            'status': 'ok',
-            'message': chat_message.message,
-            'user': chat_message.user.username,
-            'timestamp': chat_message.timestamp.strftime('%b %d, %I:%M %p')
-        })
+    context = {
+        'movies_html': movies,
+        'query': query,
+        'no_results': no_results
+    }
+    return render(request, 'movie_list.html', context)
 
-    except Movie.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Movie not found'}, status=404)
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+def movie_search_view(request):
+    query = request.GET.get('q', '') 
+    if query:
+        movies = Movie.objects.filter(title__icontains=query)
+        no_results = not movies.exists()
+    else:
+        movies = Movie.objects.none() 
+        no_results = False
 
-class CinemaPricesView(DetailView):
+    return render(request, 'home.html', {
+        'movies_html': movies,
+        'user': request.user,
+        'year': datetime.datetime.now().year,
+        'query': query,
+        'no_results': no_results,
+    })
+
+def cinema_list_view(request):
+    cinemas = Cinema.objects.all()
+    context = {'cinemas': cinemas}
+    return render(request, 'cinema_list.html', context)
+
+# === Class-Based Views (CBVs) ===
+
+class cinema_prices(DetailView):
     model = Movie
     template_name = 'cinema_prices.html'
     context_object_name = 'movie'
@@ -172,154 +180,29 @@ class CinemaPricesView(DetailView):
         movie = self.get_object()
         now = timezone.now()
 
-        # --- This is the EFFICIENT query logic from your function ---
-
-        # 1. Create a Prefetch to get only this movie's upcoming showtimes
         showtimes_for_this_movie = Prefetch(
-            'cinema_showtimes',  # The related_name from Cinema to Showtime
+            'cinema_showtimes',
             queryset=Showtime.objects.filter(
                 movie_id=movie.id,
                 show_time__gte=now
             ).order_by('show_time'),
-            to_attr='filtered_showtimes'  # This creates 'cinema.filtered_showtimes' in the template
+            to_attr='filtered_showtimes'
         )
-
-        # 2. Get ONLY cinemas that have upcoming showtimes for this movie.
-        # This runs 2 queries total, not 101.
         
         cinemas_with_showtimes = Cinema.objects.filter(
             cinema_showtimes__movie_id=movie.id,
             cinema_showtimes__show_time__gte=now
         ).distinct().prefetch_related(showtimes_for_this_movie)
         
-        # --- End of efficient query logic ---
-
         context['cinemas_with_showtimes'] = cinemas_with_showtimes
-
-        # This adds the chat messages (which you already had)
         context['chat_messages'] = ChatMessage.objects.filter(movie=movie)
-        
         return context
-
-def admin_view(request):
-    return HttpResponse("Admin View")
-
-def chat_api(request):
-    return HttpResponse("Chat API is working!")
-
-def base_view(request):
-    return render(request, 'base.html')
-
-def movie_list(request):
-    """
-    This view handles both displaying all movies and searching.
-    """
-    query = request.GET.get('q')
-    no_results = False
-    
-    if query:
-        # --- MODIFICATION 1: Added .order_by('pk') ---
-        movies = Movie.objects.filter(
-            Q(title__icontains=query) |
-            Q(director__icontains=query) |
-            Q(genre_movie__icontains=query)
-        ).order_by('pk') # <-- Sorts search results from old to new
-        
-        if not movies.exists():
-            no_results = True
-    else:
-        # --- MODIFICATION 2: Added .order_by('pk') ---
-        movies = Movie.objects.all().order_by('pk') # <-- Sorts all movies from old to new
-
-    context = {
-        'movies_html': movies,
-        'query': query,
-        'no_results': no_results
-    }
-    
-    return render(request, 'movie_list.html', context)
-
-# def search(request):
-#     query = request.GET.get('q', '')
-#     movies = Movie.objects.filter(Title__icontains=query)
-    
-#     # Check if the search returned any movies
-#     no_results = not movies.exists() if query else False # Only show if a query was made
-
-#     context = {
-#         'movies_html': movies,
-#         'query': query, # Pass the query back to display it
-#         'no_results': no_results # Add the flag to the context
-#     }
-#     return render(request, 'home.html', context)
-    
-# nume.com/hello_regex?"nume='Andrei":
-#     return HttpResponse(request):
-#         nume_url = request.GET.net('nume', '')
-#         return HttpResponse(f"Hello, {nume}!")
-
-dictionary = {"Strada1": 46565, "Strada2": 651245, "Strada3": 6512452}
-def phone_book(request):
-    strada = request.GET.get('strada', '')
-    if strada in dictionary:
-        return HttpResponse(f"Phone number for {strada} is {dictionary[strada]}")
-    else:
-        return HttpResponse("Not found")
- 
-def phone_book2(request):
-    strada = request.GET.get('strada', '')
-    nrtelefon = int(request.GET.get('nrtelefon', 0))
-    for key, value in dictionary.items():
-        if key == strada:
-            return HttpResponse(f"Phone number for {strada} is {value}")
-        elif value == nrtelefon:
-            return HttpResponse(f"Street for phone number {nrtelefon} is {key}")
-    return HttpResponse("Not found")
-
-def afiseaza(request):
-    filme = Movie.objects.all()
-    output = ""
-    for film in filme:
-        output += f"Title: {film.Title}, Director: {film.director}, Year: {film.Year}<br>" 
-    return HttpResponse(output)
-
-def show_streams(request):
-    nume_url = request.GET.get('nume', '')
-    prenume_url = request.GET.get('prenume', '')
-    return HttpResponse(f"Hello, {nume_url} {prenume_url}!")
-
-def afiseaza_home_page(request):
-    filme = Movie.objects.all()
-    return render(request, 'home.html', {'movies_html': filme})
-
-# Build a reusable ModelForm that includes the genre field if present on the Movie model
-_MOVIE_FIELD_NAMES = {f.name for f in Movie._meta.get_fields()}
-_GENRE_FIELD = 'genre_movie' if 'genre_movie' in _MOVIE_FIELD_NAMES else ('genre' if 'genre' in _MOVIE_FIELD_NAMES else None)
-_BASE_FIELDS = ['title', 'director', 'year', 'rating', 'genre_movie', 'bio', 'profile_picture', 'cinema_price'] # <-- Fixed
-_FORM_FIELDS = _BASE_FIELDS + ([_GENRE_FIELD] if _GENRE_FIELD else [])
-
-class MovieForm(forms.ModelForm):
-    class Meta:
-        model = Movie
-        fields = _FORM_FIELDS
 
 class MovieCreateView(CreateView):
     model = Movie
     form_class = MovieForm
     template_name = 'movie_form.html'
-    success_url = reverse_lazy("home")  # Redirect to home page after successful creation
-
-class MovieListView(ListView):
-    model = Movie
-    template_name = 'movie_list.html'
-    context_object_name = 'movies_html'
-
-def shawshank_redemption_view(request):
-    return render(request, 'shawshank_redemption.html')
-
-def inception_view(request):
-    # Reuse the existing 'search' logic to respond for "Inception"
-    return search(request, "Inception")
+    success_url = reverse_lazy("home")
 
 class MovieUpdateView(UpdateView):
     model = Movie
@@ -330,401 +213,47 @@ class MovieUpdateView(UpdateView):
 class MovieDeleteView(DeleteView):
     model = Movie
     template_name = 'movie_confirm_delete.html'
-    success_url = reverse_lazy("home")  # Redirect to home page after successful deletion
-
-def movie1_details(request, pk):
-    try:
-        movie = Movie.objects.get(pk=pk)
-        return render(request, f'movie_{pk}.html', {'movie': movie})
-    except Movie.DoesNotExist:
-        return HttpResponse("Movie not found", status=404)
-
-class view_details(View):
-    model = Movie
-    template_name = 'Inception.html'
-    context_object_name = 'movie_html'
-    success_url = reverse_lazy("home")  # Redirect to home page after successful creation
-
-    def get(self, request, pk):
-        try:
-            movie = Movie.objects.get(pk=pk)
-            return render(request, self.template_name, {'movie_html': movie})
-        except Movie.DoesNotExist:
-            return HttpResponse("Movie not found", status=404)        
+    success_url = reverse_lazy("home")
 
 class MovieDetailView(DetailView):
     model = Movie
     context_object_name = 'movie'
-    template_name = 'movie_detail.html'  # Default template
+    template_name = 'movie_detail.html'
 
-    # def get_template_names(self):
-    #     if self.object:
-    #         return [f'movie_{self.object.id}.html', self.template_name]
-    #     return [self.template_name]
-
-def movie_details_view(request, pk):
-    try:
-        movie = Movie.objects.get(pk=pk)
-        return render(request, f'movie_{pk}.html', {'movie': movie})
-    except Movie.DoesNotExist:
-        return HttpResponse("Movie not found", status=404)
-  # Ensure the template exists
-
-class TheGodfatherView(DetailView):
-    model = Movie
-    template_name = 'The Godfather.html'
-    context_object_name = 'movie_html'
-    success_url = reverse_lazy("home")
-    def get_object(self, queryset=None):
-        return Movie.objects.get(Title="The Godfather")
-    # Ensure views are imported if views.py exists
-
-def movie_details(request, pk):
-    try:
-        movie = Movie.objects.get(pk=pk)
-        return render(request, 'movie_details.html', {'movie': movie})
-    except Movie.DoesNotExist:
-        return HttpResponse("Movie not found", status=404)
-
-def the_godfather(request, slug=None):
-    try:
-        if slug is None:
-            return HttpResponse("Slug not provided", status=400)
-        movie = Movie.objects.get(slug=slug)
-        return render(request, 'The Godfather.html', {'movie': movie})
-    except Movie.DoesNotExist:
-        return HttpResponse("Movie not found", status=404)
-    
-class LoginForm(forms.Form):
-    username = forms.CharField(max_length=100)
-    password = forms.CharField(widget=forms.PasswordInput)
-def serve_static(request, path):
-    from django.conf import settings
-    from django.views.static import serve
-    return serve(request, path, document_root=settings.STATIC_ROOT)
-def login_view(request):
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            # Here you would typically authenticate the user
-            return HttpResponse(f"Logged in as {username}")
-    else:
-        form = LoginForm()
-    return render(request, 'Log_in.html', {'form': form})
+# === Auth & Profile Views ===
 
 def signup_view(request):
     if request.method == 'POST':
-        # 2. Use CustomSignupForm for POST data
         form = CustomSignupForm(request.POST)
         if form.is_valid():
             user = form.save()
             messages.success(request, f"User {user.username} signed up successfully!")
-            # Redirect to login page after successful signup
             return redirect('login')
         else:
-            # If form is invalid, errors will be shown on the template
             messages.error(request, "Please correct the errors below.")
-            # No need to explicitly render here, it falls through
     else:
-        # 2. Use CustomSignupForm for GET requests (blank form)
         form = CustomSignupForm()
-
-    # Render the signup page with the form (either blank or with errors)
-    # Make sure 'Sign_up.html' matches your actual template filename
     return render(request, 'sign_up.html', {'form': form})
 
-def logout_view(request):
-    # Here you would typically log out the user
-    return HttpResponse("Logged out successfully")
-
-class SignupForm(forms.Form):
-    username = forms.CharField(max_length=100)
-    password = forms.CharField(widget=forms.PasswordInput)
-
-def signup(request):
-    if request.method == 'POST':
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            # Here you would typically create the user
-            return HttpResponse(f"User {username} signed up successfully")
-    else:
-        form = SignupForm()
-    return render(request, 'sign_up.html', {'form': form})
-
-def movie_search_view(request):
-    query = request.GET.get('q', '') 
-    
-    if query:
-        # --- IF there is a query, filter the movies ---
-        # This is the line that actually performs the search
-        movies = Movie.objects.filter(title__icontains=query)
-        no_results = not movies.exists()
-    else:
-        # --- IF the query is empty, show no movies ---
-        movies = Movie.objects.none() 
-        no_results = False
-
-    # Render the SAME 'home.html' template, but with the filtered 'movies'
-    return render(request, 'home.html', {
-        'movies_html': movies,
-        'user': request.user,
-        'year': datetime.datetime.now().year,
-        'query': query,       # Pass the query back to the template
-        'no_results': no_results,
-    })
-
-def movie_search(request):
-    # Get the search term from the URL's 'q' parameter
-    query = request.GET.get('q', '') 
-    
-    if query:
-        # --- IF there is a query, filter the movies ---
-        # This is the line that actually performs the search
-        movies = Movie.objects.filter(Title__icontains=query)
-        no_results = not movies.exists()
-    else:
-        # --- IF the query is empty, show no movies ---
-        movies = Movie.objects.none() 
-        no_results = False
-
-    # Render the SAME 'home.html' template, but with the filtered 'movies'
-    return render(request, 'home.html', {
-        'movies_html': movies,
-        'user': request.user,
-        'year': datetime.datetime.now().year,
-        'query': query,       # Pass the query back to the template
-        'no_results': no_results,
-    })
-  
-def movie_id_view(request, pk):
-    try:
-        movie = Movie.objects.get(pk=pk)
-        return render(request, 'movie_detail.html', {'movie_html': movie})
-    except Movie.DoesNotExist:
-        return HttpResponse("Movie not found", status=404)
-    
-def movie_details_view(request, pk):
-    try:
-        movie = Movie.objects.get(pk=pk)
-        return render(request, f'movie_{pk}.html', {'movie': movie})
-    except Movie.DoesNotExist:
-        return HttpResponse("Movie not found", status=404)
-    
-def movie_detail(request, pk):
-    movie = get_object_or_404(Movie, pk=pk)
-    return render(request, 'movie_detail.html', {'movie': movie})
-
-def register_view(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return HttpResponse("Registration successful")
-    else:
-        form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
-
+# This is the active profile_view linked in your urls.py
+@login_required
 def profile_view(request):
     if request.method == 'POST':
-        form = ProfileForm(request.POST)
+        form = ProfileForm(request.POST) # This form is simple, not a ModelForm
         if form.is_valid():
-            # Process the form data
             return HttpResponse("Profile updated successfully")
     else:
         form = ProfileForm()
     return render(request, 'profile.html', {'form': form})
 
-def profile_edit_view(request):
-    if request.method == 'POST':
-        form = ProfileForm(request.POST)
-        if form.is_valid():
-            # Process the form data
-            return HttpResponse("Profile updated successfully")
-    else:
-        form = ProfileForm()
-    return render(request, 'profile_edit.html', {'form': form})
-
-def profile_delete_view(request):
-    if request.method == 'POST':
-        # Here you would typically delete the user's profile
-        return HttpResponse("Profile deleted successfully")
-    return render(request, 'profile_delete.html')
-
-@login_required
-
-# @login_required
-# def profile_edit(request):
-#     user = request.user
-#     if request.method == 'POST':
-#         user.username = request.POST.get('username', user.username)
-#         user.email = request.POST.get('email', user.email)
-#         user.first_name = request.POST.get('first_name', user.first_name)
-#         user.last_name = request.POST.get('last_name', user.last_name)
-#         user.save()
-#         return redirect('profile')
-#     return render(request, 'profile_edit.html', {'user': user})
-
-def profile_delete_confirm_view(request):
-    if request.method == 'POST':
-        user = request.user
-        user.delete()
-        return redirect('home')
-    return render(request, 'profile_delete_confirm.html')
-
-def movie_add(request):
-    if request.method == 'POST':
-        form = MovieForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('movie-list')
-    else:
-        form = MovieForm()
-    return render(request, 'movie_form.html', {'form': form})
-
-def CustomSignupView(request):
-    if request.method == 'POST':
-        form = CustomSignupForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')
-    else:
-        form = CustomSignupForm()
-    return render(request, 'sign_up.html', {'form': form})
-
-def register_view(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return HttpResponse("Registration successful")
-    else:
-        form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
-
-@login_required
-def profile_view(request):
-    if request.method == 'POST':
-        form = ProfileForm(request.POST)
-        if form.is_valid():
-            # Process the form data
-            return HttpResponse("Profile updated successfully")
-    else:
-        form = ProfileForm()
-    return render(request, 'profile.html', {'form': form})
-
-@login_required
-def profile_edit_view(request):
-    if request.method == 'POST':
-        form = ProfileForm(request.POST)
-        if form.is_valid():
-            # Process the form data
-            return HttpResponse("Profile updated successfully")
-    else:
-        form = ProfileForm()
-    return render(request, 'profile_edit.html', {'form': form})
-
-@login_required
-def profile_delete_view(request):
-    if request.method == 'POST':
-        # Here you would typically delete the user's profile
-        return HttpResponse("Profile deleted successfully")
-    return render(request, 'profile_delete.html')
-
-def movie_create(request):
-    if request.method == 'POST':
-        form = MovieForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('movie-list')
-    else:
-        form = MovieForm()
-    return render(request, 'movie_form.html', {'form': form})
-
-# def cinema_prices_view(request, pk):
-#     """
-#     Shows prices for all cinemas AND upcoming showtimes for
-#     the movie specified by 'movie_id'.
-#     """
-    
-#     # 1. Get the specific movie we want to see
-#     movie = get_object_or_404(Movie, pk=pk)
-    
-#     # 2. Get the current time
-#     now = timezone.now()
-
-#     # 3. Create a Prefetch object to get ONLY upcoming showtimes for this movie.
-#     #    This is how we'll get the list of times for each cinema.
-#     showtimes_for_this_movie = Prefetch(
-#         'cinema_showtimes',
-#         # We filter for the movie AND for showtimes that are in the future
-#         queryset=Showtime.objects.filter(
-#             movie_id=movie.id,
-#             show_time__gte=now  # 'gte' means "greater than or equal to"
-#         ).order_by('show_time'),
-#         to_attr='filtered_showtimes' # The template will access this
-#     )
-
-#     # 4. Get ONLY the cinemas that have upcoming showtimes for this movie.
-#     #    This is the main fix. We no longer fetch cinemas that aren't playing the movie.
-#     relevant_cinemas = Cinema.objects.filter(
-#         cinema_showtimes__movie_id=movie.id,
-#         cinema_showtimes__show_time__gte=now
-#     ).distinct().prefetch_related(showtimes_for_this_movie)
-    
-#     # 5. Get all other cinemas that DON'T have showtimes, just for price comparison
-#     other_cinemas = Cinema.objects.exclude(
-#         id__in=relevant_cinemas.values_list('id', flat=True)
-#     )
-
-#     context = {
-#         'cinemas_with_showtimes': relevant_cinemas, # Cinemas *with* showtimes
-#         'other_cinemas': other_cinemas,           # Cinemas *without* showtimes
-#         'movie': movie                            # The specific movie
-#     }
-#     return render(request, 'cinema_prices.html', context)
-    
-def cinema_prices_update_view(request, pk):
-    """
-    View to update cinema prices for a specific cinema.
-    """
-    cinema = get_object_or_404(Cinema, pk=pk)
-    
-    if request.method == 'POST':
-        form = CinemaForm(request.POST, instance=cinema)
-        if form.is_valid():
-            form.save()
-            return redirect('cinema_prices', pk=pk)  # Redirect to the cinema prices view
-    else:
-        form = CinemaForm(instance=cinema)
-    
-    return render(request, 'cinema_prices_update.html', {'form': form, 'cinema': cinema})
-
-
-def cinema_prices_delete_view(request, pk):
-    """
-    View to delete a specific cinema.
-    """
-    cinema = get_object_or_404(Cinema, pk=pk)
-    
-    if request.method == 'POST':
-        cinema.delete()
-        return redirect('home')  # Redirect to home page after deletion
-    
-    return render(request, 'cinema_prices_delete.html', {'cinema': cinema})
-
+# This is the active edit_profile linked in your urls.py
 @login_required
 def edit_profile(request, pk):
     user = get_object_or_404(User, pk=pk)
+    if request.user != user: # Add a check
+        return redirect('home')
+        
     if request.method == 'POST':
-        # Handle profile update logic here
-        # Example: update user fields from request.POST
         user.first_name = request.POST.get('first_name', user.first_name)
         user.last_name = request.POST.get('last_name', user.last_name)
         user.email = request.POST.get('email', user.email)
@@ -732,14 +261,37 @@ def edit_profile(request, pk):
         return redirect('profile')
     return render(request, 'profile_edit.html', {'user': user})
 
-def CinemaUpdateView(UpdateView):
-    model = Cinema
-    form_class = CinemaForm
-    template_name = 'cinema_update_form.html'
-    success_url = reverse_lazy("home")
+@login_required
+def profile_delete_view(request):
+    if request.method == 'POST':
+        user = request.user
+        user.delete() # This deletes the user
+        messages.success(request, "Profile deleted successfully")
+        return redirect('home')
+    return render(request, 'profile_delete.html') # A confirmation page
 
-class CinemaUpdateView(UpdateView):
-    model = Cinema
-    form_class = CinemaForm
-    template_name = 'cinema_update_form.html'
-    success_url = reverse_lazy("home")
+# === Unused/Old Views (can be deleted) ===
+
+def afiseaza_home_page(request):
+    filme = Movie.objects.all()
+    return render(request, 'home.html', {'movies_html': filme})
+
+@staff_member_required
+def cinema_add_view(request):
+    if request.method == 'POST':
+        form = CinemaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Cinema '{form.cleaned_data['name']}' added successfully!")
+            return redirect('cinema-list') # Redirect back to the cinema list
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = CinemaForm() # A new, blank form
+
+    context = {
+        'form': form
+    }
+    return render(request, 'cinema_form.html', context)
+
+# ... other unused functions like 'phone_book', 'afiseaza', etc. ...

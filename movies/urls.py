@@ -12,6 +12,7 @@ urlpatterns = [
     
     # Această linie este acum corectă și va încărca fișierul de mai jos
     path('', include('viewer.urls')), 
+     
 ]
 
 # Păstrează configurarea pentru fișierele media

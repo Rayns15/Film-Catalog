@@ -67,6 +67,117 @@
         display: grid;
         gap: 5px;
     }
+    /*
+      ==================================================================
+      == START: THIS IS THE FIX ==
+      ==================================================================
+      */
+    /* This new class overrides the 'display: grid' for the file field,
+       allowing its contents to stack vertically in a normal block. */
+    .form-field-file {
+        display: block;
+    }
+    .form-field-file label[for$="-clear_id"] {
+        font-size: 0.9rem;
+        color: var(--muted);
+        padding-left: 0;
+        cursor: pointer;
+        vertical-align: middle; /* Align text with checkbox */
+    }
+    .form-field-file br {
+        display: none; /* Hide the ugly <br> tag from the widget */
+    }
+      /*
+      ==================================================================
+      == END: THIS IS THE FIX ==
+      ==================================================================
+      */
+
+    /* ==================================================================
+    == START: FINAL REPLACEMENT CSS FOR FILE INPUT (v3) ==
+    ==================================================================
+    */
+
+    /* 1. Set the parent <p> tag to just be a 'block' */
+    .form-field-file {
+        display: block; 
+    }
+    /* 2. Hide the messy <br> tags Django inserts */
+    .form-field-file br {
+        display: none;
+    }
+
+    /* 3. Style the 'Currently' part */
+    .form-field-file a {
+        font-size: 0.9rem;
+        color: var(--accent-2);
+        word-break: break-all;
+        display: block; 
+        margin-bottom: 12px; /* Space after this section */
+    }
+    /*
+    NOTE: We have REMOVED the 'a::before' rule
+    that was adding the duplicate "Currently:"
+    */
+
+
+    /* 4. Style the 'Clear' part */
+    .form-field-file div {
+        margin-bottom: 12px; /* Space after this section */
+    }
+    .form-field-file label[for$="-clear_id"] {
+        font-size: 0.9rem;
+        color: var(--muted);
+        padding-left: 0;
+        cursor: pointer;
+        vertical-align: middle; /* Align text with checkbox */
+    }
+    .form-field-file input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px; /* Space between box and "Clear" text */
+        accent-color: var(--accent-2);
+        vertical-align: middle; /* Align checkbox with text */
+    }
+
+    /* 5. Style the 'Change' part */
+    .form-field-file input[type="file"] {
+        font-size: 0.9rem;
+        color: var(--muted);
+        display: block;
+        margin-top: 12px; /* Add space above the file input */
+    }
+    /*
+    NOTE: We have REMOVED the 'input[type="file"]::before' rule
+    that was adding the duplicate "Change:"
+    */
+
+
+    /* 6. Keep the file UPLOAD BUTTON styles */
+    .form-field-file input[type="file"]::-webkit-file-upload-button {
+        appearance: none;
+        border: none;
+        cursor: pointer;
+        border-radius: 8px; 
+        padding: 6px 10px;
+        font-weight: 600;
+        transition: all .15s ease;
+        font-size: 0.9rem;
+        color: #0b1020;
+        background: linear-gradient(135deg, var(--accent-save), var(--accent-2));
+        box-shadow: 0 4px 10px rgba(167, 139, 250, 0.25);
+        margin-right: 12px;
+    }
+    .form-field-file input[type="file"]::-webkit-file-upload-button:hover {
+        filter: brightness(1.03);
+        box-shadow: 0 6px 14px rgba(167, 139, 250, 0.35);
+    }
+
+    /* ==================================================================
+    == END: FINAL REPLACEMENT CSS FOR FILE INPUT (v3) ==
+    ==================================================================
+    */
+
     form label {
         font-size: .9rem;
         color: var(--muted);
@@ -189,19 +300,60 @@
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 
-                {{ form.as_p }}
+                {% if form.non_field_errors %}
+                    <div classD="errorlist">
+                        {% for error in form.non_field_errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
                 <p>
-                    <label for="genre">Genre:</label>
-                    <select name="genre" id="genre" required>
-                        <option value="" disabled selected>Select a genre</option>
-                        <option value="Action">Action</option>
-                        <option value="Drama">Drama</option>
-                        <option value="Sci-Fi">Sci-Fi</option>
-                        <option value="Comedy">Comedy</option>
-                        <option value="Thriller">Thriller</option>
-                        <option value="Horror">Horror</option>
-                    </select>
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                    {% if form.title.errors %}<div class="errorlist">{{ form.title.errors }}</div>{% endif %}
+                </p>
+
+                <p>
+                    {{ form.director.label_tag }}
+                    {{ form.director }}
+                    {% if form.director.errors %}<div class="errorlist">{{ form.director.errors }}</div>{% endif %}
+                </p>
+
+                <p>
+                    {{ form.year.label_tag }}
+                    {{ form.year }}
+                    {% if form.year.errors %}<div class="errorlist">{{ form.year.errors }}</div>{% endif %}
+                </p>
+
+                <p>
+                    {{ form.rating.label_tag }}
+                    {{ form.rating }}
+                    {% if form.rating.errors %}<div class="errorlist">{{ form.rating.errors }}</div>{% endif %}
+                </p>
+
+                <p>
+                    {{ form.genre_movie.label_tag }}
+                    {{ form.genre_movie }}
+                    {% if form.genre_movie.errors %}<div class="errorlist">{{ form.genre_movie.errors }}</div>{% endif %}
+                </p>
+
+                <p>
+                    {{ form.bio.label_tag }}
+                    {{ form.bio }}
+                    {% if form.bio.errors %}<div class="errorlist">{{ form.bio.errors }}</div>{% endif %}
+                </p>
+
+                <p class="form-field-file">
+                    {{ form.profile_picture.label_tag }}
+                    {{ form.profile_picture }}
+                    {% if form.profile_picture.errors %}<div class="errorlist">{{ form.profile_picture.errors }}</div>{% endif %}
+                </p>
+
+                <p>
+                    {{ form.cinema_price.label_tag }}
+                    {{ form.cinema_price }}
+                    {% if form.cinema_price.errors %}<div class="errorlist">{{ form.cinema_price.errors }}</div>{% endif %}
                 </p>
 
                 <div class="actions">
