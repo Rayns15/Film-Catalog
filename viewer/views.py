@@ -14,8 +14,40 @@ from .models import Cinema, Showtime, Movie, ChatMessage, Profile, User
 from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
 import json
+from viewer.forms import ShowtimeForm, CinemaForm, MovieForm, ProfileForm
 # Register a safe 'add_class' template filter so templates don't crash if widget_tweaks isn't loaded
 from django.template.defaultfilters import register as default_template_register
+
+class ShowtimeCreateView(CreateView):
+    model = Showtime
+    form_class = ShowtimeForm
+    template_name = 'add_showtime.html' # Or 'showtime_manager.html'
+    success_url = reverse_lazy('showtime_create') # Reload the same page
+
+    # ADD THIS METHOD
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add the list of all showtimes to the context
+        context['showtime_list'] = Showtime.objects.all().order_by('-show_time')
+        return context
+
+class ShowtimeUpdateView(UpdateView):
+    model = Showtime
+    form_class = ShowtimeForm
+    template_name = 'add_showtime.html' # Or 'showtime_manager.html'
+    success_url = reverse_lazy('showtime_create') # Redirect back to the main manager page
+
+    # ADD THIS METHOD
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add the list of all showtimes to the context
+        context['showtime_list'] = Showtime.objects.all().order_by('-show_time')
+        return context
+
+class ShowtimeDeleteView(DeleteView):
+    model = Showtime
+    template_name = 'showtime_confirm_delete.html' 
+    success_url = reverse_lazy('showtime_create')
 
 @default_template_register.filter(name='add_class')
 def add_class(field, css_classes):
@@ -293,5 +325,7 @@ def cinema_add_view(request):
         'form': form
     }
     return render(request, 'cinema_form.html', context)
+
+
 
 # ... other unused functions like 'phone_book', 'afiseaza', etc. ...

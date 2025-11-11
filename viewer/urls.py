@@ -35,6 +35,9 @@ urlpatterns = [
     path('cinemas/', views.cinema_list_view, name='cinema-list'),
     path('showtimes/add/', views.add_showtime_view, name='add-showtime'),
     path('cinemas/add/', views.cinema_add_view, name='cinema-add'),
+    path('schedule/new/', views.ShowtimeCreateView.as_view(), name='showtime_create'),
+    path('schedule/<int:pk>/update/', views.ShowtimeUpdateView.as_view(), name='showtime_update'),
+    path('schedule/<int:pk>/delete/', views.ShowtimeDeleteView.as_view(), name='showtime_delete'),
 
     # === Autentificare ===
     path('login/', auth_views.LoginView.as_view(template_name='Log_in.html'), name='login'),

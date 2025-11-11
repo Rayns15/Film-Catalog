@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirm Delete{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-screen-xl mx-auto px-2 sm:px-4 md:px-8 py-10">
+
+    <div class="max-w-xl mx-auto bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-700">
+        <div class="p-6 sm:p-8">
+            <h1 class="text-3xl font-extrabold text-white text-center mb-6">
+                Delete Showtime 🗑️
+            </h1>
+            
+            <p class="text-lg text-gray-300 text-center mb-8">
+                Are you sure you want to delete the showtime for:
+                <br>
+                <strong class="text-cyan-300">{{ object.movie.title }}</strong>
+                <br>
+                at
+                <strong class="text-cyan-300">{{ object.cinema.name }}</strong>
+                <br>
+                on
+                <strong class="text-cyan-300">{{ object.show_time|date:"F j, Y, g:i A" }}</strong>?
+            </p>
+
+            <p class="text-center text-red-400 font-medium mb-8">
+                <strong>This action cannot be undone.</strong>
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    
+                    <a href="{% url 'showtime_update' object.pk %}" class="text-center bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition font-medium">
+                        Cancel
+                    </a>
+                    <button type="submit" class="bg-red-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-red-700 transition">
+                        Yes, Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
