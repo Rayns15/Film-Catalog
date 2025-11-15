@@ -215,14 +215,14 @@ class cinema_prices(DetailView):
         showtimes_for_this_movie = Prefetch(
             'cinema_showtimes',
             queryset=Showtime.objects.filter(
-                movie_id=movie.id,
-                show_time__gte=now
+                movie_id=movie.pk,
+                #show_time__gte=now
             ).order_by('show_time'),
             to_attr='filtered_showtimes'
         )
         
         cinemas_with_showtimes = Cinema.objects.filter(
-            cinema_showtimes__movie_id=movie.id,
+            cinema_showtimes__movie_id=movie.pk,
             cinema_showtimes__show_time__gte=now
         ).distinct().prefetch_related(showtimes_for_this_movie)
         

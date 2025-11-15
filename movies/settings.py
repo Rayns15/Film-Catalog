@@ -28,7 +28,7 @@ DEBUG = True
 
 
 ALLOWED_HOSTS = [
-    '51.20.67.2',  # Your instance's Public IP
+    '51.20.121.19',  # Your instance's Public IP
     'ec2-51-20-67-2.eu-north-1.compute.amazonaws.com', # Your Public DNS
     'localhost',
     '127.0.0.1',
