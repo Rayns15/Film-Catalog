@@ -91,7 +91,7 @@ TEMPLATES = [
         # This is the line you are adding.
         # It tells Django to look in a folder named 'Templates'
         # in your project's root directory (BASE_DIR).
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'viewer/templates')],
         
         'APP_DIRS': True, # This tells Django to ALSO look inside app folders
         'OPTIONS': {
