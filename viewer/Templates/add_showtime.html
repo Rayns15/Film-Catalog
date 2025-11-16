@@ -98,15 +98,11 @@
                 <div class="flex flex-col sm:flex-row justify-end gap-4 w-full sm:w-auto">
                     
                     {% if object %}
-                        <a href="{% url 'home' %}" class="text-center bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition font-medium">
+                        <a href="{% url 'showtime_create' %}" class="text-center bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition font-medium">
                             Add New
                         </a>
-                    {% else %}
-                        <button type="reset" class="text-center bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition font-medium">
-                            Reset
-                        </button>
                     {% endif %}
-                    <a href="{% url 'home' %}" class="text-center bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition font-medium">
+                    <a href="{% url 'showtime_create' %}" class="text-center bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition font-medium">
                         Cancel
                     </a>
                     <button type="submit" class="bg-indigo-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
