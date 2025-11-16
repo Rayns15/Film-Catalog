@@ -187,7 +187,7 @@ def movie_search_view(request):
         movies = Movie.objects.none() 
         no_results = False
 
-    return render(request, 'home.html', {
+    return render(request, 'movie_search.html', {
         'movies_html': movies,
         'user': request.user,
         'year': datetime.datetime.now().year,
