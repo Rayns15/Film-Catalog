@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView
@@ -29,10 +30,9 @@ class ShowtimeCreateView(CreateView):
     # (Este identică cu cea din UpdateView)
     #
     def get_context_data(self, **kwargs):
-        # 1. Obține contextul de bază (care include 'form')
         context = super().get_context_data(**kwargs)
 
-        # 2. Adaugă logica de filtrare și sortare
+        # --- Logica de Filtrare ---
         showtime_list = Showtime.objects.select_related('movie', 'cinema')
         
         movie_filter = self.request.GET.get('movie_filter', None)
@@ -46,7 +46,7 @@ class ShowtimeCreateView(CreateView):
         if date_filter:
             showtime_list = showtime_list.filter(show_time__date=date_filter)
 
-        # 3. Logica de SORTARE
+        # --- Logica de Sortare ---
         sort_by = self.request.GET.get('sort', '-show_time')
         valid_sort_fields = [
             'movie__title', '-movie__title', 'cinema__name', 
@@ -55,10 +55,23 @@ class ShowtimeCreateView(CreateView):
         if sort_by not in valid_sort_fields:
             sort_by = '-show_time'
         
+        # Aplicăm sortarea la lista *completă*
         showtime_list = showtime_list.order_by(sort_by)
 
-        # 4. Adaugă lista și sortarea la context
-        context['showtime_list'] = showtime_list
+        # --- NOU: Logica de Paginare ---
+        # 1. Creăm paginatorul cu lista completă, filtrată și sortată
+        #    Să zicem 5 elemente pe pagină (puteți schimba valoarea)
+        paginator = Paginator(showtime_list, 5)
+        
+        # 2. Luăm numărul paginii din URL (ex: ?page=2). Implicit e pagina 1.
+        page_number = self.request.GET.get('page', 1)
+        
+        # 3. Obținem obiectul paginii curente (care conține doar cele 5 elemente)
+        page_obj = paginator.get_page(page_number)
+        
+        # --- Contextul Final ---
+        # ATENȚIE: Nu mai trimitem 'showtime_list'. Trimitem 'page_obj'.
+        context['page_obj'] = page_obj  # Acesta conține elementele paginii curente
         context['current_sort'] = sort_by
         
         return context
@@ -69,11 +82,51 @@ class ShowtimeUpdateView(UpdateView):
     template_name = 'add_showtime.html' # Or 'showtime_manager.html'
     success_url = reverse_lazy('showtime_create') # Redirect back to the main manager page
 
-    # ADD THIS METHOD
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add the list of all showtimes to the context
-        context['showtime_list'] = Showtime.objects.all().order_by('-show_time')
+
+        # --- Logica de Filtrare ---
+        showtime_list = Showtime.objects.select_related('movie', 'cinema')
+        
+        movie_filter = self.request.GET.get('movie_filter', None)
+        cinema_filter = self.request.GET.get('cinema_filter', None)
+        date_filter = self.request.GET.get('date_filter', None)
+
+        if movie_filter:
+            showtime_list = showtime_list.filter(movie__title__icontains=movie_filter)
+        if cinema_filter:
+            showtime_list = showtime_list.filter(cinema__name__icontains=cinema_filter)
+        if date_filter:
+            showtime_list = showtime_list.filter(show_time__date=date_filter)
+
+        # --- Logica de Sortare ---
+        sort_by = self.request.GET.get('sort', '-show_time')
+        valid_sort_fields = [
+            'movie__title', '-movie__title', 'cinema__name', 
+            '-cinema__name', 'show_time', '-show_time'
+        ]
+        if sort_by not in valid_sort_fields:
+            sort_by = '-show_time'
+        
+        # Aplicăm sortarea la lista *completă*
+        showtime_list = showtime_list.order_by(sort_by)
+
+        # --- NOU: Logica de Paginare ---
+        # 1. Creăm paginatorul cu lista completă, filtrată și sortată
+        #    Să zicem 5 elemente pe pagină (puteți schimba valoarea)
+        paginator = Paginator(showtime_list, 5)
+        
+        # 2. Luăm numărul paginii din URL (ex: ?page=2). Implicit e pagina 1.
+        page_number = self.request.GET.get('page', 1)
+        
+        # 3. Obținem obiectul paginii curente (care conține doar cele 5 elemente)
+        page_obj = paginator.get_page(page_number)
+        
+        # --- Contextul Final ---
+        # ATENȚIE: Nu mai trimitem 'showtime_list'. Trimitem 'page_obj'.
+        context['page_obj'] = page_obj  # Acesta conține elementele paginii curente
+        context['current_sort'] = sort_by
+        
         return context
 
 def showtime_manager(request):

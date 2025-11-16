@@ -27,3 +27,15 @@ def sorted_url(context, sort_field):
     
     # Returnează string-ul de interogare (query string)
     return query_params.urlencode()
+
+@register.simple_tag(takes_context=True)
+def pagination_url(context, page_number):
+    """
+    Construiește URL-ul pentru paginare, păstrând TOȚI parametrii GET
+    existenți (filtre, sortare) și doar suprascriind 'page'.
+    """
+    request = context['request']
+    query_params = request.GET.copy()  # Copiază toți parametrii (sort, filter, etc.)
+    query_params['page'] = page_number  # Setează sau suprascrie 'page'
+    
+    return query_params.urlencode()

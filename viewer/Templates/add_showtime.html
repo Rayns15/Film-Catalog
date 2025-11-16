@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load sorting_tags %} {% block title %}
+{% load sorting_tags %} 
+
+{% block title %}
     {% if object %}
         Update Showtime
     {% else %}
@@ -148,7 +150,7 @@
             </div>
         </form>
         
-        {% if showtime_list %}
+        {% if page_obj %}
             <div class="bg-gray-900/50 backdrop-blur-md border border-gray-700 rounded-xl shadow-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-700">
                     
@@ -190,7 +192,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-800">
-                        {% for show in showtime_list %}
+                        {% for show in page_obj %}
                         <tr class="hover:bg-gray-800/60 transition">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{{ show.movie.title }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ show.cinema.name }}</td>
@@ -204,15 +206,56 @@
                                 </a>
                             </td>
                         </tr>
+                        
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
+
+                {% if page_obj.has_other_pages %}
+                <nav class="flex items-center justify-center space-x-2 p-4" aria-label="Pagination">
+                    
+                    {% if page_obj.has_previous %}
+                        <a href="?{% pagination_url 1 %}" class="relative inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700">
+                            &laquo; First
+                        </a>
+                        <a href="?{% pagination_url page_obj.previous_page_number %}" class="relative inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700">
+                            &lsaquo; Prev
+                        </a>
+                    {% endif %}
+
+                    {% for page_num in page_obj.paginator.get_elided_page_range %}
+                        {% if page_num == page_obj.paginator.ELLIPSIS %}
+                            <span class="px-3 py-2 text-sm text-gray-400">...</span>
+                        {% else %}
+                            <a href="?{% pagination_url page_num %}" 
+                               class="relative inline-flex items-center rounded-md px-4 py-2 text-sm font-semibold 
+                                      {% if page_num == page_obj.number %}
+                                        bg-indigo-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600
+                                      {% else %}
+                                        text-gray-300 hover:bg-gray-700
+                                      {% endif %}">
+                                {{ page_num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?{% pagination_url page_obj.next_page_number %}" class="relative inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700">
+                            Next &rsaquo;
+                        </a>
+                        <a href="?{% pagination_url page_obj.paginator.num_pages %}" class="relative inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700">
+                            Last &raquo;
+                        </a>
+                    {% endif %}
+                </nav>
+                {% endif %}
+                </div>
         
         {% else %}
             <div class="text-center py-10 bg-gray-900/50 backdrop-blur-md rounded-xl border border-gray-700">
-                <p class="text-gray-400">No showtimes match your filters or none are scheduled.</p> </div>
+                <p class="text-gray-400">No showtimes match your filters or none are scheduled.</p> 
+            </div>
         {% endif %}
-    </div>
+        </div>
 </div>
 {% endblock %}
