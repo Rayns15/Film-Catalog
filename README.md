@@ -31,32 +31,38 @@ It allows authenticated users to perform full CRUD (Create, Read, Update, Delete
 ## Installation
 
 1.  Clone the repository:
-    ```
+
+    ```bash
     git clone [https://github.com/Rayns15/Film-Catalog.git](https://github.com/Rayns15/Film-Catalog.git)
     ```
 
 2.  Navigate to the project directory:
-    ```
+
+    ```bash
     cd film-catalog
     ```
 
 3.  Create and activate a new virtual environment:
-    ```
+
+    ```bash
     python -m venv env
     source env/bin/activate
     ```
 
 4.  Install the project dependencies:
-    ```
+
+    ```bash
     pip install -r requirements.txt
     ```
 
 5.  Install the `django-tailwind` module:
-    ```
+
+    ```bash
     pip install django-tailwind
     ```
 
 6.  Add `tailwind` to your `INSTALLED_APPS` list in `settings.py`:
+
     ```python
     INSTALLED_APPS = [
         # ...
@@ -66,16 +72,19 @@ It allows authenticated users to perform full CRUD (Create, Read, Update, Delete
     ```
 
 7.  Run the Tailwind CSS configuration command:
+
     ```python
     python manage.py tailwind init
     ```
 
 8.  Create the database tables:
+
     ```python
     python manage.py migrate
     ```
 
 9.  Run the development server:
+
     ```python
     python manage.py runserver
     ```
@@ -128,16 +137,23 @@ It allows authenticated users to perform full CRUD (Create, Read, Update, Delete
 To deploy this project to a web server, you can follow these general steps:
 
 1.  Set up a web server that can run Python applications. This could be a VPS, a PaaS like Heroku, or a cloud-based server like AWS.
+
 2.  Clone the repository to your server:
-    ```
+
+    ```bash
     git clone [https://github.com/Rayns15/Film-Catalog.git](https://github.com/Rayns15/Film-Catalog.git)
     ```
+
 3.  Install the project dependencies on your server using `pip`:
-    ```
+
+    ```bash
     pip install -r requirements.txt
     ```
+
 4.  Set up a database for the project, if necessary. You can use a database like PostgreSQL, MySQL, or SQLite, depending on your needs.
+
 5.  Configure the `settings.py` file with your server's settings:
+
     ```python
     DATABASES = {
         'default': {
@@ -155,15 +171,18 @@ To deploy this project to a web server, you can follow these general steps:
 
     ALLOWED_HOSTS = ['example.com', '[www.example.com](https://www.example.com)']
     ```
+
     The `DATABASES` setting specifies the database connection details. In this example, we're using PostgreSQL with a database named `mydatabase`, a user named `mydatabaseuser`, and a password of `mypassword`. The `STATIC_ROOT` and `MEDIA_ROOT` settings specify the file paths where static files and media files will be stored. The `ALLOWED_HOSTS` setting is a list of domain names that the application is allowed to serve.
 
 6.  Run the `python manage.py collectstatic` command to collect all the static files into the `STATIC_ROOT` directory:
-    ```python
+
+    ```bash
     python manage.py collectstatic
     ```
 
 7.  Start the Django development server, or set up a production server using a WSGI server like uWSGI or Gunicorn.
-    ```python
+
+    ```bash
     python manage.py runserver
     ```
 
