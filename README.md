@@ -33,7 +33,7 @@ It allows authenticated users to perform full CRUD (Create, Read, Update, Delete
 1.  Clone the repository:
 
     ```bash
-    git clone [https://github.com/Rayns15/Film-Catalog.git](https://github.com/Rayns15/Film-Catalog.git)
+    git clone https://github.com/Rayns15/Film-Catalog.git
     ```
 
 2.  Navigate to the project directory:
@@ -141,7 +141,7 @@ To deploy this project to a web server, you can follow these general steps:
 2.  Clone the repository to your server:
 
     ```bash
-    git clone [https://github.com/Rayns15/Film-Catalog.git](https://github.com/Rayns15/Film-Catalog.git)
+    git clone https://github.com/Rayns15/Film-Catalog.git
     ```
 
 3.  Install the project dependencies on your server using `pip`:
