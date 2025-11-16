@@ -12,7 +12,8 @@ urlpatterns = [
     # Am șters 'admin/' și 'include()' de aici
     path('api/chat/post/<int:movie_pk>/', views.post_chat_message, name='post-chat-message'),
     path('api/chat/delete/<int:message_pk>/', views.delete_chat_message, name='delete-chat-message'),
-    
+    path('showtime_create/', views.ShowtimeCreateView.as_view(), name='showtime_create'),
+
     #path('', views.afiseaza_home_page, name='home'),
     path('', views.movie_list, name='home'), # Am corectat name='home' aici
     

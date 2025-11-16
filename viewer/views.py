@@ -21,14 +21,46 @@ from django.template.defaultfilters import register as default_template_register
 class ShowtimeCreateView(CreateView):
     model = Showtime
     form_class = ShowtimeForm
-    template_name = 'add_showtime.html' # Or 'showtime_manager.html'
-    success_url = reverse_lazy('showtime_create') # Reload the same page
+    template_name = 'add_showtime.html'
+    success_url = reverse_lazy('showtime_create')
 
-    # ADD THIS METHOD
+    #
+    # --- ADAUGATI ACEASTĂ METODĂ AICI ---
+    # (Este identică cu cea din UpdateView)
+    #
     def get_context_data(self, **kwargs):
+        # 1. Obține contextul de bază (care include 'form')
         context = super().get_context_data(**kwargs)
-        # Add the list of all showtimes to the context
-        context['showtime_list'] = Showtime.objects.all().order_by('-show_time')
+
+        # 2. Adaugă logica de filtrare și sortare
+        showtime_list = Showtime.objects.select_related('movie', 'cinema')
+        
+        movie_filter = self.request.GET.get('movie_filter', None)
+        cinema_filter = self.request.GET.get('cinema_filter', None)
+        date_filter = self.request.GET.get('date_filter', None)
+
+        if movie_filter:
+            showtime_list = showtime_list.filter(movie__title__icontains=movie_filter)
+        if cinema_filter:
+            showtime_list = showtime_list.filter(cinema__name__icontains=cinema_filter)
+        if date_filter:
+            showtime_list = showtime_list.filter(show_time__date=date_filter)
+
+        # 3. Logica de SORTARE
+        sort_by = self.request.GET.get('sort', '-show_time')
+        valid_sort_fields = [
+            'movie__title', '-movie__title', 'cinema__name', 
+            '-cinema__name', 'show_time', '-show_time'
+        ]
+        if sort_by not in valid_sort_fields:
+            sort_by = '-show_time'
+        
+        showtime_list = showtime_list.order_by(sort_by)
+
+        # 4. Adaugă lista și sortarea la context
+        context['showtime_list'] = showtime_list
+        context['current_sort'] = sort_by
+        
         return context
 
 class ShowtimeUpdateView(UpdateView):
@@ -44,6 +76,114 @@ class ShowtimeUpdateView(UpdateView):
         context['showtime_list'] = Showtime.objects.all().order_by('-show_time')
         return context
 
+def showtime_manager(request):
+    
+    # --- Logica POST (când apăsați "Save Showtime") ---
+    if request.method == 'POST':
+        form = ShowtimeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            # Redirecționează la aceeași pagină (fără date POST)
+            return redirect('showtime_create') # <-- Asigurați-vă că acesta e numele din urls.py
+    else:
+        # --- Logica GET (când încărcați pagina) ---
+        # Creați un formular gol
+        form = ShowtimeForm() 
+
+    # --- Logica GET (Filtrare ȘI Sortare) ---
+    # Începe de fiecare dată cu lista completă
+    showtime_list = Showtime.objects.select_related('movie', 'cinema')
+
+    # 2. Logica de FILTRARE
+    movie_filter = request.GET.get('movie_filter', None)
+    cinema_filter = request.GET.get('cinema_filter', None)
+    date_filter = request.GET.get('date_filter', None)
+
+    if movie_filter:
+        showtime_list = showtime_list.filter(movie__title__icontains=movie_filter)
+    if cinema_filter:
+        showtime_list = showtime_list.filter(cinema__name__icontains=cinema_filter)
+    if date_filter:
+        showtime_list = showtime_list.filter(show_time__date=date_filter)
+
+    # 3. Logica de SORTARE
+    sort_by = request.GET.get('sort', '-show_time')
+    valid_sort_fields = [
+        'movie__title', '-movie__title',
+        'cinema__name', '-cinema__name',
+        'show_time', '-show_time'
+    ]
+    if sort_by not in valid_sort_fields:
+        sort_by = '-show_time'
+    
+    showtime_list = showtime_list.order_by(sort_by)
+    
+    # --- Contextul Final ---
+    context = {
+        'form': form, # Formularul (gol sau cu erori dacă a fost POST)
+        'showtime_list': showtime_list, # Lista filtrată și sortată
+        'object': None, # Nu actualizăm niciun obiect pe pagina de creare
+        'current_sort': sort_by, # Pentru a afișa săgețile (▲/▼)
+    }
+    
+    # Asigurați-vă că calea este corectă. 
+    # Dacă 'templates' e la rădăcină, e 'add_showtime.html'
+    # Dacă e în folderul aplicației, e 'schedule/add_showtime.html'
+    return render(request, 'add_showtime.html', context)
+
+
+#
+# --- Partea 2: Pagina de Actualizare (Update) ---
+#
+# Această clasă va gestiona pagina de UPDATE.
+# Va folosi același template 'add_showtime.html'.
+#
+class ShowtimeUpdateView(UpdateView):
+    model = Showtime
+    form_class = ShowtimeForm
+    template_name = 'add_showtime.html' # Același template ca la creare
+    success_url = reverse_lazy('showtime_create') # Mergi înapoi la pagina principală
+
+    # Trebuie să suprascriem get_context_data pentru a adăuga
+    # lista FILTRATĂ ȘI SORTATĂ și pe pagina de update.
+    def get_context_data(self, **kwargs):
+        # 1. Obține contextul de bază (care include 'form' și 'object')
+        context = super().get_context_data(**kwargs)
+
+        # 2. Adaugă logica de filtrare și sortare (la fel ca mai sus)
+        showtime_list = Showtime.objects.select_related('movie', 'cinema')
+        
+        movie_filter = self.request.GET.get('movie_filter', None)
+        cinema_filter = self.request.GET.get('cinema_filter', None)
+        date_filter = self.request.GET.get('date_filter', None)
+
+        if movie_filter:
+            showtime_list = showtime_list.filter(movie__title__icontains=movie_filter)
+        if cinema_filter:
+            showtime_list = showtime_list.filter(cinema__name__icontains=cinema_filter)
+        if date_filter:
+            showtime_list = showtime_list.filter(show_time__date=date_filter)
+
+        # 3. Logica de SORTARE
+        sort_by = self.request.GET.get('sort', '-show_time')
+        valid_sort_fields = [
+            'movie__title', '-movie__title', 'cinema__name', 
+            '-cinema__name', 'show_time', '-show_time'
+        ]
+        if sort_by not in valid_sort_fields:
+            sort_by = '-show_time'
+        
+        showtime_list = showtime_list.order_by(sort_by)
+
+        # 4. Adaugă lista și sortarea la context
+        context['showtime_list'] = showtime_list
+        context['current_sort'] = sort_by
+        
+        return context
+
+#
+# --- Partea 3: Pagina de Ștergere (Delete) ---
+#
 class ShowtimeDeleteView(DeleteView):
     model = Showtime
     template_name = 'showtime_confirm_delete.html' 
