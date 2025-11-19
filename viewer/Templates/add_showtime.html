@@ -68,7 +68,17 @@
 </style>
 
 <div class="w-full max-w-screen-xl mx-auto px-2 sm:px-4 md:px-8 py-10">
-
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+        <h1 class="text-4xl font-extrabold text-white text-center">
+            <span class='bg-clip-text text-transparent bg-gradient-to-r from-sky-300 to-blue-400'>
+                {% if object %}
+                    Update Showtime
+                {% else %}
+                    Add a New Showtime
+                {% endif %}
+            </span> 🍿
+        </h1>
+    </div>
     <div class="max-w-2xl mx-auto bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-700 mb-16">
         
         <form method="post" class="p-6 sm:p-8 space-y-6">
