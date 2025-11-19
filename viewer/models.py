@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 # Create your models here.
 
@@ -77,6 +78,11 @@ class Cinema(models.Model):
     @property
     def student_weekend_price(self):
         return self._get_weekend_price(self.Student_ticket_price)
+    
+    def get_absolute_url(self):
+        # Aici vom folosi 'cinema_detail' (numele URL-ului pe care-l vom crea)
+        # cu primary key-ul cinematografului ca argument.
+        return reverse('viewer:cinema_detail', kwargs={'pk': self.pk})
 
 class Showtime(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="showtimes")

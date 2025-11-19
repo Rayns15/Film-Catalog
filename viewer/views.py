@@ -1,3 +1,5 @@
+# viewer/views.py
+
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
@@ -15,233 +17,13 @@ from .models import Cinema, Showtime, Movie, ChatMessage, Profile, User
 from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
 import json
-from viewer.forms import ShowtimeForm, CinemaForm, MovieForm, ProfileForm
-# Register a safe 'add_class' template filter so templates don't crash if widget_tweaks isn't loaded
+from .forms import (
+    ShowtimeForm, CinemaForm, MovieForm, ProfileForm,
+    CustomSignupForm, RegisterForm # Asigurați-vă că acestea există în forms.py
+)
 from django.template.defaultfilters import register as default_template_register
 
-class ShowtimeCreateView(CreateView):
-    model = Showtime
-    form_class = ShowtimeForm
-    template_name = 'add_showtime.html'
-    success_url = reverse_lazy('showtime_create')
-
-    #
-    # --- ADAUGATI ACEASTĂ METODĂ AICI ---
-    # (Este identică cu cea din UpdateView)
-    #
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # --- Logica de Filtrare ---
-        showtime_list = Showtime.objects.select_related('movie', 'cinema')
-        
-        movie_filter = self.request.GET.get('movie_filter', None)
-        cinema_filter = self.request.GET.get('cinema_filter', None)
-        date_filter = self.request.GET.get('date_filter', None)
-
-        if movie_filter:
-            showtime_list = showtime_list.filter(movie__title__icontains=movie_filter)
-        if cinema_filter:
-            showtime_list = showtime_list.filter(cinema__name__icontains=cinema_filter)
-        if date_filter:
-            showtime_list = showtime_list.filter(show_time__date=date_filter)
-
-        # --- Logica de Sortare ---
-        sort_by = self.request.GET.get('sort', '-show_time')
-        valid_sort_fields = [
-            'movie__title', '-movie__title', 'cinema__name', 
-            '-cinema__name', 'show_time', '-show_time'
-        ]
-        if sort_by not in valid_sort_fields:
-            sort_by = '-show_time'
-        
-        # Aplicăm sortarea la lista *completă*
-        showtime_list = showtime_list.order_by(sort_by)
-
-        # --- NOU: Logica de Paginare ---
-        # 1. Creăm paginatorul cu lista completă, filtrată și sortată
-        #    Să zicem 5 elemente pe pagină (puteți schimba valoarea)
-        paginator = Paginator(showtime_list, 5)
-        
-        # 2. Luăm numărul paginii din URL (ex: ?page=2). Implicit e pagina 1.
-        page_number = self.request.GET.get('page', 1)
-        
-        # 3. Obținem obiectul paginii curente (care conține doar cele 5 elemente)
-        page_obj = paginator.get_page(page_number)
-        
-        # --- Contextul Final ---
-        # ATENȚIE: Nu mai trimitem 'showtime_list'. Trimitem 'page_obj'.
-        context['page_obj'] = page_obj  # Acesta conține elementele paginii curente
-        context['current_sort'] = sort_by
-        
-        return context
-
-class ShowtimeUpdateView(UpdateView):
-    model = Showtime
-    form_class = ShowtimeForm
-    template_name = 'add_showtime.html' # Or 'showtime_manager.html'
-    success_url = reverse_lazy('showtime_create') # Redirect back to the main manager page
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # --- Logica de Filtrare ---
-        showtime_list = Showtime.objects.select_related('movie', 'cinema')
-        
-        movie_filter = self.request.GET.get('movie_filter', None)
-        cinema_filter = self.request.GET.get('cinema_filter', None)
-        date_filter = self.request.GET.get('date_filter', None)
-
-        if movie_filter:
-            showtime_list = showtime_list.filter(movie__title__icontains=movie_filter)
-        if cinema_filter:
-            showtime_list = showtime_list.filter(cinema__name__icontains=cinema_filter)
-        if date_filter:
-            showtime_list = showtime_list.filter(show_time__date=date_filter)
-
-        # --- Logica de Sortare ---
-        sort_by = self.request.GET.get('sort', '-show_time')
-        valid_sort_fields = [
-            'movie__title', '-movie__title', 'cinema__name', 
-            '-cinema__name', 'show_time', '-show_time'
-        ]
-        if sort_by not in valid_sort_fields:
-            sort_by = '-show_time'
-        
-        # Aplicăm sortarea la lista *completă*
-        showtime_list = showtime_list.order_by(sort_by)
-
-        # --- NOU: Logica de Paginare ---
-        # 1. Creăm paginatorul cu lista completă, filtrată și sortată
-        #    Să zicem 5 elemente pe pagină (puteți schimba valoarea)
-        paginator = Paginator(showtime_list, 5)
-        
-        # 2. Luăm numărul paginii din URL (ex: ?page=2). Implicit e pagina 1.
-        page_number = self.request.GET.get('page', 1)
-        
-        # 3. Obținem obiectul paginii curente (care conține doar cele 5 elemente)
-        page_obj = paginator.get_page(page_number)
-        
-        # --- Contextul Final ---
-        # ATENȚIE: Nu mai trimitem 'showtime_list'. Trimitem 'page_obj'.
-        context['page_obj'] = page_obj  # Acesta conține elementele paginii curente
-        context['current_sort'] = sort_by
-        
-        return context
-
-def showtime_manager(request):
-    
-    # --- Logica POST (când apăsați "Save Showtime") ---
-    if request.method == 'POST':
-        form = ShowtimeForm(request.POST)
-        if form.is_valid():
-            form.save()
-            # Redirecționează la aceeași pagină (fără date POST)
-            return redirect('showtime_create') # <-- Asigurați-vă că acesta e numele din urls.py
-    else:
-        # --- Logica GET (când încărcați pagina) ---
-        # Creați un formular gol
-        form = ShowtimeForm() 
-
-    # --- Logica GET (Filtrare ȘI Sortare) ---
-    # Începe de fiecare dată cu lista completă
-    showtime_list = Showtime.objects.select_related('movie', 'cinema')
-
-    # 2. Logica de FILTRARE
-    movie_filter = request.GET.get('movie_filter', None)
-    cinema_filter = request.GET.get('cinema_filter', None)
-    date_filter = request.GET.get('date_filter', None)
-
-    if movie_filter:
-        showtime_list = showtime_list.filter(movie__title__icontains=movie_filter)
-    if cinema_filter:
-        showtime_list = showtime_list.filter(cinema__name__icontains=cinema_filter)
-    if date_filter:
-        showtime_list = showtime_list.filter(show_time__date=date_filter)
-
-    # 3. Logica de SORTARE
-    sort_by = request.GET.get('sort', '-show_time')
-    valid_sort_fields = [
-        'movie__title', '-movie__title',
-        'cinema__name', '-cinema__name',
-        'show_time', '-show_time'
-    ]
-    if sort_by not in valid_sort_fields:
-        sort_by = '-show_time'
-    
-    showtime_list = showtime_list.order_by(sort_by)
-    
-    # --- Contextul Final ---
-    context = {
-        'form': form, # Formularul (gol sau cu erori dacă a fost POST)
-        'showtime_list': showtime_list, # Lista filtrată și sortată
-        'object': None, # Nu actualizăm niciun obiect pe pagina de creare
-        'current_sort': sort_by, # Pentru a afișa săgețile (▲/▼)
-    }
-    
-    # Asigurați-vă că calea este corectă. 
-    # Dacă 'templates' e la rădăcină, e 'add_showtime.html'
-    # Dacă e în folderul aplicației, e 'schedule/add_showtime.html'
-    return render(request, 'add_showtime.html', context)
-
-
-#
-# --- Partea 2: Pagina de Actualizare (Update) ---
-#
-# Această clasă va gestiona pagina de UPDATE.
-# Va folosi același template 'add_showtime.html'.
-#
-class ShowtimeUpdateView(UpdateView):
-    model = Showtime
-    form_class = ShowtimeForm
-    template_name = 'add_showtime.html' # Același template ca la creare
-    success_url = reverse_lazy('showtime_create') # Mergi înapoi la pagina principală
-
-    # Trebuie să suprascriem get_context_data pentru a adăuga
-    # lista FILTRATĂ ȘI SORTATĂ și pe pagina de update.
-    def get_context_data(self, **kwargs):
-        # 1. Obține contextul de bază (care include 'form' și 'object')
-        context = super().get_context_data(**kwargs)
-
-        # 2. Adaugă logica de filtrare și sortare (la fel ca mai sus)
-        showtime_list = Showtime.objects.select_related('movie', 'cinema')
-        
-        movie_filter = self.request.GET.get('movie_filter', None)
-        cinema_filter = self.request.GET.get('cinema_filter', None)
-        date_filter = self.request.GET.get('date_filter', None)
-
-        if movie_filter:
-            showtime_list = showtime_list.filter(movie__title__icontains=movie_filter)
-        if cinema_filter:
-            showtime_list = showtime_list.filter(cinema__name__icontains=cinema_filter)
-        if date_filter:
-            showtime_list = showtime_list.filter(show_time__date=date_filter)
-
-        # 3. Logica de SORTARE
-        sort_by = self.request.GET.get('sort', '-show_time')
-        valid_sort_fields = [
-            'movie__title', '-movie__title', 'cinema__name', 
-            '-cinema__name', 'show_time', '-show_time'
-        ]
-        if sort_by not in valid_sort_fields:
-            sort_by = '-show_time'
-        
-        showtime_list = showtime_list.order_by(sort_by)
-
-        # 4. Adaugă lista și sortarea la context
-        context['showtime_list'] = showtime_list
-        context['current_sort'] = sort_by
-        
-        return context
-
-#
-# --- Partea 3: Pagina de Ștergere (Delete) ---
-#
-class ShowtimeDeleteView(DeleteView):
-    model = Showtime
-    template_name = 'showtime_confirm_delete.html' 
-    success_url = reverse_lazy('showtime_create')
-
+# === Filtru Template ===
 @default_template_register.filter(name='add_class')
 def add_class(field, css_classes):
     try:
@@ -251,105 +33,10 @@ def add_class(field, css_classes):
     except Exception:
         return field
 
-# Import all forms from forms.py
-from .forms import (
-    CustomSignupForm, ProfileForm, RegisterForm, 
-    CinemaForm, ShowtimeForm, MovieForm,
-)
-
-# === Staff Views ===
-
-@staff_member_required
-def add_showtime_view(request):
-    if request.method == 'POST':
-        form = ShowtimeForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Showtime successfully added!')
-            return redirect('add-showtime')
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = ShowtimeForm()
-    context = {'form': form}
-    return render(request, 'add_showtime.html', context)
-
-@staff_member_required
-def cinema_prices_update(request, pk):
-    cinema = get_object_or_404(Cinema, pk=pk)
-    next_url = request.POST.get('next', request.GET.get('next', ''))
-
-    if request.method == 'POST':
-        form = CinemaForm(request.POST, instance=cinema)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f"Prices for '{cinema.name}' updated successfully!")
-            if next_url:
-                return redirect(next_url)
-            else:
-                return redirect('cinema-list')
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = CinemaForm(instance=cinema)
-
-    context = {
-        'form': form,
-        'cinema': cinema,
-        'next_url': next_url
-    }
-    return render(request, 'cinema_prices_update.html', context)
-
-# === Chat/API Views ===
-
-@login_required
-@require_POST
-def delete_chat_message(request, message_pk):
-    if not request.user.is_staff:
-        return JsonResponse({'status': 'error', 'message': 'Not authorized'}, status=403)
-    try:
-        message = ChatMessage.objects.get(pk=message_pk)
-        message.delete()
-        return JsonResponse({'status': 'ok'})
-    except ChatMessage.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Message not found'}, status=404)
-
-# This is the CORRECT version of post_chat_message
-@login_required
-@require_POST
-def post_chat_message(request, movie_pk):
-    try:
-        movie = Movie.objects.get(pk=movie_pk)
-        data = json.loads(request.body)
-        message_text = data.get('message')
-
-        if not message_text:
-            return JsonResponse({'status': 'error', 'message': 'Message is empty'}, status=400)
-
-        chat_message = ChatMessage.objects.create(
-            movie=movie,
-            user=request.user,
-            message=message_text
-        )
-        
-        return JsonResponse({
-            'status': 'ok',
-            'message': chat_message.message,
-            'user': chat_message.user.username,
-            'timestamp': chat_message.timestamp.strftime('%b %d, %I:%M %p'),
-            'message_id': chat_message.pk  # <-- This was missing in your duplicate
-        })
-    except Movie.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Movie not found'}, status=404)
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-def chat_api(request):
-    return HttpResponse("Chat API is working!")
-
-# === Main Page Views ===
+# === Vederi principale (Filme, Cinematografe) ===
 
 def movie_list(request):
+    """ Pagina principală (HOME) - afișează lista de filme și gestionează căutarea. """
     query = request.GET.get('q')
     no_results = False
     
@@ -372,6 +59,7 @@ def movie_list(request):
     return render(request, 'movie_list.html', context)
 
 def movie_search_view(request):
+    """ Pagină dedicată pentru rezultatele căutării. """
     query = request.GET.get('q', '') 
     if query:
         movies = Movie.objects.filter(title__icontains=query)
@@ -388,14 +76,173 @@ def movie_search_view(request):
         'no_results': no_results,
     })
 
-def cinema_list_view(request):
-    cinemas = Cinema.objects.all()
-    context = {'cinemas': cinemas}
-    return render(request, 'cinema_list.html', context)
+class CinemaListView(ListView):
+    """ Afișează lista de carduri pentru cinematografe. """
+    model = Cinema
+    template_name = 'cinemas/cinema_list.html'
+    context_object_name = 'cinemas'
+    queryset = Cinema.objects.all().order_by('name')
 
-# === Class-Based Views (CBVs) ===
+class CinemaDetailView(DetailView):
+    """ Afișează detaliile unui singur cinematograf și showtimes-urile sale. """
+    model = Cinema
+    template_name = 'cinemas/cinema_detail.html'
+    context_object_name = 'cinema'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['showtimes'] = Showtime.objects.filter(cinema=self.object).order_by('show_time', 'movie__title')
+        return context
+
+# === CRUD Filme (Class-Based Views) ===
+
+class MovieCreateView(CreateView):
+    model = Movie
+    form_class = MovieForm
+    template_name = 'movie_form.html'
+    success_url = reverse_lazy("viewer:home") # Corectat să folosească app_name
+
+class MovieUpdateView(UpdateView):
+    model = Movie
+    form_class = MovieForm
+    template_name = 'movie_update.html'
+    success_url = reverse_lazy("viewer:home") # Corectat să folosească app_name
+
+class MovieDeleteView(DeleteView):
+    model = Movie
+    template_name = 'movie_confirm_delete.html'
+    success_url = reverse_lazy("viewer:home") # Corectat să folosească app_name
+
+class MovieDetailView(DetailView):
+    model = Movie
+    context_object_name = 'movie'
+    template_name = 'movie_detail.html'
+
+# === CRUD Showtimes (Class-Based Views) ===
+
+class ShowtimeCreateView(CreateView):
+    """ Pagina 'Showtime Manager' - creează și listează showtimes. """
+    model = Showtime
+    form_class = ShowtimeForm
+    template_name = 'add_showtime.html'
+    success_url = reverse_lazy('viewer:showtime_create') # Corectat
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        showtime_list = Showtime.objects.select_related('movie', 'cinema')
+        
+        # Filtrare
+        movie_filter = self.request.GET.get('movie_filter', None)
+        cinema_filter = self.request.GET.get('cinema_filter', None)
+        date_filter = self.request.GET.get('date_filter', None)
+        if movie_filter:
+            showtime_list = showtime_list.filter(movie__title__icontains=movie_filter)
+        if cinema_filter:
+            showtime_list = showtime_list.filter(cinema__name__icontains=cinema_filter)
+        if date_filter:
+            showtime_list = showtime_list.filter(show_time__date=date_filter)
+
+        # Sortare
+        sort_by = self.request.GET.get('sort', '-show_time')
+        valid_sort_fields = [
+            'movie__title', '-movie__title', 'cinema__name', 
+            '-cinema__name', 'show_time', '-show_time'
+        ]
+        if sort_by not in valid_sort_fields:
+            sort_by = '-show_time'
+        showtime_list = showtime_list.order_by(sort_by)
+
+        # Paginare
+        paginator = Paginator(showtime_list, 5) # 5 elemente pe pagină
+        page_number = self.request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+        
+        context['page_obj'] = page_obj
+        context['current_sort'] = sort_by
+        return context
+
+class ShowtimeUpdateView(UpdateView):
+    """ Pagina de update pentru un showtime, refolosește același template. """
+    model = Showtime
+    form_class = ShowtimeForm
+    template_name = 'add_showtime.html'
+    success_url = reverse_lazy('viewer:showtime_create') # Corectat
+
+    def get_context_data(self, **kwargs):
+        # Logica este identică cu cea de la CreateView
+        context = super().get_context_data(**kwargs)
+        showtime_list = Showtime.objects.select_related('movie', 'cinema')
+        
+        # Filtrare
+        movie_filter = self.request.GET.get('movie_filter', None)
+        cinema_filter = self.request.GET.get('cinema_filter', None)
+        date_filter = self.request.GET.get('date_filter', None)
+        if movie_filter:
+            showtime_list = showtime_list.filter(movie__title__icontains=movie_filter)
+        if cinema_filter:
+            showtime_list = showtime_list.filter(cinema__name__icontains=cinema_filter)
+        if date_filter:
+            showtime_list = showtime_list.filter(show_time__date=date_filter)
+
+        # Sortare
+        sort_by = self.request.GET.get('sort', '-show_time')
+        valid_sort_fields = [
+            'movie__title', '-movie__title', 'cinema__name', 
+            '-cinema__name', 'show_time', '-show_time'
+        ]
+        if sort_by not in valid_sort_fields:
+            sort_by = '-show_time'
+        showtime_list = showtime_list.order_by(sort_by)
+
+        # Paginare
+        paginator = Paginator(showtime_list, 5) # 5 elemente pe pagină
+        page_number = self.request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+        
+        context['page_obj'] = page_obj
+        context['current_sort'] = sort_by
+        return context
+
+class ShowtimeDeleteView(DeleteView):
+    model = Showtime
+    template_name = 'showtime_confirm_delete.html' 
+    success_url = reverse_lazy('viewer:showtime_create') # Corectat
+
+# === Vederi pentru Staff (Funcții) ===
+
+@staff_member_required
+def cinema_add_view(request):
+    """ Formular pentru adăugarea unui cinematograf nou. """
+    if request.method == 'POST':
+        form = CinemaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Cinema '{form.cleaned_data['name']}' added successfully!")
+            return redirect('viewer:cinema-list') # Corectat
+    else:
+        form = CinemaForm()
+    return render(request, 'cinema_form.html', {'form': form})
+
+@staff_member_required
+def cinema_prices_update(request, pk):
+    """ Formular pentru actualizarea prețurilor unui cinematograf. """
+    cinema = get_object_or_404(Cinema, pk=pk)
+    next_url = request.POST.get('next', request.GET.get('next', ''))
+
+    if request.method == 'POST':
+        form = CinemaForm(request.POST, instance=cinema)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Prices for '{cinema.name}' updated successfully!")
+            return redirect(next_url or 'viewer:cinema-list') # Corectat
+    else:
+        form = CinemaForm(instance=cinema)
+
+    context = {'form': form, 'cinema': cinema, 'next_url': next_url}
+    return render(request, 'cinema_prices_update.html', context)
 
 class cinema_prices(DetailView):
+    """ Afișează prețurile și showtimes-urile unui film, grupate pe cinematograf. """
     model = Movie
     template_name = 'cinema_prices.html'
     context_object_name = 'movie'
@@ -404,16 +251,18 @@ class cinema_prices(DetailView):
         context = super().get_context_data(**kwargs)
         movie = self.get_object()
         now = timezone.now()
-
+        
+        # Optimizare: Preia showtimes-urile relevante pentru acest film
         showtimes_for_this_movie = Prefetch(
             'cinema_showtimes',
             queryset=Showtime.objects.filter(
                 movie_id=movie.pk,
-                #show_time__gte=now
+                show_time__gte=now # Arată doar showtimes viitoare
             ).order_by('show_time'),
             to_attr='filtered_showtimes'
         )
         
+        # Preia cinematografele care au showtimes viitoare pentru acest film
         cinemas_with_showtimes = Cinema.objects.filter(
             cinema_showtimes__movie_id=movie.pk,
             cinema_showtimes__show_time__gte=now
@@ -423,102 +272,90 @@ class cinema_prices(DetailView):
         context['chat_messages'] = ChatMessage.objects.filter(movie=movie)
         return context
 
-class MovieCreateView(CreateView):
-    model = Movie
-    form_class = MovieForm
-    template_name = 'movie_form.html'
-    success_url = reverse_lazy("home")
+# === API pentru Chat ===
 
-class MovieUpdateView(UpdateView):
-    model = Movie
-    form_class = MovieForm
-    template_name = 'movie_update.html'
-    success_url = reverse_lazy("home")
+@login_required
+@require_POST
+def post_chat_message(request, movie_pk):
+    try:
+        movie = Movie.objects.get(pk=movie_pk)
+        data = json.loads(request.body)
+        message_text = data.get('message')
+        if not message_text:
+            return JsonResponse({'status': 'error', 'message': 'Message is empty'}, status=400)
 
-class MovieDeleteView(DeleteView):
-    model = Movie
-    template_name = 'movie_confirm_delete.html'
-    success_url = reverse_lazy("home")
+        chat_message = ChatMessage.objects.create(
+            movie=movie, user=request.user, message=message_text
+        )
+        return JsonResponse({
+            'status': 'ok',
+            'message': chat_message.message,
+            'user': chat_message.user.username,
+            'timestamp': chat_message.timestamp.strftime('%b %d, %I:%M %p'),
+            'message_id': chat_message.pk
+        })
+    except Movie.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Movie not found'}, status=44)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-class MovieDetailView(DetailView):
-    model = Movie
-    context_object_name = 'movie'
-    template_name = 'movie_detail.html'
+@login_required
+@require_POST
+def delete_chat_message(request, message_pk):
+    if not request.user.is_staff:
+        return JsonResponse({'status': 'error', 'message': 'Not authorized'}, status=403)
+    try:
+        message = ChatMessage.objects.get(pk=message_pk)
+        message.delete()
+        return JsonResponse({'status': 'ok'})
+    except ChatMessage.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Message not found'}, status=404)
 
-# === Auth & Profile Views ===
+def chat_api(request):
+    return HttpResponse("Chat API is working!")
+
+# === Autentificare & Profil (Funcții) ===
 
 def signup_view(request):
     if request.method == 'POST':
-        form = CustomSignupForm(request.POST)
+        form = CustomSignupForm(request.POST) # Folosind CustomSignupForm
         if form.is_valid():
             user = form.save()
             messages.success(request, f"User {user.username} signed up successfully!")
-            return redirect('login')
-        else:
-            messages.error(request, "Please correct the errors below.")
+            return redirect('viewer:login') # Corectat
     else:
         form = CustomSignupForm()
     return render(request, 'sign_up.html', {'form': form})
 
-# This is the active profile_view linked in your urls.py
 @login_required
 def profile_view(request):
     if request.method == 'POST':
-        form = ProfileForm(request.POST) # This form is simple, not a ModelForm
+        form = ProfileForm(request.POST) 
         if form.is_valid():
             return HttpResponse("Profile updated successfully")
     else:
         form = ProfileForm()
     return render(request, 'profile.html', {'form': form})
 
-# This is the active edit_profile linked in your urls.py
 @login_required
 def edit_profile(request, pk):
     user = get_object_or_404(User, pk=pk)
-    if request.user != user: # Add a check
-        return redirect('home')
+    if request.user != user:
+        return redirect('viewer:home') # Corectat
         
     if request.method == 'POST':
         user.first_name = request.POST.get('first_name', user.first_name)
         user.last_name = request.POST.get('last_name', user.last_name)
         user.email = request.POST.get('email', user.email)
         user.save()
-        return redirect('profile')
+        return redirect('viewer:profile') # Corectat
     return render(request, 'profile_edit.html', {'user': user})
 
 @login_required
 def profile_delete_view(request):
     if request.method == 'POST':
         user = request.user
-        user.delete() # This deletes the user
+        user.delete()
         messages.success(request, "Profile deleted successfully")
-        return redirect('home')
-    return render(request, 'profile_delete.html') # A confirmation page
-
-# === Unused/Old Views (can be deleted) ===
-
-def afiseaza_home_page(request):
-    filme = Movie.objects.all()
-    return render(request, 'home.html', {'movies_html': filme})
-
-@staff_member_required
-def cinema_add_view(request):
-    if request.method == 'POST':
-        form = CinemaForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f"Cinema '{form.cleaned_data['name']}' added successfully!")
-            return redirect('cinema-list') # Redirect back to the cinema list
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = CinemaForm() # A new, blank form
-
-    context = {
-        'form': form
-    }
-    return render(request, 'cinema_form.html', context)
-
-
-
-# ... other unused functions like 'phone_book', 'afiseaza', etc. ...
+        return redirect('viewer:home') # Corectat
+    return render(request, 'profile_delete.html')

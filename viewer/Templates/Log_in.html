@@ -201,7 +201,7 @@
                 </ul>
             {% endif %}
 
-            <form method="post" action="{% url 'login' %}">
+            <form method="post" action="{% url 'viewer:login' %}">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ next|default:'/' }}"> {# Use 'next' from context or default to home #}
 
@@ -229,8 +229,8 @@
             </form>
 
             <div class="footer-links">
-                <a class="link" href="{% url 'home' %}">Return Home</a>
-                 <a class="link" href="{% url 'signup' %}">Sign up?</a>
+                <a class="link" href="{% url 'viewer:home' %}">Return Home</a>
+                 <a class="link" href="{% url 'viewer:signup' %}">Sign up?</a>
             </div>
         </div>
     </div>

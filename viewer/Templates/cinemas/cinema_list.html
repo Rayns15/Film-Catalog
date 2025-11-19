@@ -12,28 +12,30 @@
         </h1>
         
         {% if user.is_staff %}
-            <a href="{% url 'cinema-add' %}" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-lg font-medium ml-4">
+            <a href="{% url 'viewer:cinema-add' %}" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-lg font-medium ml-4">
                 Add Cinema
             </a>
         {% endif %}
     </div>
-
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
         {% for cinema in cinemas %}
             <div class="bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-700 flex flex-col h-full transform hover:scale-105 transition-transform duration-300 ease-in-out">
                 
                 <div class="p-4 bg-gray-800/70 flex flex-col sm:flex-row sm:justify-between sm:items-center">
                     <div>
-                        <h3 class="text-2xl font-bold text-cyan-300">{{ cinema.name }}</h3>
+                        <h3 class="text-2xl font-bold text-white mb-2">
+                            <a href="{{ cinema.get_absolute_url }}" class="hover:text-indigo-400 transition">
+                                {{ cinema.name }}
+                            </a>
+                        </h3>
                         <p class="text-sm font-normal text-gray-400">{{ cinema.location }}</p>
                     </div>
                     {% if user.is_staff %}
-                        <a href="{% url 'cinema_prices_update' cinema.pk %}?next={{ request.path }}" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition text-sm font-medium mt-2 sm:mt-0 self-start sm:self-center">
+                        <a href="{% url 'viewer:cinema_prices_update' cinema.pk %}?next={{ request.path }}" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition text-sm font-medium mt-2 sm:mt-0 self-start sm:self-center">
                             Update Prices
                         </a>
                     {% endif %}
                 </div>
-
                 <div class="p-6 flex flex-col flex-grow">
                     <h3 class="text-sm font-semibold text-cyan-300 mb-2">Showtimes at this Cinema:</h3>
                     <ul class="text-xs space-y-1 text-gray-300 max-h-24 overflow-y-auto">

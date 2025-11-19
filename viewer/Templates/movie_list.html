@@ -7,7 +7,7 @@
 <div class="w-full max-w-screen-xl mx-auto px-2 sm:px-4 md:px-8">
 
     <div class="flex justify-end mt-4 mb-4"></div>
-    <form action="{% url 'movie_search' %}" method="get" class="justify-end flex mb-4">
+    <form action="" method="get" class="justify-end flex mb-4">
         <input type="text" name="q" placeholder="Search movies..." class="px-3 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800" value="{{ query|default_if_none:'' }}" />
         <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition">Search</button>
     </form>
@@ -42,9 +42,9 @@
         <button class="filter-btn bg-pink-500 text-white px-2 py-1 rounded text-lg hover:bg-pink-600" data-genre="horror">Horror</button>
         {% if user.is_authenticated %}
         
-        <a href="{% url 'movie-add' %}" class="bg-teal-500 text-white px-2 py-1 rounded text-lg hover:bg-teal-600">Add Movie</a>
-        <a href="{% url 'showtime_create' %}" class="bg-cyan-500 text-white px-2 py-1 rounded text-lg hover:bg-cyan-600">Showtime Manager</a>
-        <a href="{% url 'cinema-list' %}" class="bg-indigo-500 text-white px-2 py-1 rounded text-lg hover:bg-indigo-600">View Cinemas</a>
+        <a href="{% url 'viewer:movie-add' %}" class="bg-teal-500 text-white px-2 py-1 rounded text-lg hover:bg-teal-600">Add Movie</a>
+        <a href="{% url 'viewer:showtime_create' %}" class="bg-cyan-500 text-white px-2 py-1 rounded text-lg hover:bg-cyan-600">Showtime Manager</a>
+        <a href="{% url 'viewer:cinema-list' %}" class="bg-indigo-500 text-white px-2 py-1 rounded text-lg hover:bg-indigo-600">View Cinemas</a>
         
         
         {% endif %}
@@ -61,10 +61,10 @@
                 <div class="flex-grow">
                     {% if user.is_authenticated %}
                         <div class="flex justify-end gap-2 mb-2">
-                            <a href="{% url 'movie-update' movie.pk %}" title="Update Movie">
+                            <a href="{% url 'viewer:movie-update' movie.pk %}" title="Update Movie">
                                 <img src="{% static 'logos/pencil.jpg' %}" alt="Update Movie" class="h-6 w-auto rounded shadow hover:opacity-90 transition" />
                             </a>
-                            <a href="{% url 'movie-delete' movie.pk %}" title="Delete Movie">
+                            <a href="{% url 'viewer:movie-delete' movie.pk %}" title="Delete Movie">
                                 <img src="{% static 'logos/delete.jpg' %}" alt="Delete Movie" class="h-6 w-auto rounded shadow hover:opacity-90 transition" />
                             </a>
                         </div>
@@ -109,15 +109,15 @@
             <div class="p-6 flex flex-col flex-grow border-t border-gray-200">
                 
                 <div class="flex flex-col items-center gap-2 mb-4">
-                    <a href="{% url 'movie-detail' movie.pk %}" alt="View Details" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 text-sm rounded-full transition-colors duration-300">
+                    <a href="{% url 'viewer:movie-detail' movie.pk %}" alt="View Details" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 text-sm rounded-full transition-colors duration-300">
                         View Details
                     </a>
-                    <a href="{% url 'cinema_prices' movie.pk %}" alt="See Prices & Showtimes" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1 px-3 text-sm rounded-full transition-colors duration-300">
+                    <a href="{% url 'viewer:cinema_prices' movie.pk %}" alt="See Prices & Showtimes" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1 px-3 text-sm rounded-full transition-colors duration-300">
                         Prices & Showtimes
                     </a>
                 </div>
                 
-                <a href="{% url 'movie-detail' movie.pk %}" class="block hover:opacity-90 transition max-w-full mb-4">
+                <a href="{% url 'viewer:movie-detail' movie.pk %}" class="block hover:opacity-90 transition max-w-full mb-4">
                     {% if movie.profile_picture %}
                         <img src="{{ movie.profile_picture.url }}"
                              alt="{{ movie.title }} cover"
@@ -148,13 +148,13 @@
                 <ul class="space-y-1">
                         <li class="flex items-center gap-2 mt-1">
                             <span class="text-gray-500 text-xs font-medium">Available on:</span>
-                            <a href="https.www.netflix.com" target="_blank" rel="noopener noreferrer">
+                            <a href="https://www.netflix.com" target="_blank" rel="noopener noreferrer">
                                 <img src="{% static 'logos/netflix.jpg' %}" alt="Netflix" class="h-5 w-5 rounded shadow" title="Netflix">
                             </a>
-                            <a href="https.www.primevideo.com" target="_blank" rel="noopener noreferrer">
+                            <a href="https://www.primevideo.com" target="_blank" rel="noopener noreferrer">
                                 <img src="{% static 'logos/prime.jpg' %}" alt="Amazon Prime" class="h-5 w-5 rounded shadow" title="Amazon Prime">
                             </a>
-                            <a href="https.www.hbo.com" target="_blank" rel="noopener noreferrer">
+                            <a href="https://www.hbo.com" target="_blank" rel="noopener noreferrer">
                                 <img src="{% static 'logos/hbo.jpg' %}" alt="HBO" class="h-5 w-5 rounded shadow" title="HBO">
                             </a>
                         </li>

@@ -92,7 +92,7 @@
             <div class="flex flex-col sm:flex-row items-center {% if object %}justify-between{% else %}justify-end{% endif %} gap-4 pt-6 border-t border-gray-700">
                 
                 {% if object %}
-                <a href="{% url 'showtime_delete' object.pk %}" class="text-center bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition font-medium w-full sm:w-auto">
+                <a href="{% url 'viewer:showtime_delete' object.pk %}" class="text-center bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition font-medium w-full sm:w-auto">
                     Delete
                 </a>
                 {% endif %}
@@ -100,11 +100,11 @@
                 <div class="flex flex-col sm:flex-row justify-end gap-4 w-full sm:w-auto">
                     
                     {% if object %}
-                        <a href="{% url 'showtime_create' %}" class="text-center bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition font-medium">
+                        <a href="{% url 'viewer:showtime_create' %}" class="text-center bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition font-medium">
                             Add New
                         </a>
                     {% endif %}
-                    <a href="{% url 'showtime_create' %}" class="text-center bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition font-medium">
+                    <a href="{% url 'viewer:showtime_create' %}" class="text-center bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition font-medium">
                         Cancel
                     </a>
                     <button type="submit" class="bg-indigo-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
@@ -145,7 +145,7 @@
                 </div>
                 <div class="flex flex-col sm:flex-row gap-2">
                     <button type="submit" class="w-full filter-btn filter-btn-apply">Filter</button>
-                    <a href="{% url 'showtime_create' %}" class="w-full text-center filter-btn filter-btn-clear">Clear</a>
+                    <a href="{% url 'viewer:showtime_create' %}" class="w-full text-center filter-btn filter-btn-clear">Clear</a>
                 </div>
             </div>
         </form>
@@ -198,10 +198,10 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ show.cinema.name }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ show.show_time|date:"D, M d, Y - g:i A" }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
-                                <a href="{% url 'showtime_update' show.pk %}" class="text-indigo-400 hover:text-indigo-300 transition">
+                                <a href="{% url 'viewer:showtime_update' show.pk %}" class="text-indigo-400 hover:text-indigo-300 transition">
                                     Update
                                 </a>
-                                <a href="{% url 'showtime_delete' show.pk %}" class="text-red-500 hover:text-red-400 transition">
+                                <a href="{% url 'viewer:showtime_delete' show.pk %}" class="text-red-500 hover:text-red-400 transition">
                                     Delete
                                 </a>
                             </td>

@@ -32,7 +32,7 @@
                 {% csrf_token %}
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
                     
-                    <a href="{% url 'showtime_update' object.pk %}" class="text-center bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition font-medium">
+                    <a href="{% url 'viewer:showtime_update' object.pk %}" class="text-center bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition font-medium">
                         Cancel
                     </a>
                     <button type="submit" class="bg-red-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-red-700 transition">

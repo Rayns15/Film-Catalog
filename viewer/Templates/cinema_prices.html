@@ -24,7 +24,7 @@
                         <p class="text-sm font-normal text-gray-400">{{ cinema.location }}</p>
                     </div>
                     {% if user.is_staff %}
-                        <a href="{% url 'cinema_prices_update' cinema.pk %}?next={{ request.path }}" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition text-sm font-medium mt-2 sm:mt-0 self-start sm:self-center">
+                        <a href="{% url 'viewer:cinema_prices_update' cinema.pk %}?next={{ request.path }}" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition text-sm font-medium mt-2 sm:mt-0 self-start sm:self-center">
                             Update Prices
                         </a>
                     {% endif %}
@@ -218,7 +218,7 @@
     </div>
 
     {% if user.is_authenticated %}
-        <form id="chat-form" method="post" action="{% url 'post-chat-message' movie.pk %}" onsubmit="return false;" class="p-4 bg-gray-800/70 border-t border-gray-700 flex gap-3">
+        <form id="chat-form" method="post" action="{% url 'viewer:post-chat-message' movie.pk %}" onsubmit="return false;" class="p-4 bg-gray-800/70 border-t border-gray-700 flex gap-3">
             {% csrf_token %}
             <input type="text" id="chat-message-input" name="message" placeholder="Write a message..." required autocomplete="off" class="flex-grow bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <button type="button" id="chat-send-btn" class="bg-indigo-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-indigo-700 transition">
@@ -228,7 +228,7 @@
     {% else %}
         <div class="p-4 bg-gray-800/70 border-t border-gray-700 text-center">
             <p class="text-gray-400">
-                You must be <a href="{% url 'login' %}?next={{ request.path }}" class="text-indigo-400 font-semibold hover:underline">logged in</a> to post a message.
+                You must be <a href="{% url 'viewer:login' %}?next={{ request.path }}" class="text-indigo-400 font-semibold hover:underline">logged in</a> to post a message.
             </p>
         </div>
     {% endif %}
@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const message = messageInput.value.trim();
         if (message === "") return; // Don't send empty messages
 
-        const postUrl = `{% url 'post-chat-message' movie.pk %}`;
+        const postUrl = `{% url 'viewer:post-chat-message' movie.pk %}`;
 
         fetch(postUrl, {
             method: 'POST',
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 if (confirm('Are you sure you want to delete this message?')) {
-                    const deleteUrl = `{% url 'delete-chat-message' 0 %}`.replace('0', messageId);
+                    const deleteUrl = `{% url 'viewer:delete-chat-message' 0 %}`.replace('0', messageId);
 
                     fetch(deleteUrl, {
                         method: 'POST', 

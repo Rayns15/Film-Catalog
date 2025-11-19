@@ -166,7 +166,7 @@
                 </ul>
             {% endif %}
 
-            <form method="post" action="{% url 'profile_edit' user.pk %}">
+            <form method="post" action="{% url 'viewer:profile_edit' user.pk %}">
                 {% csrf_token %}
 
                 <div class="field">
@@ -193,7 +193,7 @@
             </form>
 
             <div class="footer-links">
-                <a class="link" href="{% url 'home' %}">Cancel</a>
+                <a class="link" href="{% url 'viewer:home' %}">Cancel</a>
             </div>
 
         </div>

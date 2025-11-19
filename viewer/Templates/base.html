@@ -142,7 +142,7 @@
     <header class="app-header" role="banner">
         <div class="container flex flex-col md:flex-row items-center justify-between">
             <div class="flex items-center mb-2 md:mb-0">
-                <a class="brand flex items-center gap-2" href="{% url 'home' %}" aria-label="Film Catalog home">
+                <a class="brand flex items-center gap-2" href="/" aria-label="Film Catalog home">
                     <span class="brand-badge" aria-hidden="true">FC</span>
                     <span class="">Film Catalog</span>
                 </a>
@@ -151,20 +151,20 @@
             <div class="flex-1"></div>
             <nav class="actions flex gap-4 mt-2 md:mt-0 justify-end" aria-label="User account actions">
                 {% if user.is_authenticated %}
-                    <a class="btn btn-login" href="{% url 'profile' %}">My account</a>
-                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    <a class="btn btn-login" href="/profile/">My account</a>
+                    <form action="/logout/" method="post" style="display:inline;">
                         {% csrf_token %}
-                        <input type="hidden" name="next" value="{% url 'home' %}">
+                        <input type="hidden" name="next" value="/">
                         <button type="submit" class="btn btn-signup">Log out</button>
                     </form>
                 {% else %}
-                    <a class="btn btn-login" href="{% url 'login' %}">Log in</a>
-                    <a class="btn btn-signup" href="{% url 'signup' %}">Sign up</a>
+                    <a class="btn btn-login" href="{% url 'viewer:login' %}">Log in</a>
+                    <a class="btn btn-signup" href="{% url 'viewer:signup' %}">Sign up</a>
                 {% endif %}
                 <a class="btn btn-login" href="http://127.0.0.1:8000/aboutme/">About Me</a>
                 <a class="btn btn-login" href="/contact/">Contact</a>
                 {% if request.path == '/search/' or request.path|slice:":8" == '/search/' %}
-                    <a class="btn btn-login bg-indigo-500 hover:bg-indigo-700 text-white" href="{% url 'home' %}">Exit Search</a>
+                    <a class="btn btn-login bg-indigo-500 hover:bg-indigo-700 text-white" href="/">Exit Search</a>
                 {% endif %}
             </nav>
         </div>

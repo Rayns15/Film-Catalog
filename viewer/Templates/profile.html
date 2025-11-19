@@ -140,8 +140,8 @@
             {% endif %}
             
             <div class="footer-links">
-                <a class="link" href="{% url 'profile_edit' user.pk %}">Edit Profile</a>
-                <a class="link" href="{% url 'logout' %}">Logout</a>
+                <a class="link" href="{% url 'viewer:profile_edit' user.pk %}">Edit Profile</a>
+                <a class="link" href="{% url 'viewer:logout' %}">Logout</a>
             </div>
 
         </div>

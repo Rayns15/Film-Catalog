@@ -344,7 +344,7 @@
                     {% if form.bio.errors %}<div class="errorlist">{{ form.bio.errors }}</div>{% endif %}
                 </p>
 
-                <p class="form-field-file">
+                <p>
                     {{ form.profile_picture.label_tag }}
                     {{ form.profile_picture }}
                     {% if form.profile_picture.errors %}<div class="errorlist">{{ form.profile_picture.errors }}</div>{% endif %}
@@ -357,7 +357,7 @@
                 </p>
 
                 <div class="actions">
-                    <a href="{% url 'home' %}" class="button-cancel">Cancel</a>
+                    <a href="{% url 'viewer:home' %}" class="button-cancel">Cancel</a>
                     <button type="submit">Save Movie</button>
                 </div>
             </form>
