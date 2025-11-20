@@ -129,7 +129,7 @@ It allows authenticated users to perform full CRUD (Create, Read, Update, Delete
 
 ![media/Home_third](https://github.com/Rayns15/Film-Catalog/blob/f791caf5f00c6be2db72509f18002270f3a09abb/media/Home_new2.jpg)
 ![media/Home_forth](https://github.com/Rayns15/Film-Catalog/blob/f791caf5f00c6be2db72509f18002270f3a09abb/media/Home_new3.jpg)
-![media/Home_5](https://github.com/Rayns15/Film-Catalog/blob/f791caf5f00c6be2db72509f18002270f3a09abb/media/Home_new4.jpg)
+![media/Home_5](https://github.com/Rayns15/Film-Catalog/blob/f0056dbe6c07a4f02a05934aa384d27aaa7808db/media/Home_new4.jpg)
 ![media/Home_6](https://github.com/Rayns15/Film-Catalog/blob/f791caf5f00c6be2db72509f18002270f3a09abb/media/Home_new5.jpg)
 
 ## Deployment
