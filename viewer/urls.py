@@ -25,15 +25,26 @@ urlpatterns = [
     path('cinemas/', views.CinemaListView.as_view(), name='cinema-list'),
     path('cinemas/<int:pk>/', views.CinemaDetailView.as_view(), name='cinema_detail'),
     path('cinemas/add/', views.cinema_add_view, name='cinema-add'), # Pentru staff
+    path('cinemas/', views.CinemaListView.as_view(), name='cinema_list'),
     path('movie/<int:pk>/prices/', views.cinema_prices.as_view(), name='cinema_prices'),
     path('prices/update/<int:pk>/', views.cinema_prices_update, name='cinema_prices_update'), # Pentru staff
+    path('prices/create/', views.cinema_prices_create.as_view(), name='cinema_prices_create'), # Pentru staff
+    path('prices/delete/<int:pk>/', views.cinema_prices_delete.as_view(), name='cinema_prices_delete'), # Pentru staff
+    path('booking/<int:showtime_pk>/', views.booking_view.as_view(), name='booking'),
+    path('booking/confirm/<int:booking_pk>/', views.booking_confirm_view.as_view(), name='booking_confirm'),
+    path('booking/cancel/<int:booking_pk>/', views.booking_cancel_view.as_view(), name='booking_cancel'),
+    path('my_bookings/', views.my_bookings_view.as_view(), name='my_bookings'),
+    path('book_seat/<int:showtime_pk>/', views.book_seat_view.as_view(), name='book_seat'),
+    path('cancel_seat/<int:booking_pk>/', views.cancel_seat_view.as_view(), name='cancel_seat'),
+    path('booking_history/', views.booking_history_view.as_view(), name='booking_history'),
+    path('cinemas/<int:pk>/showtimes/', views.CinemaShowtimesView.as_view(), name='cinema_showtimes'),
 
     # === Showtimes ===
     path('schedule/new/', views.ShowtimeCreateView.as_view(), name='showtime_create'),
     path('schedule/<int:pk>/update/', views.ShowtimeUpdateView.as_view(), name='showtime_update'),
     path('schedule/<int:pk>/delete/', views.ShowtimeDeleteView.as_view(), name='showtime_delete'),
     path('schedule/', views.ShowtimeListView.as_view(), name='showtime_list'),
-    path('schedule/<int:pk>/', views.ShowtimeDetailView.as_view(), name='showtime_detail'),
+    path('schedule/<int:pk>/', views.book_seat.as_view(), name='showtime_detail'),
     # === Chat API ===
     path('api/chat/post/<int:movie_pk>/', views.post_chat_message, name='post-chat-message'),
     path('api/chat/delete/<int:message_pk>/', views.delete_chat_message, name='delete-chat-message'),

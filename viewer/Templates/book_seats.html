@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Simple Styling for the Seat Map */
+    .booking-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        text-align: center;
+        color: #fff; /* Assuming dark theme based on your IDE */
+    }
+
+    .movie-info {
+        margin-bottom: 2rem;
+        background-color: #333;
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .screen {
+        background-color: #fff;
+        height: 10px;
+        width: 80%;
+        margin: 0 auto 30px;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        border-radius: 5px;
+        position: relative;
+    }
+    
+    .screen::after {
+        content: "SCREEN";
+        position: absolute;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.8rem;
+        color: #aaa;
+    }
+
+    .seats-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .row {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    /* Hide the actual checkbox */
+    .seat-checkbox {
+        display: none;
+    }
+
+    /* Style the label to look like a seat */
+    .seat-label {
+        width: 35px;
+        height: 35px;
+        background-color: #444; /* Empty Seat Color */
+        border-radius: 5px 5px 2px 2px; /* Chair shape */
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        user-select: none;
+        transition: all 0.2s;
+        border: 1px solid #555;
+    }
+
+    .seat-label:hover {
+        background-color: #666;
+    }
+
+    /* State when checked */
+    .seat-checkbox:checked + .seat-label {
+        background-color: #e50914; /* Selected Color (Red) */
+        color: white;
+        border-color: #ff3b3b;
+        transform: scale(1.1);
+    }
+
+    .legend {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+        font-size: 0.9rem;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .seat-sample {
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        border-radius: 3px;
+    }
+
+    .submit-btn {
+        margin-top: 30px;
+        padding: 12px 40px;
+        background-color: #e50914;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .submit-btn:hover {
+        background-color: #b20710;
+    }
+</style>
+
+<div class="booking-container">
+    
+    <div class="movie-info">
+        <h1>{{ showtime.movie.title }}</h1>
+        <h3>{{ showtime.cinema.name }}</h3>
+        <p><strong>Date:</strong> {{ showtime.show_time|date:"l, d F Y" }}</p>
+        <p><strong>Time:</strong> {{ showtime.show_time|date:"H:i" }}</p>
+        <hr style="border-color: #555; margin: 15px 0;">
+        <p>Ticket Price (Adult): ${{ showtime.cinema.Adult_ticket_price }}</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="screen"></div>
+
+        <div class="seats-grid">
+            <div class="row">
+                <span style="margin-right: 10px; align-self: center;">A</span>
+                {% for i in "12345678"|make_list %}
+                    <input type="checkbox" id="seat-A{{ i }}" name="seats" value="A{{ i }}" class="seat-checkbox">
+                    <label for="seat-A{{ i }}" class="seat-label">A{{ i }}</label>
+                {% endfor %}
+            </div>
+            
+            <div class="row">
+                <span style="margin-right: 10px; align-self: center;">B</span>
+                {% for i in "12345678"|make_list %}
+                    <input type="checkbox" id="seat-B{{ i }}" name="seats" value="B{{ i }}" class="seat-checkbox">
+                    <label for="seat-B{{ i }}" class="seat-label">B{{ i }}</label>
+                {% endfor %}
+            </div>
+
+            <div class="row">
+                <span style="margin-right: 10px; align-self: center;">C</span>
+                {% for i in "12345678"|make_list %}
+                    <input type="checkbox" id="seat-C{{ i }}" name="seats" value="C{{ i }}" class="seat-checkbox">
+                    <label for="seat-C{{ i }}" class="seat-label">C{{ i }}</label>
+                {% endfor %}
+            </div>
+
+             <div class="row">
+                <span style="margin-right: 10px; align-self: center;">D</span>
+                {% for i in "12345678"|make_list %}
+                    <input type="checkbox" id="seat-D{{ i }}" name="seats" value="D{{ i }}" class="seat-checkbox">
+                    <label for="seat-D{{ i }}" class="seat-label">D{{ i }}</label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <span class="seat-sample" style="background-color: #444; border: 1px solid #555;"></span> Available
+            </div>
+            <div class="legend-item">
+                <span class="seat-sample" style="background-color: #e50914;"></span> Selected
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Book Selected Seats</button>
+    </form>
+</div>
+{% endblock %}

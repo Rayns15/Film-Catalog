@@ -94,6 +94,80 @@ class CinemaDetailView(DetailView):
         context['showtimes'] = Showtime.objects.filter(cinema=self.object).order_by('show_time', 'movie__title')
         return context
 
+# === Booking and Ticketing ===
+
+class cinema_prices_create(View):
+    """ Formular pentru crearea prețurilor unui cinematograf. """
+    @staff_member_required
+    def get(self, request):
+        form = CinemaForm()
+        return render(request, 'cinema_prices_create.html', {'form': form})
+
+    @staff_member_required
+    def post(self, request):
+        form = CinemaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Cinema prices created successfully!")
+            return redirect('viewer:cinema-list') # Corectat
+        return render(request, 'cinema_prices_create.html', {'form': form})
+
+class cinema_prices_delete(View):
+    """ Șterge prețurile unui cinematograf. """
+    @staff_member_required
+    def post(self, request, pk):
+        cinema = get_object_or_404(Cinema, pk=pk)
+        cinema.delete()
+        messages.success(request, f"Prices for '{cinema.name}' deleted successfully!")
+        return redirect('viewer:cinema-list') # Corectat
+    
+class booking_view(View):
+    """ Vizualizează detaliile rezervării pentru un showtime specific. """
+    def get(self, request, showtime_pk):
+        showtime = get_object_or_404(Showtime, pk=showtime_pk)
+        return render(request, 'booking.html', {'showtime': showtime})
+    
+class booking_confirm_view(View):
+    """ Confirmă o rezervare specifică. """
+    def get(self, request, booking_pk):
+        return HttpResponse(f"Booking {booking_pk} confirmed!")
+    
+class booking_cancel_view(View):
+    """ Anulează o rezervare specifică. """
+    def get(self, request, booking_pk):
+        return HttpResponse(f"Booking {booking_pk} canceled!")
+    
+class my_bookings_view(View):
+    """ Afișează rezervările utilizatorului curent. """
+    def get(self, request):
+        return HttpResponse("List of my bookings")
+    
+class book_seat_view(View):
+    """ Permite utilizatorului să rezerve un loc pentru un showtime specific. """
+    def get(self, request, showtime_pk):
+        return HttpResponse(f"Book seat for showtime {showtime_pk}")
+    
+class cancel_seat_view(View):
+    """ Permite utilizatorului să anuleze un loc rezervat. """
+    def get(self, request, booking_pk):
+        return HttpResponse(f"Cancel seat for booking {booking_pk}")
+    
+class booking_history_view(View):
+    """ Afișează istoricul rezervărilor utilizatorului. """
+    def get(self, request):
+        return HttpResponse("Booking history")
+
+class CinemaShowtimesView(DetailView):
+    """ Afișează showtimes-urile unui cinematograf specific. """
+    model = Cinema
+    template_name = 'cinemas/cinema_showtimes.html'
+    context_object_name = 'cinema'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['showtimes'] = Showtime.objects.filter(cinema=self.object).order_by('show_time', 'movie__title')
+        return context
+
 # === CRUD Filme (Class-Based Views) ===
 
 class MovieCreateView(CreateView):
@@ -153,10 +227,22 @@ class ShowtimeListView(ListView):
 
         return showtime_list
 
+class book_seat(View):
+    """ Gestionarea rezervării locurilor pentru un showtime specific. """
+    def get(self, request, pk):
+        showtime = get_object_or_404(Showtime, pk=pk)
+        return render(request, 'book_seats.html', {'showtime': showtime})
+
+    def post(self, request, pk):
+        showtime = get_object_or_404(Showtime, pk=pk)
+        selected_seats = request.POST.getlist('seats')
+        # Logica de rezervare a locurilor ar trebui implementată aici
+        return HttpResponse(f"Seats {', '.join(selected_seats)} booked for showtime {showtime.pk}")
+
 class ShowtimeDetailView(DetailView):
     """ Afișează detaliile unui showtime specific. """
     model = Showtime
-    template_name = 'cinemas/add_showtime.html'
+    template_name = 'showtime_detail.html'
     context_object_name = 'showtime'
 
 class ShowtimeCreateView(CreateView):
