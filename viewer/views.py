@@ -120,6 +120,45 @@ class MovieDetailView(DetailView):
 
 # === CRUD Showtimes (Class-Based Views) ===
 
+class ShowtimeListView(ListView):
+    """ Afișează lista de showtimes cu paginare, filtrare și sortare. """
+    model = Showtime
+    template_name = 'showtime_list.html'
+    context_object_name = 'showtimes'
+    paginate_by = 5
+
+    def get_queryset(self):
+        showtime_list = Showtime.objects.select_related('movie', 'cinema')
+        
+        # Filtrare
+        movie_filter = self.request.GET.get('movie_filter', None)
+        cinema_filter = self.request.GET.get('cinema_filter', None)
+        date_filter = self.request.GET.get('date_filter', None)
+        if movie_filter:
+            showtime_list = showtime_list.filter(movie__title__icontains=movie_filter)
+        if cinema_filter:
+            showtime_list = showtime_list.filter(cinema__name__icontains=cinema_filter)
+        if date_filter:
+            showtime_list = showtime_list.filter(show_time__date=date_filter)
+
+        # Sortare
+        sort_by = self.request.GET.get('sort', '-show_time')
+        valid_sort_fields = [
+            'movie__title', '-movie__title', 'cinema__name', 
+            '-cinema__name', 'show_time', '-show_time'
+        ]
+        if sort_by not in valid_sort_fields:
+            sort_by = '-show_time'
+        showtime_list = showtime_list.order_by(sort_by)
+
+        return showtime_list
+
+class ShowtimeDetailView(DetailView):
+    """ Afișează detaliile unui showtime specific. """
+    model = Showtime
+    template_name = 'cinemas/add_showtime.html'
+    context_object_name = 'showtime'
+
 class ShowtimeCreateView(CreateView):
     """ Pagina 'Showtime Manager' - creează și listează showtimes. """
     model = Showtime

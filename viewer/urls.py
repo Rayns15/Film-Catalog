@@ -32,7 +32,8 @@ urlpatterns = [
     path('schedule/new/', views.ShowtimeCreateView.as_view(), name='showtime_create'),
     path('schedule/<int:pk>/update/', views.ShowtimeUpdateView.as_view(), name='showtime_update'),
     path('schedule/<int:pk>/delete/', views.ShowtimeDeleteView.as_view(), name='showtime_delete'),
-    
+    path('schedule/', views.ShowtimeListView.as_view(), name='showtime_list'),
+    path('schedule/<int:pk>/', views.ShowtimeDetailView.as_view(), name='showtime_detail'),
     # === Chat API ===
     path('api/chat/post/<int:movie_pk>/', views.post_chat_message, name='post-chat-message'),
     path('api/chat/delete/<int:message_pk>/', views.delete_chat_message, name='delete-chat-message'),
