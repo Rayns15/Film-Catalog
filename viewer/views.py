@@ -245,12 +245,34 @@ class ShowtimeDetailView(DetailView):
     template_name = 'showtime_detail.html'
     context_object_name = 'showtime'
 
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
+from django.core.paginator import Paginator
+from .models import Showtime
+from .forms import ShowtimeForm
+
 class ShowtimeCreateView(CreateView):
     """ Pagina 'Showtime Manager' - creează și listează showtimes. """
     model = Showtime
     form_class = ShowtimeForm
     template_name = 'add_showtime.html'
-    success_url = reverse_lazy('viewer:showtime_create') # Corectat
+    success_url = reverse_lazy('viewer:showtime_create') 
+
+    # --- 🟢 ADD THIS METHOD HERE ---
+    def get_initial(self):
+        """
+        Pre-selects the Cinema if 'cinema' is in the URL (e.g., ?cinema=5).
+        """
+        initial = super().get_initial()
+        # Get the cinema ID from the URL parameters
+        cinema_id = self.request.GET.get('cinema')
+        
+        # If the ID exists, set it as the initial value for the 'cinema' field
+        if cinema_id:
+            initial['cinema'] = cinema_id
+            
+        return initial
+    # -------------------------------
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -260,6 +282,7 @@ class ShowtimeCreateView(CreateView):
         movie_filter = self.request.GET.get('movie_filter', None)
         cinema_filter = self.request.GET.get('cinema_filter', None)
         date_filter = self.request.GET.get('date_filter', None)
+
         if movie_filter:
             showtime_list = showtime_list.filter(movie__title__icontains=movie_filter)
         if cinema_filter:
