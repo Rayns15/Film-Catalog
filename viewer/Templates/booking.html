@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Select Seats - {{ showtime.movie.title }}{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Custom CSS for the Seat Map (Integrated) --- */
+    
+    .screen {
+        background-color: #fff;
+        height: 6px;
+        width: 100%;
+        margin: 0 auto 40px;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        border-radius: 5px;
+        position: relative;
+    }
+    
+    .screen::after {
+        content: "SCREEN";
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+        color: #888;
+    }
+
+    .seats-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .row {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .row-label {
+        color: #9ca3af; /* Tailwind gray-400 */
+        font-weight: bold;
+        width: 20px;
+        text-align: center;
+    }
+
+    /* Hide the actual checkbox */
+    .seat-checkbox {
+        display: none;
+    }
+
+    /* Style the label to look like a seat */
+    .seat-label {
+        width: 32px;
+        height: 32px;
+        background-color: #374151; /* Tailwind gray-700 */
+        border-radius: 6px 6px 2px 2px; 
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        color: #d1d5db;
+        user-select: none;
+        transition: all 0.2s;
+        border: 1px solid #4b5563;
+        position: relative;
+    }
+
+    .seat-label:hover {
+        background-color: #4b5563; /* lighter gray */
+        transform: translateY(-2px);
+    }
+
+    /* State when checked */
+    .seat-checkbox:checked + .seat-label {
+        background-color: #4f46e5; /* Indigo-600 */
+        color: white;
+        border-color: #6366f1;
+        box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
+    }
+
+    .legend {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #374151;
+        font-size: 0.85rem;
+        color: #d1d5db;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .seat-sample {
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        border-radius: 2px;
+    }
+</style>
+
+<div class="w-full max-w-screen-xl mx-auto px-2 sm:px-4 md:px-8 py-10">
+
+    <div class="max-w-4xl mx-auto text-center mb-10">
+        <h1 class="text-4xl font-extrabold text-white mb-2">Select Your Seats</h1>
+        <p class="text-gray-400">Step 2 of 3</p>
+    </div>
+
+    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div class="md:col-span-1 space-y-6">
+            <div class="bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-700 sticky top-4">
+                {% if showtime.movie.profile_picture %}
+                    <img src="{{ showtime.movie.profile_picture.url }}" alt="{{ showtime.movie.title }}" class="w-full h-64 object-cover">
+                {% else %}
+                    <div class="w-full h-64 bg-gray-800 flex items-center justify-center text-gray-500">No Image</div>
+                {% endif %}
+                
+                <div class="p-5 space-y-3">
+                    <h2 class="text-2xl font-bold text-white leading-tight">{{ showtime.movie.title }}</h2>
+                    
+                    <div class="text-gray-300 text-sm space-y-2 mt-4 pt-4 border-t border-gray-700">
+                        <p class="flex justify-between">
+                            <span class="text-cyan-400 font-semibold">Cinema:</span> 
+                            <span>{{ showtime.cinema.name }}</span>
+                        </p>
+                        <p class="flex justify-between">
+                            <span class="text-cyan-400 font-semibold">Date:</span> 
+                            <span>{{ showtime.show_time|date:"D, M d" }}</span>
+                        </p>
+                        <p class="flex justify-between">
+                            <span class="text-cyan-400 font-semibold">Time:</span> 
+                            <span>{{ showtime.show_time|time:"g:i A" }}</span>
+                        </p>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-gray-800/50 rounded-lg text-xs text-gray-400">
+                        * Prices vary by seat type. Selection will be calculated at checkout.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-2">
+            <form method="post" action="{% url 'viewer:book_seat' showtime.pk %}" class="bg-gray-900/50 backdrop-blur-md rounded-xl shadow-lg border border-gray-700 p-6 sm:p-8 h-full flex flex-col justify-between">
+                {% csrf_token %}
+                
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-8 border-b border-gray-700 pb-4">Screen A - Seating Chart</h3>
+
+                    <div class="px-8">
+                        <div class="screen"></div>
+                    </div>
+
+                    <div class="seats-grid">
+                        <div class="row">
+                            <span class="row-label">A</span>
+                            {% for i in "12345678"|make_list %}
+                                {% with seat_id="A"|add:i %}
+                                    
+                                    {% if seat_id in taken_seats %}
+                                        <div class="seat-label bg-red-600 border-red-800 cursor-not-allowed text-white opacity-50" title="Occupied">
+                                            {{ seat_id }}
+                                        </div>
+                                    {% else %}
+                                        <input type="checkbox" id="seat-{{ seat_id }}" name="seats" value="{{ seat_id }}" class="seat-checkbox">
+                                        <label for="seat-{{ seat_id }}" class="seat-label" title="Seat {{ seat_id }}">
+                                            {{ seat_id }}
+                                        </label>
+                                    {% endif %}
+                                    
+                                {% endwith %}
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="row">
+                            <span class="row-label">B</span>
+                            {% for i in "12345678"|make_list %}
+                                <input type="checkbox" id="seat-B{{ i }}" name="seats" value="B{{ i }}" class="seat-checkbox">
+                                <label for="seat-B{{ i }}" class="seat-label" title="Seat B{{ i }}">B{{ i }}</label>
+                            {% endfor %}
+                        </div>
+
+                        <div class="row">
+                            <span class="row-label">C</span>
+                            {% for i in "12345678"|make_list %}
+                                <input type="checkbox" id="seat-C{{ i }}" name="seats" value="C{{ i }}" class="seat-checkbox">
+                                <label for="seat-C{{ i }}" class="seat-label" title="Seat C{{ i }}">C{{ i }}</label>
+                            {% endfor %}
+                        </div>
+
+                        <div class="row">
+                            <span class="row-label">D</span>
+                            {% for i in "12345678"|make_list %}
+                                <input type="checkbox" id="seat-D{{ i }}" name="seats" value="D{{ i }}" class="seat-checkbox">
+                                <label for="seat-D{{ i }}" class="seat-label" title="Seat D{{ i }}">D{{ i }}</label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="legend">
+                        <div class="legend-item">
+                            <span class="seat-sample" style="background-color: #374151; border: 1px solid #4b5563;"></span> Available
+                        </div>
+                        <div class="legend-item">
+                            <span class="seat-sample" style="background-color: #4f46e5;"></span> Selected
+                        </div>
+                        <div class="legend-item opacity-50">
+                            <span class="seat-sample" style="background-color: #ef4444;"></span> Occupied
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 pt-8 mt-4 border-t border-gray-700">
+                    <a href="{% url 'viewer:cinema_prices' showtime.movie.pk %}" class="flex-1 text-center py-3 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-800 transition">
+                        Cancel
+                    </a>
+                    <button type="submit" class="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-500/30 transform hover:-translate-y-0.5">
+                        Confirm Selection
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

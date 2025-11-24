@@ -4,6 +4,22 @@ from django.urls import reverse
 
 # Create your models here.
 
+class Booking(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings")
+    showtime = models.ForeignKey('Showtime', on_delete=models.CASCADE, related_name="bookings")
+    # We will store seats as a comma-separated string, e.g., "A1,A2,B5"
+    seats = models.CharField(max_length=255) 
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Optional: If you want to store the total cost calculated
+    total_cost = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.showtime} ({self.seats})"
+    
+    def get_seat_list(self):
+        return self.seats.split(',')
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     bio = models.TextField(blank=True, null=True)

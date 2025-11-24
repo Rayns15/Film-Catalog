@@ -13,7 +13,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.db.models import Prefetch, Q
 from django.utils import timezone
-from .models import Cinema, Showtime, Movie, ChatMessage, Profile, User
+from .models import Booking, Cinema, Showtime, Movie, ChatMessage, Profile, User, Booking
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
 import json
@@ -22,6 +23,8 @@ from .forms import (
     CustomSignupForm, RegisterForm # Asigurați-vă că acestea există în forms.py
 )
 from django.template.defaultfilters import register as default_template_register
+
+
 
 # === Filtru Template ===
 @default_template_register.filter(name='add_class')
@@ -152,10 +155,14 @@ class cancel_seat_view(View):
     def get(self, request, booking_pk):
         return HttpResponse(f"Cancel seat for booking {booking_pk}")
     
-class booking_history_view(View):
-    """ Afișează istoricul rezervărilor utilizatorului. """
+class booking_history_view(LoginRequiredMixin, View):
+    """ Displays the booking history for the current user. """
+    
     def get(self, request):
-        return HttpResponse("Booking history")
+        # Get bookings for the logged-in user, newest first
+        my_bookings = Booking.objects.filter(user=request.user).order_by('-created_at')
+        
+        return render(request, 'booking_history.html', {'bookings': my_bookings})
 
 class CinemaShowtimesView(DetailView):
     """ Afișează showtimes-urile unui cinematograf specific. """
@@ -227,17 +234,67 @@ class ShowtimeListView(ListView):
 
         return showtime_list
 
-class book_seat(View):
-    """ Gestionarea rezervării locurilor pentru un showtime specific. """
-    def get(self, request, pk):
-        showtime = get_object_or_404(Showtime, pk=pk)
-        return render(request, 'book_seats.html', {'showtime': showtime})
+class book_seat(LoginRequiredMixin, View):
+    """ Handles seat selection and booking creation. """
+    
+    # This Mixin automatically handles the @login_required logic for both GET and POST
+    
+    def get(self, request, showtime_pk):
+        showtime = get_object_or_404(Showtime, pk=showtime_pk)
+        
+        # 1. Find all bookings for this specific showtime
+        existing_bookings = Booking.objects.filter(showtime=showtime)
+        
+        # 2. Extract all taken seats into a single list (e.g., ['A1', 'A2', 'C5'])
+        taken_seats = []
+        for booking in existing_bookings:
+            taken_seats.extend(booking.get_seat_list())
+            
+        context = {
+            'showtime': showtime,
+            'taken_seats': taken_seats,
+        }
+        return render(request, 'booking.html', context)
 
-    def post(self, request, pk):
-        showtime = get_object_or_404(Showtime, pk=pk)
+    def post(self, request, showtime_pk):
+        showtime = get_object_or_404(Showtime, pk=showtime_pk)
+        
+        # 1. Get the list of seats (e.g., ['A1', 'A2'])
         selected_seats = request.POST.getlist('seats')
-        # Logica de rezervare a locurilor ar trebui implementată aici
-        return HttpResponse(f"Seats {', '.join(selected_seats)} booked for showtime {showtime.pk}")
+        
+        if not selected_seats:
+            messages.error(request, "Please select at least one seat.")
+            return redirect('viewer:book_seat', showtime_pk=showtime_pk)
+            
+        # 2. Check if seats are already taken (Double Booking Prevention)
+        existing_bookings = Booking.objects.filter(showtime=showtime)
+        all_taken = []
+        for b in existing_bookings:
+            all_taken.extend(b.get_seat_list())
+            
+        for seat in selected_seats:
+            if seat in all_taken:
+                messages.error(request, f"Sorry, seat {seat} was just booked by someone else.")
+                return redirect('viewer:book_seat', showtime_pk=showtime_pk)
+
+        # 3. Save the Booking to the Database
+        seats_string = ",".join(selected_seats) 
+        
+        # Calculate price (Defaults to $10 if not set)
+        ticket_price = showtime.cinema.Adult_ticket_price or 10
+        total_cost = ticket_price * len(selected_seats)
+        
+        # Create the database entry
+        Booking.objects.create(
+            user=request.user,
+            showtime=showtime,
+            seats=seats_string,
+            total_cost=total_cost
+        )
+        
+        # 4. Redirect to History Page
+        messages.success(request, "Booking confirmed!")
+        return redirect('viewer:booking_history')
 
 class ShowtimeDetailView(DetailView):
     """ Afișează detaliile unui showtime specific. """
@@ -308,6 +365,50 @@ class ShowtimeCreateView(CreateView):
         context['page_obj'] = page_obj
         context['current_sort'] = sort_by
         return context
+
+class ShowtimeDetailView(DetailView):
+    """ Afișează detaliile unui showtime specific. """
+    model = Showtime
+    template_name = 'showtime_detail.html'
+    context_object_name = 'showtime'
+
+class showtime_create(View):
+    """ Pagina 'Showtime Manager' - creează și listează showtimes. """
+    @staff_member_required
+    def get(self, request):
+        form = ShowtimeForm()
+        showtime_list = Showtime.objects.select_related('movie', 'cinema').order_by('-show_time')
+
+        # Paginare
+        paginator = Paginator(showtime_list, 5) # 5 elemente pe pagină
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+
+        context = {
+            'form': form,
+            'page_obj': page_obj,
+        }
+        return render(request, 'add_showtime.html', context)
+
+    @staff_member_required
+    def post(self, request):
+        form = ShowtimeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Showtime added successfully!")
+            return redirect('viewer:showtime_create') # Corectat
+        showtime_list = Showtime.objects.select_related('movie', 'cinema').order_by('-show_time')
+
+        # Paginare
+        paginator = Paginator(showtime_list, 5) # 5 elemente pe pagină
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+
+        context = {
+            'form': form,
+            'page_obj': page_obj,
+        }
+        return render(request, 'add_showtime.html', context)
 
 class ShowtimeUpdateView(UpdateView):
     """ Pagina de update pentru un showtime, refolosește același template. """
