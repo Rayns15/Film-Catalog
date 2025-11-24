@@ -7,16 +7,17 @@
 ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
 
-# Film Catalog - A Django Cinema Management System
+# Film Catalog - Django Cinema Booking & Management System
 
 ## Introduction
 
-**"Film Catalog"** is a full-stack web application built with **Django** and **Tailwind CSS**. Originally a simple movie database, this project has evolved into a comprehensive **Cinema Showtime Management System** featuring a modern, responsive, dark-mode UI.
+**"Film Catalog"** is a robust full-stack web application built with **Django** and **Tailwind CSS**. Originally a simple movie database, this project has evolved into a comprehensive **Cinema Booking & Management System** featuring a modern, responsive, dark-mode UI.
 
-It allows authenticated users (Staff) to perform full CRUD operations on **Movies**, **Cinemas**, and **Showtimes**. The core of the application is the showtime scheduler, which links specific movies to cinemas at designated times. It also features a dynamic pricing system to manage ticket costs (e.g., weekday vs. weekend) and various surcharges for each cinema.
+The application serves two distinct roles:
+1.  **For Administrators (Staff):** A powerful backend to manage Movies, Cinema Locations, and complex Schedules. It includes a dynamic pricing engine (handling weekday vs. weekend rates and surcharges).
+2.  **For Users:** A complete booking experience allowing users to browse movies, **select specific seats via an interactive visual map**, manage ticket types (Adult, Child, etc.), and view their booking history.
 
 ![Home Page](https://github.com/Rayns15/Film-Catalog/blob/994cdef6c3dda9f6f5ffc0f2f146edf4850edd55/media/Home_new6.jpg) 
-![Showtime Manager](https://github.com/Rayns15/Film-Catalog/blob/994cdef6c3dda9f6f5ffc0f2f146edf4850edd55/media/Home_new.jpg)
 
 ## Table of Contents
 
@@ -95,36 +96,45 @@ It allows authenticated users (Staff) to perform full CRUD operations on **Movie
 
 ## Features
 
-* **Modern UI:** A custom-designed dark/neon aesthetic using Tailwind CSS.
+### User Features
+* **Interactive Seat Booking:** A visual seat map allowing users to select specific seats (Rows A-D). The system tracks occupied vs. available seats in real-time.
+* **Ticket Type Selection:** Users can choose between Adult, Child, Senior, and Student tickets, with dynamic total cost calculation.
+* **My Bookings Dashboard:** A user profile section displaying past and upcoming bookings with the ability to cancel future reservations.
+* **Authentication:** Secure Sign Up, Login, and Profile management.
+
+### Staff/Management Features
 * **Cinema Locations Dashboard:** A visual grid of all cinemas, showing upcoming showtime counts and quick-access administrative links.
 * **Showtime Manager:** An advanced filtering and scheduling interface. Filter by Movie, Cinema, or Date to find existing shows, or use the form to schedule new ones.
-* **Full CRUD:** Complete Create, Read, Update, Delete functionality for Movies, Cinemas, and Showtimes.
-* **Dynamic Price Management:** Custom ticket prices (Adult, Child, Senior, Student) configurable per cinema.
-* **Surcharges:** Manage add-on costs like Weekend Surcharges and Matinee Discounts.
-* **User Authentication:** Secure Log in, Log out, and Sign up functionality with staff permissions.
+* **Dynamic Price Management:** Custom ticket prices configurable per cinema (e.g., specific pricing for "Le Grand Rex" vs "AMC").
+* **Surcharges:** Manage add-on costs like Weekend Surcharges and Matinee Discounts automatically.
+* **Full CRUD:** Complete control over Movies, Cinemas, and Showtimes.
 
 ## Pages
 
 * `Home`: The landing page displaying all movie cards with "Prices & Showtimes" buttons.
-* `Cinema Locations`: A dashboard displaying all cinema venues, their locations, and quick links to manage prices or add shows.
-* `Showtime Manager`: The administrative hub for scheduling. Includes a form to add new shows and a table to filter/update/delete existing ones.
+* `Select Seats`: The interactive booking interface with seat map and ticket counters.
+* `My Bookings`: User history page showing confirmed tickets and cancellation options.
+* `Cinema Locations`: Dashboard displaying venues and quick links to manage prices.
+* `Showtime Manager`: Admin hub for scheduling and filtering showtimes.
 * `Movie Detail`: Displays cast, crew, ratings, and detailed descriptions.
-* `Ticket Prices`: A dedicated page to configure the pricing matrix for specific cinemas.
-* `Auth Pages`: Login, Logout, and Profile management.
+* `Ticket Prices`: Configuration page for the pricing matrix.
 
 ## Website Screenshots
 
-### Cinema Locations Dashboard
+### 1. Interactive Booking System (Seat Map)
+![Book the tickets](https://github.com/Rayns15/Film-Catalog/blob/28e4c2ec991651d5602f1d876f833ffc6ca0cb09/media/Home_new7.jpg)
+
+### 2. User Dashboard (My Bookings)
+![My Bookings](https://github.com/Rayns15/Film-Catalog/blob/28e4c2ec991651d5602f1d876f833ffc6ca0cb09/media/Home_new8.jpg)
+
+### 3. Cinema Locations (Staff View)
 ![Cinema Locations](https://github.com/Rayns15/Film-Catalog/blob/994cdef6c3dda9f6f5ffc0f2f146edf4850edd55/media/Home_new5.jpg)
 
-### Showtime Manager
+### 4. Showtime Manager (Staff View)
 ![Showtime Manager](https://github.com/Rayns15/Film-Catalog/blob/994cdef6c3dda9f6f5ffc0f2f146edf4850edd55/media/Home_new4.jpg)
 
-### Upcoming Showtimes & Ticket Prices
-![Home Page](https://github.com/Rayns15/Film-Catalog/blob/994cdef6c3dda9f6f5ffc0f2f146edf4850edd55/media/Home_new2.jpg)
-
-### Upcoming Showtimes & Ticket Prices
-![Home Page](https://github.com/Rayns15/Film-Catalog/blob/994cdef6c3dda9f6f5ffc0f2f146edf4850edd55/media/Home_new3.jpg)
+### 5. Movie Details & Pricing
+![Movie Details](https://github.com/Rayns15/Film-Catalog/blob/994cdef6c3dda9f6f5ffc0f2f146edf4850edd55/media/Home_new3.jpg)
 
 ## Deployment
 
