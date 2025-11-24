@@ -48,7 +48,7 @@
         box-shadow: 0 0 10px rgba(79, 70, 229, 0.6); 
     }
 
-    /* OCCUPIED State */
+    /* OCCUPIED State (Others) */
     .seat-occupied {
         background-color: #7f1d1d !important; /* red-900 */
         border-top-color: #991b1b !important;
@@ -57,6 +57,22 @@
         opacity: 0.7;
         pointer-events: none; 
     }
+
+    /* MY SEATS State (Yours) */
+    .seat-mine {
+        background-color: #d97706 !important; /* Amber-600 */
+        border-top-color: #f59e0b !important; /* Amber-500 */
+        color: white !important;
+        cursor: not-allowed !important;
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+        pointer-events: none;
+    }
+
+    /* Custom Scrollbar for Booking History */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
 
     /* Input Spinners Removal */
     input[type=number]::-webkit-inner-spin-button, 
@@ -76,7 +92,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             <div class="lg:col-span-4 space-y-6">
-                <div class="bg-gray-800/60 backdrop-blur-md rounded-2xl shadow-xl border border-gray-700 overflow-hidden sticky top-5">
+                
+                <div class="bg-gray-800/60 backdrop-blur-md rounded-2xl shadow-xl border border-gray-700 overflow-hidden sticky top-5 z-10">
                     
                     <div class="p-6 border-b border-gray-700 bg-gray-900/50">
                         <h2 class="text-xl font-bold text-white">{{ showtime.movie.title }}</h2>
@@ -155,6 +172,44 @@
                         </div>
                     </div>
                 </div>
+
+                {% if user_bookings %}
+                <div class="bg-indigo-900/40 backdrop-blur-md rounded-2xl shadow-xl border border-indigo-500/30 overflow-hidden mt-6">
+                    <div class="p-5 border-b border-indigo-500/30 bg-indigo-900/50 flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-white">Your Bookings</h3>
+                        <span class="text-xs bg-indigo-600 text-white px-2 py-1 rounded-full">{{ user_bookings.count }} Order(s)</span>
+                    </div>
+                    
+                    <div class="p-5 space-y-4 max-h-80 overflow-y-auto custom-scrollbar">
+                        {% for booking in user_bookings %}
+                        <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700 relative group transition hover:border-indigo-500">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <span class="text-xs text-gray-400 uppercase tracking-wide">Seats</span>
+                                    <div class="text-white font-bold text-lg tracking-widest text-emerald-400">
+                                        {{ booking.seats }}
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs text-gray-400 uppercase tracking-wide">Paid</span>
+                                    <div class="text-white font-bold">${{ booking.total_cost }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-xs text-gray-500 mb-3">
+                                Booked on: {{ booking.created_at|date:"M d, Y" }}
+                            </div>
+
+                            <a href="{% url 'viewer:booking_cancel' booking.pk %}" 
+                               class="block w-full text-center py-2 rounded bg-red-900/30 text-red-300 border border-red-900/50 hover:bg-red-600 hover:text-white transition text-sm font-semibold">
+                                Cancel Booking
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
             </div>
 
             <div class="lg:col-span-8">
@@ -171,14 +226,26 @@
 
                             {% for col in "12345678"|make_list %}
                                 {% with seat_id=row|add:col %}
+                                    
                                     <div class="relative group">
-                                        {% if seat_id in taken_seats %}
-                                            <div class="seat-label seat-occupied" title="Occupied">{{ seat_id }}</div>
+                                        {% if seat_id in my_seats %}
+                                            <div class="seat-label seat-mine" title="Your Seat">
+                                                {{ seat_id }}
+                                            </div>
+
+                                        {% elif seat_id in taken_seats %}
+                                            <div class="seat-label seat-occupied" title="Occupied">
+                                                {{ seat_id }}
+                                            </div>
+
                                         {% else %}
                                             <input type="checkbox" name="seats" value="{{ seat_id }}" id="seat-{{ seat_id }}" class="seat-checkbox" onchange="validateForm()">
-                                            <label for="seat-{{ seat_id }}" class="seat-label">{{ seat_id }}</label>
+                                            <label for="seat-{{ seat_id }}" class="seat-label">
+                                                {{ seat_id }}
+                                            </label>
                                         {% endif %}
                                     </div>
+
                                 {% endwith %}
                             {% endfor %}
                         </div>
@@ -192,6 +259,11 @@
                         <div class="flex items-center gap-2">
                             <div class="w-4 h-4 bg-indigo-600 rounded shadow-sm"></div> Selected
                         </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 bg-amber-600 rounded border border-amber-500"></div> Yours
+                        </div>
+
                         <div class="flex items-center gap-2">
                             <div class="w-4 h-4 bg-red-900 rounded opacity-70"></div> Occupied
                         </div>
@@ -202,7 +274,7 @@
                     </div>
 
                     <div class="w-full flex gap-4 mt-auto">
-                        <a href="{% url 'viewer:home' %}" class="flex-1 py-3 border border-gray-600 rounded-xl text-center text-gray-300 hover:bg-gray-700 transition font-semibold">Cancel</a>
+                        <a href="{% url 'viewer:cinema_prices' showtime.movie.pk %}" class="flex-1 py-3 border border-gray-600 rounded-xl text-center text-gray-300 hover:bg-gray-700 transition font-semibold">Cancel</a>
                         <button type="submit" id="submit-btn" class="flex-1 py-3 bg-gray-600 text-gray-300 rounded-xl font-bold cursor-not-allowed transition" disabled>Confirm Booking</button>
                     </div>
 

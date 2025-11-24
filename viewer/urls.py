@@ -34,10 +34,10 @@ urlpatterns = [
     path('booking/cancel/<int:booking_pk>/', views.booking_cancel_view.as_view(), name='booking_cancel'),
     path('my_bookings/', views.my_bookings_view.as_view(), name='my_bookings'),
     path('booking/<int:showtime_pk>/', views.book_seat.as_view(), name='booking'),
-    path('cancel_seat/<int:booking_pk>/', views.cancel_seat_view.as_view(), name='cancel_seat'),
+    #path('cancel_seat/<int:booking_pk>/', views.cancel_seat_view.as_view(), name='cancel_seat'),
     path('booking_history/', views.booking_history_view.as_view(), name='booking_history'),
     path('cinemas/<int:pk>/showtimes/', views.CinemaShowtimesView.as_view(), name='cinema_showtimes'),
-    path('book_seat/<int:showtime_pk>/', views.book_seat.as_view(), name='book_seat'),
+    #path('book_seat/<int:showtime_pk>/', views..as_view(), name='book_seat'),
     # === Showtimes ===
     path('schedule/new/', views.ShowtimeCreateView.as_view(), name='showtime_create'),
     

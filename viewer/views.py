@@ -13,6 +13,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.db.models import Prefetch, Q
 from django.utils import timezone
+from urllib3 import request
 from .models import Booking, Cinema, Showtime, Movie, ChatMessage, Profile, User, Booking
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.http import require_POST
@@ -132,11 +133,27 @@ class booking_confirm_view(View):
     """ Confirmă o rezervare specifică. """
     def get(self, request, booking_pk):
         return HttpResponse(f"Booking {booking_pk} confirmed!")
-    
-class booking_cancel_view(View):
-    """ Anulează o rezervare specifică. """
+
+class booking_cancel_view(LoginRequiredMixin, View):
+    """ Handles the confirmation and deletion of a booking. """
+
     def get(self, request, booking_pk):
-        return HttpResponse(f"Booking {booking_pk} canceled!")
+        # 1. Fetch the booking, ensuring it belongs to the current user
+        booking = get_object_or_404(Booking, pk=booking_pk, user=request.user)
+        
+        # 2. Render the confirmation page
+        return render(request, 'booking_cancel.html', {'booking': booking})
+
+    def post(self, request, booking_pk):
+        # 1. Fetch the booking again
+        booking = get_object_or_404(Booking, pk=booking_pk, user=request.user)
+        
+        # 2. Delete the booking
+        booking.delete()
+        
+        # 3. Success message and redirect
+        messages.success(request, "Booking cancelled successfully.")
+        return redirect('viewer:booking', showtime_pk=booking.showtime.pk)
     
 class my_bookings_view(View):
     """ Afișează rezervările utilizatorului curent. """
@@ -248,6 +265,14 @@ class book_seat(LoginRequiredMixin, View):
         for booking in existing_bookings:
             taken_seats.extend(booking.get_seat_list())
         
+        my_bookings = existing_bookings.filter(user=request.user)
+        
+        # 4. Extract purely the user's seats to color them differently (Optional but cool)
+        my_seats = []
+        for booking in my_bookings:
+            my_seats.extend(booking.get_seat_list())
+        # --- NEW CODE ENDS HERE ---
+
         # Check if weekend (Saturday=5, Sunday=6)
         is_weekend = showtime.show_time.weekday() >= 5
 
@@ -255,6 +280,8 @@ class book_seat(LoginRequiredMixin, View):
             'showtime': showtime,
             'taken_seats': taken_seats,
             'is_weekend': is_weekend,
+            'my_seats': my_seats,
+            'user_bookings': my_bookings,
         }
         return render(request, 'booking.html', context)
 
@@ -318,7 +345,7 @@ class book_seat(LoginRequiredMixin, View):
         )
         
         messages.success(request, "Booking confirmed!")
-        return redirect('viewer:booking_history')
+        return redirect('viewer:booking', showtime_pk=showtime_pk)
 
 class ShowtimeDetailView(DetailView):
     """ Afișează detaliile unui showtime specific. """
