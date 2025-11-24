@@ -265,8 +265,10 @@ class book_seat(LoginRequiredMixin, View):
     def post(self, request, showtime_pk):
         showtime = get_object_or_404(Showtime, pk=showtime_pk)
         
-        # 1. Get Data from Form
+        # 1. Get the list of seats selected (e.g., ['A1', 'B2'])
         selected_seats = request.POST.getlist('seats')
+        
+        # 2. Get quantities for each ticket type
         adult_qty = int(request.POST.get('adult_qty', 0))
         child_qty = int(request.POST.get('child_qty', 0))
         senior_qty = int(request.POST.get('senior_qty', 0))
@@ -274,7 +276,7 @@ class book_seat(LoginRequiredMixin, View):
         
         total_tickets = adult_qty + child_qty + senior_qty + student_qty
 
-        # 2. Validation: Do tickets match seats?
+        # 3. Validation: Do tickets match seats?
         if len(selected_seats) != total_tickets:
             messages.error(request, f"Mismatch: You selected {total_tickets} tickets but {len(selected_seats)} seats.")
             return redirect('viewer:book_seat', showtime_pk=showtime_pk)
@@ -283,7 +285,7 @@ class book_seat(LoginRequiredMixin, View):
             messages.error(request, "Please select at least one ticket.")
             return redirect('viewer:book_seat', showtime_pk=showtime_pk)
 
-        # 3. Check Availability
+        # 4. Double Booking Check
         existing_bookings = Booking.objects.filter(showtime=showtime)
         all_taken = []
         for b in existing_bookings:
@@ -294,11 +296,13 @@ class book_seat(LoginRequiredMixin, View):
                 messages.error(request, f"Seat {seat} is already taken.")
                 return redirect('viewer:book_seat', showtime_pk=showtime_pk)
 
-        # 4. Calculate Total Cost
+        # 5. Calculate Total Cost
         is_weekend = showtime.show_time.weekday() >= 5
         
+        # Helper to pick correct price
         def get_price(weekend_price, regular_price):
-            return weekend_price if is_weekend else regular_price
+            price = weekend_price if is_weekend else regular_price
+            return price or 0 # Handle None values safely
 
         cost = 0
         cost += adult_qty * get_price(showtime.cinema.adult_weekend_price, showtime.cinema.Adult_ticket_price)
@@ -306,7 +310,7 @@ class book_seat(LoginRequiredMixin, View):
         cost += senior_qty * get_price(showtime.cinema.senior_weekend_price, showtime.cinema.Senior_ticket_price)
         cost += student_qty * get_price(showtime.cinema.student_weekend_price, showtime.cinema.Student_ticket_price)
 
-        # 5. Create Booking
+        # 6. Create Booking
         seats_string = ",".join(selected_seats)
         
         Booking.objects.create(

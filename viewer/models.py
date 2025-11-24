@@ -21,7 +21,7 @@ class Booking(models.Model):
         # Ensure seats is a string before splitting
         if not self.seats:
             return []
-        return str(self.seats).split(',')
+        return [seat.strip() for seat in str(self.seats).split(',')]
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
