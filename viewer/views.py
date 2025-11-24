@@ -24,8 +24,6 @@ from .forms import (
 )
 from django.template.defaultfilters import register as default_template_register
 
-
-
 # === Filtru Template ===
 @default_template_register.filter(name='add_class')
 def add_class(field, css_classes):
@@ -279,12 +277,11 @@ class book_seat(LoginRequiredMixin, View):
         # 3. Validation: Do tickets match seats?
         if len(selected_seats) != total_tickets:
             messages.error(request, f"Mismatch: You selected {total_tickets} tickets but {len(selected_seats)} seats.")
-            return redirect('viewer:book_seat', showtime_pk=showtime_pk)
+            return redirect('viewer:booking', showtime_pk=showtime_pk)
             
         if total_tickets == 0:
             messages.error(request, "Please select at least one ticket.")
-            return redirect('viewer:book_seat', showtime_pk=showtime_pk)
-
+            return redirect('viewer:booking', showtime_pk=showtime_pk)
         # 4. Double Booking Check
         existing_bookings = Booking.objects.filter(showtime=showtime)
         all_taken = []
@@ -294,7 +291,7 @@ class book_seat(LoginRequiredMixin, View):
         for seat in selected_seats:
             if seat in all_taken:
                 messages.error(request, f"Seat {seat} is already taken.")
-                return redirect('viewer:book_seat', showtime_pk=showtime_pk)
+                return redirect('viewer:booking', showtime_pk=showtime_pk)
 
         # 5. Calculate Total Cost
         is_weekend = showtime.show_time.weekday() >= 5
