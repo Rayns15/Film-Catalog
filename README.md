@@ -17,7 +17,7 @@ The application serves two distinct roles:
 1.  **For Administrators (Staff):** A powerful backend to manage Movies, Cinema Locations, and complex Schedules. It includes a dynamic pricing engine (handling weekday vs. weekend rates and surcharges).
 2.  **For Users:** A complete booking experience allowing users to browse movies, **select specific seats via an interactive visual map**, manage ticket types (Adult, Child, etc.), and view their booking history.
 
-![Home Page](https://github.com/Rayns15/Film-Catalog/blob/994cdef6c3dda9f6f5ffc0f2f146edf4850edd55/media/Home_new6.jpg) 
+![Home Page](https://github.com/Rayns15/Film-Catalog/blob/b5538064cf9d1d3d8a53f01922a064fa4d2447ae/media/Home_new.jpg) 
 
 ## Table of Contents
 
