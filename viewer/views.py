@@ -249,24 +249,41 @@ class book_seat(LoginRequiredMixin, View):
         taken_seats = []
         for booking in existing_bookings:
             taken_seats.extend(booking.get_seat_list())
-            
+        
+        # Check if weekend (Saturday=5, Sunday=6)
+        is_weekend = showtime.show_time.weekday() >= 5
+
         context = {
             'showtime': showtime,
             'taken_seats': taken_seats,
+            'is_weekend': is_weekend,
         }
         return render(request, 'booking.html', context)
+
+    # viewer/views.py
 
     def post(self, request, showtime_pk):
         showtime = get_object_or_404(Showtime, pk=showtime_pk)
         
-        # 1. Get the list of seats (e.g., ['A1', 'A2'])
+        # 1. Get Data from Form
         selected_seats = request.POST.getlist('seats')
+        adult_qty = int(request.POST.get('adult_qty', 0))
+        child_qty = int(request.POST.get('child_qty', 0))
+        senior_qty = int(request.POST.get('senior_qty', 0))
+        student_qty = int(request.POST.get('student_qty', 0))
         
-        if not selected_seats:
-            messages.error(request, "Please select at least one seat.")
+        total_tickets = adult_qty + child_qty + senior_qty + student_qty
+
+        # 2. Validation: Do tickets match seats?
+        if len(selected_seats) != total_tickets:
+            messages.error(request, f"Mismatch: You selected {total_tickets} tickets but {len(selected_seats)} seats.")
             return redirect('viewer:book_seat', showtime_pk=showtime_pk)
             
-        # 2. Check if seats are already taken (Double Booking Prevention)
+        if total_tickets == 0:
+            messages.error(request, "Please select at least one ticket.")
+            return redirect('viewer:book_seat', showtime_pk=showtime_pk)
+
+        # 3. Check Availability
         existing_bookings = Booking.objects.filter(showtime=showtime)
         all_taken = []
         for b in existing_bookings:
@@ -274,25 +291,31 @@ class book_seat(LoginRequiredMixin, View):
             
         for seat in selected_seats:
             if seat in all_taken:
-                messages.error(request, f"Sorry, seat {seat} was just booked by someone else.")
+                messages.error(request, f"Seat {seat} is already taken.")
                 return redirect('viewer:book_seat', showtime_pk=showtime_pk)
 
-        # 3. Save the Booking to the Database
-        seats_string = ",".join(selected_seats) 
+        # 4. Calculate Total Cost
+        is_weekend = showtime.show_time.weekday() >= 5
         
-        # Calculate price (Defaults to $10 if not set)
-        ticket_price = showtime.cinema.Adult_ticket_price or 10
-        total_cost = ticket_price * len(selected_seats)
+        def get_price(weekend_price, regular_price):
+            return weekend_price if is_weekend else regular_price
+
+        cost = 0
+        cost += adult_qty * get_price(showtime.cinema.adult_weekend_price, showtime.cinema.Adult_ticket_price)
+        cost += child_qty * get_price(showtime.cinema.child_weekend_price, showtime.cinema.Child_ticket_price)
+        cost += senior_qty * get_price(showtime.cinema.senior_weekend_price, showtime.cinema.Senior_ticket_price)
+        cost += student_qty * get_price(showtime.cinema.student_weekend_price, showtime.cinema.Student_ticket_price)
+
+        # 5. Create Booking
+        seats_string = ",".join(selected_seats)
         
-        # Create the database entry
         Booking.objects.create(
             user=request.user,
             showtime=showtime,
             seats=seats_string,
-            total_cost=total_cost
+            total_cost=cost
         )
         
-        # 4. Redirect to History Page
         messages.success(request, "Booking confirmed!")
         return redirect('viewer:booking_history')
 
